@@ -33,7 +33,7 @@ const lato = Lato({
 	subsets: ['latin']
 })
 
-export const subscriptions: Subscription[] = [
+export const subscriptions: Omit<Subscription, "userId">[] = [
 	{
 		id: "1",
 		name: "Spotify",
@@ -41,7 +41,8 @@ export const subscriptions: Subscription[] = [
 		frequency: "monthly",
 		category: "productivity",
 		next_invoice: new Date(),
-		icon: "spotify"
+		icon_ref: "spotify",
+		send_alert: true
 	},
 	{
 		id: "2",
@@ -50,7 +51,8 @@ export const subscriptions: Subscription[] = [
 		frequency: "yearly",
 		category: "entertainment",
 		next_invoice: dayjs('Aug 17, 2024').toDate(),
-		icon: "amazon"
+		icon_ref: "amazon",
+		send_alert: true
 	},
 	{
 		id: "3",
@@ -59,7 +61,8 @@ export const subscriptions: Subscription[] = [
 		frequency: "yearly",
 		category: "entertainment",
 		next_invoice: dayjs('Aug 17, 2025').toDate(),
-		icon: "google-one"
+		icon_ref: "google-one",
+		send_alert: true
 	},
 	{
 		id: "4",
@@ -68,7 +71,8 @@ export const subscriptions: Subscription[] = [
 		frequency: "bi-yearly",
 		category: "productivity",
 		next_invoice: dayjs('Aug 17, 2025').toDate(),
-		icon: "proton"
+		icon_ref: "proton",
+		send_alert: true
 	},
 	{
 		id: "5",
@@ -77,7 +81,8 @@ export const subscriptions: Subscription[] = [
 		frequency: "yearly",
 		category: "productivity",
 		next_invoice: dayjs('Jul 4, 2024').toDate(),
-		icon: "todoist"
+		icon_ref: "todoist",
+		send_alert: true
 	},
 	{
 		id: "999",
@@ -86,7 +91,8 @@ export const subscriptions: Subscription[] = [
 		frequency: "bi-yearly",
 		category: "entertainment",
 		next_invoice: dayjs('Aug 20, 2024').toDate(),
-		icon: undefined
+		icon_ref: "default",
+		send_alert: true
 	}
 ]
 
@@ -116,10 +122,10 @@ export const columns: ColumnDef<Subscription>[] = [
 		cell: ({ row }) => {
 			return (
 				<div className="flex flex-row space-x-3 items-center">
-					{row.original.icon && (
-						<Image alt={row.original.name} src={`/${row.original.icon}.svg`} height={24} width={24} />
+					{row.original.icon_ref !== "default" && (
+						<Image alt={row.original.name} src={`/${row.original.icon_ref}.svg`} height={24} width={24} />
 					)}
-					{row.original.icon === undefined && (
+					{row.original.icon_ref === "default" && (
 						<Image alt={row.original.name} src={`/default.svg`} height={24} width={24} />
 					)}
 					<div className="text-lg font-medium">{row.original.name}</div>

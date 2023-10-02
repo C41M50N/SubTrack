@@ -11,8 +11,8 @@ import { format } from "date-fns"
 
 import { api } from "@/utils/api"
 import { ModalState } from "@/lib/hooks"
-import { cn, sleep, toXCase } from "@/lib/utils"
-import { FREQUENCIES, ICONS, SubscriptionSchema, Subscription } from "@/lib/types"
+import { cn, toXCase } from "@/lib/utils"
+import { FREQUENCIES, ICONS, SubscriptionSchema } from "@/lib/types"
 import {
   Dialog,
   DialogContent,
@@ -48,30 +48,37 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 
-
-type EditSubscriptionModalProps = {
+type NewSubscriptionModalProps = {
   state: ModalState
-  subscription: Subscription
 }
 
-export default function EditSubscriptionModal ({ state, subscription }: EditSubscriptionModalProps) {
+export default function NewSubscriptionModal({ state }: NewSubscriptionModalProps) {
 
   const utils = api.useContext()
+  const session = useSession()
+  const { data: subscriptions } = api.main.getSubscriptions.useQuery(undefined, { staleTime: Infinity, cacheTime: Infinity })
   const { data: categories, isLoading: isCategoriesLoading } = api.main.getCategories.useQuery(undefined, { staleTime: Infinity, cacheTime: Infinity })
-  const { mutate: updateSubscription, isLoading } = api.main.updateSubscription.useMutation({
-    onSuccess: async (_, ) => {
-      utils.main.getSubscriptions.invalidate()
+  const { mutate: createSubscription, isLoading } = api.main.createSubscription.useMutation({
+    onSuccess: (_, newSubscription) => {
+      utils.main.getSubscriptions.setData(undefined, [...subscriptions!, { ...newSubscription, userId: session.data!.user.id, id: "" }])
       state.setState("closed")
     }
   })
 
   const form = useForm<z.infer<typeof SubscriptionSchema>>({
     resolver: zodResolver(SubscriptionSchema),
-    defaultValues: subscription,
+    defaultValues: {
+      name: "",
+      amount: 10.00,
+      frequency: "monthly",
+      icon_ref: "default",
+      next_invoice: new Date(),
+      send_alert: true
+    }
   })
 
   function onSubmit(values: z.infer<typeof SubscriptionSchema>) {
-    updateSubscription({ ...values, id: subscription.id })
+    createSubscription(values)
   }
 
   return (
@@ -258,7 +265,7 @@ export default function EditSubscriptionModal ({ state, subscription }: EditSubs
                 </div>
 
                 <DialogFooter>
-                  <Button type="submit" isLoading={isLoading}><IconDeviceFloppy size={20} /> Save</Button>
+                  <Button type="submit" isLoading={isLoading}>Submit</Button>
                 </DialogFooter>
               </form>
             </Form>

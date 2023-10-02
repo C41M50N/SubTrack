@@ -21,3 +21,7 @@ export function toMoneyString(amount: number): string {
     currency: "USD",
   }).format(amount)
 }
+
+export async function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}

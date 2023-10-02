@@ -1,12 +1,16 @@
 import React from "react"
 import Head from "next/head"
 
+import { api } from "@/utils/api";
 import { Subscription } from "@/lib/types";
+import { useSelectedSubscriptions } from "@/lib/stores";
 import MainLayout from "@/layouts/main"
-import { columns, subscriptions } from "@/components/subscriptions-table/columns";
+import { columns } from "@/components/subscriptions-table/columns";
 import { DataTable } from "@/components/subscriptions-table/table";
 import { Separator } from "@/components/ui/separator";
 import StatisticCard from "@/components/subscriptions/StatisticCard";
+import SkeletonStatisticCard from "@/components/subscriptions/SkeletonStatisticCard";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type StatisticItem = {
   description: string
@@ -123,7 +127,8 @@ const Statistics: Array<StatisticItem> = [
 
 
 export default function DashboardPage() {
-  const [selectedSubscriptions, setSelectedSubscriptions] = React.useState<Array<Subscription> | null>(null);
+  const { data: subscriptions, isLoading: isSubsLoading } = api.main.getSubscriptions.useQuery();
+  const { subscriptions: selectedSubscriptions } = useSelectedSubscriptions();
 
   return (
     <MainLayout>
@@ -139,13 +144,28 @@ export default function DashboardPage() {
 
       <div className="flex flex-row space-x-8">
         <div className="w-9/12">
-          <DataTable columns={columns} data={subscriptions} />
+          {isSubsLoading && (
+            <div className="w-full space-y-2 p-2">
+              <Skeleton className="h-12" />
+              <div className="py-2 space-y-3">
+                {[...Array(7)].map((v, idx) => (
+                  <Skeleton className="h-8" key={idx} />
+                ))}
+              </div>
+              <Skeleton className="h-12" />
+            </div>
+          )}
+          {!isSubsLoading && !subscriptions && <span className="text-xl">No Subscriptions</span>}
+          {!isSubsLoading && subscriptions && <DataTable columns={columns} data={subscriptions} />}
         </div>
 
         <div className="flex-1">
           <div className="flex flex-col space-y-4">
-            {Statistics.map((item, idx) => (
-              <StatisticCard 
+            {isSubsLoading && Statistics.map((_, idx) => (
+              <SkeletonStatisticCard key={idx} />
+            ))}
+            {!isSubsLoading && subscriptions && Statistics.map((item, idx) => (
+              <StatisticCard
                 key={idx}
                 description={item.description}
                 value={item.getResult(selectedSubscriptions || subscriptions)}
