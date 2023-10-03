@@ -12,7 +12,7 @@ export const mainRouter = createTRPCRouter({
     .input(SubscriptionSchema)
     .mutation(async ({ ctx, input }) => {
       console.log(`Creating new subscription for <${ctx.session.user.name}>`)
-      await ctx.prisma.subscription.create({ data: { ...input, userId: ctx.session.user.id } })
+      await ctx.prisma.subscription.create({ data: { userId: ctx.session.user.id, ...input } })
     }),
 
   getSubscriptions: protectedProcedure
@@ -20,15 +20,15 @@ export const mainRouter = createTRPCRouter({
       const raw_subs =  (await ctx.prisma.subscription.findMany({
         where: { userId: ctx.session.user.id }
       }))
-      await sleep(5000)
+      await sleep(1000)
       return raw_subs.map((sub) => sub as Subscription)
     }),
 
   updateSubscription: protectedProcedure
     .input(SubscriptionSchemaWithId)
     .mutation(async ({ ctx, input }) => {
-      await sleep(1000)
       await ctx.prisma.subscription.update({ where: { id: input.id, userId: ctx.session.user.id }, data: input })
+      await sleep(1000)
     }),
 
   deleteSubscription: protectedProcedure

@@ -70,7 +70,7 @@ export default function EditSubscriptionModal ({ state, subscription }: EditSubs
   })
 
   function onSubmit(values: z.infer<typeof SubscriptionSchema>) {
-    updateSubscription({ ...values, id: subscription.id })
+    updateSubscription({ id: subscription.id, ...values })
   }
 
   return (
