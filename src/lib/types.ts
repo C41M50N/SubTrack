@@ -30,7 +30,7 @@ export const SubscriptionSchema = z.object({
   name: z.string()
           .min(2, { message: "Name must be at least 2 characters" })
           .max(30, { message: "Name must be at most 30 characters" }),
-  amount: z.number()
+  amount: z.coerce.number()
             .multipleOf(0.01)
             .min(0.01, { message: "Amount must be at least $0.01" })
             .max(100_000.00, { message: "Amount must be at most $100,000.00" }),

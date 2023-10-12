@@ -168,7 +168,7 @@ export default function DashboardPage() {
               <StatisticCard
                 key={idx}
                 description={item.description}
-                value={item.getResult(selectedSubscriptions || subscriptions)}
+                value={item.getResult(selectedSubscriptions.length > 0 ? selectedSubscriptions : subscriptions)}
               />
             ))}
           </div>

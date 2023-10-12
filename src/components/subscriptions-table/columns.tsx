@@ -3,10 +3,11 @@ import { Roboto, Lato } from 'next/font/google';
 
 import dayjs from "@/lib/dayjs";
 import { ColumnDef } from "@tanstack/react-table"
+import { ArrowUpDown, MoreHorizontal } from "lucide-react"
 import { IconDotsVertical, IconPencil, IconTrash } from "@tabler/icons-react"
 
 import { Subscription } from "@/lib/types";
-import { useModalState } from "@/lib/hooks";
+import { useAllSubscriptions, useModalState } from "@/lib/hooks";
 import { toMoneyString } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -20,6 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import EditSubscriptionModal from "@/components/subscriptions/EditSubscriptionModal";
 import DeleteSubscriptionModal from "@/components/subscriptions/DeleteSubscriptionModal";
+import { useSelectedSubscriptions } from "@/lib/stores";
 
 const roboto = Roboto({
   weight: ['400', '500', '700'],
@@ -99,20 +101,43 @@ export const subscriptions: Omit<Subscription, "userId">[] = [
 export const columns: ColumnDef<Subscription>[] = [
 	{
     id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={table.getIsAllPageRowsSelected()}
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
+    header: ({ table }) => {
+			const { subscriptions } = useAllSubscriptions()
+			const { setSubscriptions, resetSubscriptions } = useSelectedSubscriptions()
+
+			return (
+				<Checkbox
+					checked={table.getIsAllPageRowsSelected()}
+					onCheckedChange={(value) => {
+						table.toggleAllPageRowsSelected(!!value)
+						if (value === true) {
+							setSubscriptions(subscriptions || [])
+						} else {
+							resetSubscriptions()
+						}
+					}}
+					aria-label="Select all"
+				/>
+			)
+		},
+    cell: ({ row }) => {
+			const { addSubscription, removeSubscription } = useSelectedSubscriptions()
+
+			return (
+				<Checkbox
+					checked={row.getIsSelected()}
+					onCheckedChange={(value) => {
+						row.toggleSelected(!!value)
+						if (value === true) {
+							addSubscription(row.original)
+						} else {
+							removeSubscription(row.original.id)
+						}
+					}}
+					aria-label="Select row"
+				/>
+			)
+		},
     enableSorting: true,
     enableHiding: false,
   },
@@ -178,7 +203,19 @@ export const columns: ColumnDef<Subscription>[] = [
 	},
 	{
 		accessorKey: "next_invoice",
-		header: () => (<div>Next Invoice</div>),
+		header: ({ column }) => {
+			return (
+				<Button
+          variant="ghost"
+          onClick={() => {
+						column.toggleSorting(false)	// orders subscriptions by closest `next_invoice`
+					}}
+        >
+          Next Invoice
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+			)
+		},
 		cell: ({ row }) => {
 			return (
 				<div className="text-left">

@@ -11,7 +11,7 @@ export const mainRouter = createTRPCRouter({
   createSubscription: protectedProcedure
     .input(SubscriptionSchema)
     .mutation(async ({ ctx, input }) => {
-      console.log(`Creating new subscription for <${ctx.session.user.name}>`)
+      console.log(`Creating new subscription for <${ctx.session.user.name}>: ${JSON.stringify(input)}`)
       await ctx.prisma.subscription.create({ data: { userId: ctx.session.user.id, ...input } })
     }),
 
@@ -48,9 +48,23 @@ export const mainRouter = createTRPCRouter({
   setCategories: protectedProcedure
     .input(z.array(z.string()))
     .mutation(async ({ ctx, input }) => {
-      await ctx.prisma.user.update({
-        where: { id: ctx.session.user.id },
-        data: { categories: input }
+      //? you can't remove categories that are in use
+      const count = await ctx.prisma.subscription.count({
+        where: {
+          userId: ctx.session.user.id,
+          category: {
+            in: input
+          }
+        }
       })
+
+      if (count > 0) {
+        await ctx.prisma.user.update({
+          where: { id: ctx.session.user.id },
+          data: { categories: input }
+        })
+      } else {
+        throw Error("Some categories you deleted are still in use.")
+      }
     }),
 });

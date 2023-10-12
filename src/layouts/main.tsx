@@ -11,6 +11,7 @@ import {
 } from "@tabler/icons-react"
 
 import { Button } from "@/components/ui/button"
+import { Toaster } from "@/components/ui/toaster"
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import NewSubscriptionModal from "@/components/subscriptions/NewSubscriptionModal"
 import { useModalState } from "@/lib/hooks"
@@ -47,7 +48,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                 <IconDashboard />
                 Dashboard
               </Link>
-              <Link href={"/settings/account"} className="text-md font-medium text-muted-foreground transition-colors rounded-md p-2 px-2 flex flex-row gap-1 hover:text-primary">
+              <Link href={"/settings/categories"} className="text-md font-medium text-muted-foreground transition-colors rounded-md p-2 px-2 flex flex-row gap-1 hover:text-primary">
                 <IconSettings />
                 Settings
               </Link>
@@ -70,11 +71,11 @@ export default function MainLayout({ children }: MainLayoutProps) {
           </div>
         </section>
       </div>
-      <main className="ml-auto mr-auto max-w-[1200px]">
+      <main className="ml-auto mr-auto max-w-[1200px] pb-8 px-6">
         {children}
+        <Toaster />
         <NewSubscriptionModal state={newModalState} />
       </main>
-
     </>
   )
 }

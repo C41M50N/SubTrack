@@ -10,7 +10,7 @@ import { IconCalendar, IconCalendarEvent, IconDeviceFloppy } from "@tabler/icons
 import { format } from "date-fns"
 
 import { api } from "@/utils/api"
-import { ModalState } from "@/lib/hooks"
+import { ModalState, useCategories, useUpdateSubscription } from "@/lib/hooks"
 import { cn, sleep, toXCase } from "@/lib/utils"
 import { FREQUENCIES, ICONS, SubscriptionSchema, Subscription } from "@/lib/types"
 import {
@@ -55,14 +55,8 @@ type EditSubscriptionModalProps = {
 
 export default function EditSubscriptionModal ({ state, subscription }: EditSubscriptionModalProps) {
 
-  const utils = api.useContext()
-  const { data: categories, isLoading: isCategoriesLoading } = api.main.getCategories.useQuery(undefined, { staleTime: Infinity, cacheTime: Infinity })
-  const { mutate: updateSubscription, isLoading } = api.main.updateSubscription.useMutation({
-    onSuccess: async (_, ) => {
-      utils.main.getSubscriptions.invalidate()
-      state.setState("closed")
-    }
-  })
+  const { categories, isCategoriesLoading } = useCategories()
+  const { updateSubscription, isUpdateSubscriptionLoading } = useUpdateSubscription(() => {}, () => state.setState("closed"))
 
   const form = useForm<z.infer<typeof SubscriptionSchema>>({
     resolver: zodResolver(SubscriptionSchema),
@@ -257,7 +251,10 @@ export default function EditSubscriptionModal ({ state, subscription }: EditSubs
                 </div>
 
                 <DialogFooter>
-                  <Button type="submit" isLoading={isLoading}><IconDeviceFloppy size={20} /> Save</Button>
+                  <Button type="submit" isLoading={isUpdateSubscriptionLoading} className="gap-1">
+                    <IconDeviceFloppy size={20} strokeWidth={1.75} />
+                    <span>Save</span>
+                  </Button>
                 </DialogFooter>
               </form>
             </Form>

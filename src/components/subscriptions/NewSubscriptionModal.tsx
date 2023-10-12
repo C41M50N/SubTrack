@@ -10,7 +10,7 @@ import { IconCalendar, IconCalendarEvent, IconDeviceFloppy } from "@tabler/icons
 import { format } from "date-fns"
 
 import { api } from "@/utils/api"
-import { ModalState } from "@/lib/hooks"
+import { ModalState, useCategories, useCreateSubscription } from "@/lib/hooks"
 import { cn, toXCase } from "@/lib/utils"
 import { FREQUENCIES, ICONS, SubscriptionSchema } from "@/lib/types"
 import {
@@ -54,15 +54,10 @@ type NewSubscriptionModalProps = {
 
 export default function NewSubscriptionModal({ state }: NewSubscriptionModalProps) {
 
-  const utils = api.useContext()
-  const session = useSession()
-  const { data: subscriptions } = api.main.getSubscriptions.useQuery(undefined, { staleTime: Infinity, cacheTime: Infinity })
-  const { data: categories, isLoading: isCategoriesLoading } = api.main.getCategories.useQuery(undefined, { staleTime: Infinity, cacheTime: Infinity })
-  const { mutate: createSubscription, isLoading } = api.main.createSubscription.useMutation({
-    onSuccess: (_, newSubscription) => {
-      utils.main.getSubscriptions.setData(undefined, [...subscriptions!, { ...newSubscription, userId: session.data!.user.id, id: "" }])
-      state.setState("closed")
-    }
+  const { categories, isCategoriesLoading } = useCategories()
+  const { createSubscription, isCreateSubscriptionLoading } = useCreateSubscription(() => {}, () => {
+    form.reset()
+    state.setState("closed")
   })
 
   const form = useForm<z.infer<typeof SubscriptionSchema>>({
@@ -155,7 +150,7 @@ export default function NewSubscriptionModal({ state }: NewSubscriptionModalProp
                       <FormItem>
                         <FormLabel>Amount</FormLabel>
                         <FormControl>
-                          <Input type={"number"} step={0.01} {...field} />
+                          <Input type="number" step={0.01} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -265,7 +260,7 @@ export default function NewSubscriptionModal({ state }: NewSubscriptionModalProp
                 </div>
 
                 <DialogFooter>
-                  <Button type="submit" isLoading={isLoading}>Submit</Button>
+                  <Button type="submit" isLoading={isCreateSubscriptionLoading}>Submit</Button>
                 </DialogFooter>
               </form>
             </Form>
