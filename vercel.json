@@ -1,0 +1,12 @@
+{
+    "crons": [
+        {
+            "path": "/api/functions/sendAlerts",
+            "schedule": "0 6 15 * *"
+        },
+        {
+            "path": "/api/functions/updateNextInvoice",
+            "schedule": "0 2 * * *"
+        }
+    ]
+}
