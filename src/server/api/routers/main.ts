@@ -67,4 +67,13 @@ export const mainRouter = createTRPCRouter({
         throw Error("Some categories you deleted are still in use.")
       }
     }),
+
+  updateName: protectedProcedure
+    .input(z.string())
+    .mutation(async ({ ctx, input: name }) => {
+      await ctx.prisma.user.update({
+        where: { id: ctx.session.user.id },
+        data: { name: name }
+      })
+    })
 });

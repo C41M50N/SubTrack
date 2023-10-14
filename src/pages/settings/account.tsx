@@ -1,8 +1,40 @@
+import z from "zod"
+import { useForm } from "react-hook-form"
+import { useSession } from "next-auth/react";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import { api } from "@/utils/api";
 import MainLayout from "@/layouts/main";
 import SettingsLayout from "@/layouts/settings";
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+
+const AccountFormSchema = z.object({
+  name: z.string()
+})
 
 export default function AccountSettingsPage() {
+  const { data: session } = useSession()
+  const form = useForm<z.infer<typeof AccountFormSchema>>({
+    resolver: zodResolver(AccountFormSchema),
+    defaultValues: { name: session?.user.name || "" }
+  })
+
+  const { mutate, isLoading } = api.main.updateName.useMutation()
+
+  function onSubmit(values: z.infer<typeof AccountFormSchema>) {
+    mutate(values.name);
+  }
+
   return (
     <MainLayout>
       <SettingsLayout>
@@ -16,7 +48,30 @@ export default function AccountSettingsPage() {
             </p>
           </div>
           <Separator />
-          {/* <AccountForm /> */}
+          
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <div className="w-1/2">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <Button type="submit" isLoading={isLoading} className="gap-1">
+                <span>Save</span>
+              </Button>
+            </form>
+          </Form>
         </div>
       </SettingsLayout>
     </MainLayout>

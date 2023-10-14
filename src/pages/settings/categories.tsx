@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function CategoriesSettingsPage() {
 
@@ -48,24 +49,31 @@ export default function CategoriesSettingsPage() {
 
           {!isCategoriesLoading && (
             <div className="space-y-4">
+              <Label className="text-xl">Current Catgeories</Label>
               <div className="flex flex-wrap gap-x-3 gap-y-2">
                 {currentCategories.map((name) => (
-                  <Badge key={name} variant={"secondary"} className="flex flex-row gap-1 text-lg">
+                  <Badge key={name} variant={"secondary"} className="flex flex-row gap-1 text-lg font-normal">
                     {name}
                     <X className="hover:cursor-pointer" onClick={() => removeCategory(name)} />
                   </Badge>
                 ))}
               </div>
 
-              <Input type="text" onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  const value = e.currentTarget.value.trim()
-                  if (value !== "") {
-                    addCategory(value)
-                    e.currentTarget.value = ""
+              <div className="py-1" />
+
+              <div className="space-y-1">
+                <Label className="text-base">Add Catgeory</Label>
+                <Input type="text" onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    const value = e.currentTarget.value.trim()
+                    if (value !== "") {
+                      addCategory(value)
+                      e.currentTarget.value = ""
+                    }
                   }
-                }
-              }} />
+                }} />
+                <Label className="text-gray-500 text-xs">Press [ENTER] to add</Label>
+              </div>
 
               <Button isLoading={isSetCategoriesLoading} onClick={() => setCategories(currentCategories)}>Save</Button>
             </div>
