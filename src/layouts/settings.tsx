@@ -19,10 +19,10 @@ const SettingsNavItems: Array<NavItem> = [
     title: "Categories",
     href: "/settings/categories"
   },
-  {
-    title: "Notifications",
-    href: "/settings/notifications"
-  }
+  // {
+  //   title: "Notifications",
+  //   href: "/settings/notifications"
+  // }
 ]
 
 

@@ -65,7 +65,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
               <span className="text-lg font-normal text-muted-foreground">{session?.user.name}</span>
               <Avatar>
                 {/* <AvatarImage src="https://github.com/shadcn.png" /> */}
-                <AvatarImage src={"https://img.icons8.com/cotton/64/gender-neutral-user--v1.png"} />
+                {/* <AvatarImage src={"https://img.icons8.com/cotton/64/gender-neutral-user--v1.png"} /> */}
+                <AvatarImage src={session?.user.image || "https://img.icons8.com/cotton/64/gender-neutral-user--v1.png"} />
               </Avatar>
             </Link>
           </div>
