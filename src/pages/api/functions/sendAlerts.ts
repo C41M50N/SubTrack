@@ -28,17 +28,15 @@ export default async function handler() {
     const subs = groupSubscriptions[userId]!;
     const user_info = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { name: true, email: true } })
 
-    if (user_info.email && user_info.name) {
-      resend.sendEmail({
-        from: '...@subtrack.com',
-        to: user_info.email,
-        subject: `SubTrack: Upcoming Subscription Renewals`,
-        react: RenewalAlertEmail({
-          user_name: user_info.name,
-          subscriptions: subs.map((s) => ({ id: s.id, title: s.name, renewal_date: dayjs(s.next_invoice).format("dddd, MMM D") }))
-        })
+    resend.sendEmail({
+      from: '...@subtrack.com',
+      to: user_info.email,
+      subject: `SubTrack: Upcoming Subscription Renewals`,
+      react: RenewalAlertEmail({
+        user_name: user_info.name,
+        subscriptions: subs.map((s) => ({ id: s.id, title: s.name, renewal_date: dayjs(s.next_invoice).format("dddd, MMM D") }))
       })
-    }
+    })
   }
 
 }

@@ -7,7 +7,8 @@
     "dev": "next dev",
     "postinstall": "prisma generate",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "email": "email dev --dir ./src/emails"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.1",
