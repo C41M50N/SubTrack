@@ -51,13 +51,13 @@ export default function AccountSettingsPage() {
           
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <div className="w-1/2">
+              <div className="grid grid-cols-3 gap-3">
                 <FormField
                   control={form.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Name</FormLabel>
+                      <FormLabel className="text-base">Name</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -65,6 +65,13 @@ export default function AccountSettingsPage() {
                     </FormItem>
                   )}
                 />
+
+                <FormItem>
+                  <FormLabel className="text-base">Email</FormLabel>
+                  <FormControl>
+                    <Input disabled value={session?.user.email ?? ""} />
+                  </FormControl>
+                </FormItem>
               </div>
 
               <Button type="submit" isLoading={isLoading} className="gap-1">

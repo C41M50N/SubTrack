@@ -52,7 +52,7 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
                   pathname === item.href
                     ? "bg-muted hover:bg-muted"
                     : "hover:bg-transparent hover:underline",
-                  "justify-start text-md"
+                  "justify-start text-md border border-gray-500 border-opacity-30 rounded-sm"
                 )}
               >
                 {item.title}
