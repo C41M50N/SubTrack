@@ -1,4 +1,5 @@
 import { type ClassValue, clsx } from "clsx"
+import dayjs from "dayjs"
 import { twMerge } from "tailwind-merge"
  
 export function cn(...inputs: ClassValue[]) {
@@ -24,4 +25,15 @@ export function toMoneyString(amount: number): string {
 
 export async function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+type Month = 'January' | 'February' | 'March' | 'April' | 'May' | 'June' | 'July' | 'August' | 'September' | 'October' | 'November' | 'December'
+type Year = number
+export function getNextNMonths(n: number) {
+  const res: Array<[Month, Year]> = []
+  for (let offset = 0; offset < n; offset++) {
+    const day = dayjs().add(1 + offset, 'month')
+    res.push([day.format('MMMM') as Month, day.year()])
+  }
+  return res;
 }

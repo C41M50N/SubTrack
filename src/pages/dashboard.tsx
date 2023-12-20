@@ -3,6 +3,7 @@ import Head from "next/head"
 
 import { api } from "@/utils/api";
 import { Subscription } from "@/lib/types";
+import { getNextNMonths, toMoneyString } from "@/lib/utils";
 import { useSelectedSubscriptions } from "@/lib/stores";
 import MainLayout from "@/layouts/main"
 import { columns } from "@/components/subscriptions-table/columns";
@@ -11,6 +12,8 @@ import { Separator } from "@/components/ui/separator";
 import StatisticCard from "@/components/subscriptions/StatisticCard";
 import SkeletonStatisticCard from "@/components/subscriptions/SkeletonStatisticCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Card } from "@/components/ui/card";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 type StatisticItem = {
   description: string
@@ -171,6 +174,25 @@ export default function DashboardPage() {
                 value={item.getResult(selectedSubscriptions.length > 0 ? selectedSubscriptions : subscriptions)}
               />
             ))}
+
+            <Card>
+              <Accordion type="single" className="px-4">
+                <AccordionItem value="monthly-cost-breakdown">
+                  <AccordionTrigger className="text-md font-semibold py-2">Monthly Cost Breakdown</AccordionTrigger>
+                  <AccordionContent>
+                    {getNextNMonths(10).map(((data) => {
+                      const [month, year] = data
+                      return (
+                        <div key={`${month}-${year}`} className="p-2 flex flex-row">
+                          <span className="flex-1">{`${month} ${year}`}</span>
+                          <span>{toMoneyString(0.00)}</span>
+                        </div>
+                      )
+                    }))}
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </Card>
           </div>
         </div>
       </div>

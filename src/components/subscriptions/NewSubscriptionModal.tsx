@@ -102,7 +102,7 @@ export default function NewSubscriptionModal({ state }: NewSubscriptionModalProp
                       <FormItem>
                         <FormLabel>Name</FormLabel>
                         <FormControl>
-                          <Input placeholder="Name" {...field} />
+                          <Input placeholder="Name" {...field} type="search" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
