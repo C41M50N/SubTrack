@@ -49,8 +49,8 @@ export default function CategoriesSettingsPage() {
           )}
 
           {!isCategoriesLoading && (
-            <div className="space-y-4">
-              <Label className="text-xl">Current Catgeories</Label>
+            <div className="space-y-3">
+              <Label className="text-base">Current Catgeories</Label>
               <div className="flex flex-wrap gap-x-3 gap-y-2">
                 {currentCategories.map((name) => (
                   <Badge key={name} variant={"secondary"} className="flex flex-row gap-1 text-lg font-normal">
@@ -64,7 +64,7 @@ export default function CategoriesSettingsPage() {
 
               <div className="space-y-1">
                 <Label className="text-base">Add Catgeory</Label>
-                <Input type="text" onKeyDown={(e) => {
+                <Input type="text" className="max-w-xs" onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     const value = e.currentTarget.value.trim()
                     if (value !== "") {

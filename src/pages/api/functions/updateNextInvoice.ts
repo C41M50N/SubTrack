@@ -14,27 +14,27 @@ export default async function handler() {
     const current = dayjs(sub.next_invoice)
     switch (sub.frequency as Subscription["frequency"]) {
       case "weekly":
-        new_next_invoice = current.add(7, "days");
+        new_next_invoice = current.add(1, "week");
         break;
 
       case "bi-weekly":
-        new_next_invoice = current.add(7*2, "days");
+        new_next_invoice = current.add(2, "week");
         break;
 
       case "monthly":
-        new_next_invoice = current.add(30, "days");
+        new_next_invoice = current.add(1, "month");
         break;
 
       case "bi-monthly":
-        new_next_invoice = current.add(30*2, "days");
+        new_next_invoice = current.add(2, "month");
         break;
 
       case "yearly":
-        new_next_invoice = current.add(365, "days");
+        new_next_invoice = current.add(1, "year");
         break;
 
       case "bi-yearly":
-        new_next_invoice = current.add(365*2, "days");
+        new_next_invoice = current.add(2, "year");
         break;
 
       default:

@@ -54,15 +54,15 @@ export default function MainLayout({ children }: MainLayoutProps) {
               </Link>
             </nav>
             <div className="ml-auto mr-14">
-              <Button className="gap-2" onClick={() => {
+              <Button className="gap-2" variant="secondary" onClick={() => {
                 newModalState.setState("open");
               }}>
                 <IconPlus />
                 Add Subscription
               </Button>
             </div>
-            <Link href={"/settings/account"} className="flex items-center space-x-4 p-2 px-3 hover:bg-muted rounded-lg hover:cursor-pointer">
-              <span className="text-lg font-normal text-muted-foreground">{session?.user.name}</span>
+            <Link href={"/settings/account"} className="flex items-center space-x-4 p-2 px-3 border border-gray-500 border-opacity-30 rounded-md hover:bg-muted hover:cursor-pointer">
+              <span className="text-lg font-normal text-black/80">{session?.user.name}</span>
               <Avatar>
                 {/* <AvatarImage src="https://github.com/shadcn.png" /> */}
                 {/* <AvatarImage src={"https://img.icons8.com/cotton/64/gender-neutral-user--v1.png"} /> */}
