@@ -67,6 +67,7 @@ model Subscription {
     frequency       String
     category        String
     next_invoice    DateTime
+    last_invoice    DateTime?
     icon_ref        String @default("default")
     send_alert      Boolean @default(true)
 

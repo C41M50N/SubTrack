@@ -1,9 +1,8 @@
 import dayjs from 'dayjs'
-import _ from 'lodash'
 import { prisma } from "@/server/db"
 import { Subscription as SubscriptionDTO } from "@prisma/client"
 import { resend } from '@/lib/resend'
-import RenewalAlertEmail from '@/emails/RenewalAlert'
+import { MonthlyReviewEmail } from '@/emails/monthly-review'
 
 function groupBy<T>(arr: T[], fn: (item: T) => any) {
   return arr.reduce<Record<string, T[]>>((prev, curr) => {
@@ -15,28 +14,33 @@ function groupBy<T>(arr: T[], fn: (item: T) => any) {
 }
 
 export default async function handler() {
-  const subscriptions = await prisma.subscription.findMany({
-    where: {
-      next_invoice: { lte: dayjs().add(32, "days").toDate() }, // within the next 32 days
-      send_alert: { equals: true }
-    }
-  })
+  const renewingSoonSubscriptions = await prisma.subscription.findMany({ where: {
+    next_invoice: { lte: dayjs().add(32, 'days').toDate(), gte: dayjs().toDate() },
+    send_alert: { equals: true }
+  }});
 
-  const groupSubscriptions = groupBy(subscriptions, (sub: SubscriptionDTO) => sub.userId);
+  const renewedRecentlySubscriptions = await prisma.subscription.findMany({ where: {
+    last_invoice: { lte: dayjs().toDate(), gte: dayjs().subtract(30, 'days').toDate() },
+    send_alert: { equals: true }
+  }});
 
-  for (const userId in groupSubscriptions) {
-    const subs = groupSubscriptions[userId]!;
-    const user_info = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { name: true, email: true } })
+  const groupRenewingSoonSubscriptions = groupBy(renewingSoonSubscriptions, (sub: SubscriptionDTO) => sub.userId);
+  const groupRenewedRecentlySubscriptions = groupBy(renewedRecentlySubscriptions, (sub: SubscriptionDTO) => sub.userId);
+
+  for (const userId in new Set([...Object.keys(groupRenewingSoonSubscriptions), ...Object.keys(groupRenewedRecentlySubscriptions)])) {
+    const renewingSoonSubs = groupRenewingSoonSubscriptions[userId];
+    const renewedRecentlySubs = groupRenewedRecentlySubscriptions[userId];
+    const user = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { name: true, email: true } });
 
     resend.sendEmail({
-      from: '...@subtrack.com',
-      to: user_info.email,
-      subject: `SubTrack: Upcoming Subscription Renewals`,
-      react: RenewalAlertEmail({
-        user_name: user_info.name,
-        subscriptions: subs.map((s) => ({ id: s.id, title: s.name, renewal_date: dayjs(s.next_invoice).format("dddd, MMM D") }))
+      from: 'blahblahblah@subtrack.com',
+      to: user.email,
+      subject: `${dayjs().subtract(1, 'month').format('MMMM')} Subscriptions Review`,
+      react: MonthlyReviewEmail({
+        user_name: user.name,
+        renewing_soon: renewingSoonSubs,
+        renewed_recently: renewedRecentlySubs
       })
     })
   }
-
 }

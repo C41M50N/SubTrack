@@ -43,7 +43,7 @@ export default async function handler() {
 
     await prisma.subscription.update({
       where: { id: sub.id },
-      data: { next_invoice: new_next_invoice!.toDate() }
+      data: { next_invoice: new_next_invoice!.toDate(), last_invoice: current.toDate() }
     })
   })
 
