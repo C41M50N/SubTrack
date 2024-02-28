@@ -11,6 +11,7 @@
     "email": "email dev --dir ./src/emails"
   },
   "dependencies": {
+    "@doist/todoist-api-typescript": "^3.0.2",
     "@hookform/resolvers": "^3.3.1",
     "@legendapp/state": "^1.11.1",
     "@next-auth/prisma-adapter": "^1.0.7",

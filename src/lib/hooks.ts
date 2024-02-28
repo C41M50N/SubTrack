@@ -48,7 +48,8 @@ export const useCreateSubscription = (before: () => void, after: () => void) => 
 	const { mutate: createSubscription, isLoading: isCreateSubscriptionLoading } = api.main.createSubscription.useMutation({
     onSuccess: (_, newSubscription) => {
 			before()
-      ctx.main.getSubscriptions.setData(undefined, [...subscriptions!, { ...newSubscription, userId: session.data!.user.id, id: "" }])
+			// TODO: fix this garbage...
+      // ctx.main.getSubscriptions.setData(undefined, [...subscriptions!, { ...newSubscription, userId: session.data!.user.id, id: "", next_invoice: new Date() }])
 			toast({
 				variant: "success",
 				title: `Successfully created ${newSubscription.name} subscription!`

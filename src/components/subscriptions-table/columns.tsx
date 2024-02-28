@@ -4,24 +4,27 @@ import { Roboto, Lato } from 'next/font/google';
 import dayjs from "@/lib/dayjs";
 import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown, MoreHorizontal } from "lucide-react"
-import { IconDotsVertical, IconPencil, IconTrash } from "@tabler/icons-react"
+import { IconAlarm, IconDotsVertical, IconPencil, IconTrash } from "@tabler/icons-react"
 
 import { Subscription } from "@/lib/types";
-import { useAllSubscriptions, useModalState } from "@/lib/hooks";
 import { toMoneyString } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
+import { useSelectedSubscriptions } from "@/lib/stores";
+import { useAllSubscriptions, useModalState } from "@/lib/hooks";
+
 import {
-  DropdownMenu,
+	DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import EditSubscriptionModal from "@/components/subscriptions/EditSubscriptionModal";
 import DeleteSubscriptionModal from "@/components/subscriptions/DeleteSubscriptionModal";
-import { useSelectedSubscriptions } from "@/lib/stores";
+import SetCancelReminderModal from "@/components/subscriptions/SetCancelReminderModal";
+import { useSession } from "next-auth/react";
 
 const roboto = Roboto({
   weight: ['400', '500', '700'],
@@ -34,69 +37,6 @@ const lato = Lato({
 	style: ['normal'],
 	subsets: ['latin']
 })
-
-export const subscriptions: Omit<Subscription, "userId">[] = [
-	{
-		id: "1",
-		name: "Spotify",
-		amount: 4.99,
-		frequency: "monthly",
-		category: "productivity",
-		next_invoice: new Date(),
-		icon_ref: "spotify",
-		send_alert: true
-	},
-	{
-		id: "2",
-		name: "Amazon Prime",
-		amount: 73.14,
-		frequency: "yearly",
-		category: "entertainment",
-		next_invoice: dayjs('Aug 17, 2024').toDate(),
-		icon_ref: "amazon",
-		send_alert: true
-	},
-	{
-		id: "3",
-		name: "Google One",
-		amount: 20.00,
-		frequency: "yearly",
-		category: "entertainment",
-		next_invoice: dayjs('Aug 17, 2025').toDate(),
-		icon_ref: "google-one",
-		send_alert: true
-	},
-	{
-		id: "4",
-		name: "Proton",
-		amount: 158.99,
-		frequency: "bi-yearly",
-		category: "productivity",
-		next_invoice: dayjs('Aug 17, 2025').toDate(),
-		icon_ref: "proton",
-		send_alert: true
-	},
-	{
-		id: "5",
-		name: "Todoist",
-		amount: 36.00,
-		frequency: "yearly",
-		category: "productivity",
-		next_invoice: dayjs('Jul 4, 2024').toDate(),
-		icon_ref: "todoist",
-		send_alert: true
-	},
-	{
-		id: "999",
-		name: "Test",
-		amount: 20000.00,
-		frequency: "bi-yearly",
-		category: "entertainment",
-		next_invoice: dayjs('Aug 20, 2024').toDate(),
-		icon_ref: "default",
-		send_alert: true
-	}
-]
 
 export const columns: ColumnDef<Subscription>[] = [
 	{
@@ -230,35 +170,50 @@ export const columns: ColumnDef<Subscription>[] = [
     cell: ({ row }) => {
       const subscription = row.original;
 
+			const { data: session } = useSession();
+
 			const deleteModalState = useModalState();
 			const editModalState = useModalState();
+			const setReminderModalState = useModalState();
  
       return (
 				<>
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button variant="ghost" className="h-8 w-8 p-0">
-									<span className="sr-only">Open menu</span>
-									<IconDotsVertical />
-								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent align="center" side="right">
-								<DropdownMenuItem className="cursor-pointer" onClick={() => editModalState.setState("open")}>
-									<IconPencil stroke={1.75} />
-									<span className={`text-[16px] font-semibold pl-2 ${lato.className}`}>Edit</span>
-								</DropdownMenuItem>
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button variant="ghost" className="h-8 w-8 p-0">
+								<span className="sr-only">Open menu</span>
+								<IconDotsVertical />
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="center" side="right">
+							<DropdownMenuItem className="cursor-pointer" onClick={() => editModalState.setState("open")}>
+								<IconPencil stroke={1.75} />
+								<span className={`text-base font-medium pl-2 ${lato.className}`}>Edit</span>
+							</DropdownMenuItem>
 
-								<DropdownMenuSeparator />
+							<DropdownMenuSeparator />
 
-								<DropdownMenuItem className="cursor-pointer text-red-700" onClick={() => deleteModalState.setState("open")}>
-									<IconTrash stroke={1.75} />
-									<span className={`text-[16px] font-semibold pl-2 ${lato.className}`}>Delete</span>
-								</DropdownMenuItem>
-							</DropdownMenuContent>
-						</DropdownMenu>
+							{session?.user.todoistAPIKey !== "" && (
+								<>
+									<DropdownMenuItem className="cursor-pointer" onClick={() => setReminderModalState.setState("open")}>
+										<IconAlarm stroke={1.75} />
+										<span className={`text-base font-medium pl-2 ${lato.className}`}>Set Cancel Reminder</span>
+									</DropdownMenuItem>
+
+									<DropdownMenuSeparator />
+								</>
+							)}
+
+							<DropdownMenuItem className="cursor-pointer text-red-700" onClick={() => deleteModalState.setState("open")}>
+								<IconTrash stroke={1.75} />
+								<span className={`text-base font-medium pl-2 ${lato.className}`}>Delete</span>
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
 
 					<EditSubscriptionModal state={editModalState} subscription={subscription} />
 					<DeleteSubscriptionModal state={deleteModalState} subscription_id={subscription.id} />
+					<SetCancelReminderModal state={setReminderModalState} subscription={subscription} />
 				</>
       )
     },

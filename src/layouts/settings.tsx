@@ -19,6 +19,10 @@ const SettingsNavItems: Array<NavItem> = [
     title: "Categories",
     href: "/settings/categories"
   },
+  {
+    title: "Todoist Integration",
+    href: "/settings/todoist"
+  }
   // {
   //   title: "Notifications",
   //   href: "/settings/notifications"

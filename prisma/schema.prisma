@@ -58,6 +58,8 @@ model User {
 
     categories    String[] @default(["entertainment", "productivity", "finance"])
     subscriptions Subscription[]
+    todoistAPIKey String @default("")
+    todoistProjectId String @default("")
 }
 
 model Subscription {

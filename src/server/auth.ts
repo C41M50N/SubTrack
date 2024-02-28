@@ -20,15 +20,19 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: DefaultSession["user"] & {
       id: string;
+      todoistAPIKey: string;
+      todoistProjectId: string;
       // ...other properties
       // role: UserRole;
     };
   }
 
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
+  interface User {
+    todoistAPIKey: string;
+    todoistProjectId: string;
+    // ...other properties
+    // role: UserRole;
+  }
 }
 
 /**
@@ -43,6 +47,8 @@ export const authOptions: NextAuthOptions = {
       user: {
         ...session.user,
         id: user.id,
+        todoistAPIKey: user.todoistAPIKey,
+        todoistProjectId: user.todoistProjectId
       },
     }),
   },
