@@ -1,4 +1,5 @@
 import z from "zod"
+import React from "react";
 import { useForm } from "react-hook-form"
 import { useSession } from "next-auth/react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,7 +26,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import React from "react";
 
 const TodoistAPIKeyFormSchema = z.object({
   key: z.string()
@@ -41,9 +41,9 @@ export default function TodoistSettingsPage() {
     resolver: zodResolver(TodoistAPIKeyFormSchema),
     defaultValues: { key: session?.user.todoistAPIKey || "" }
   });
-  const { 
-    mutate: setTodoistAPIKey, 
-    isLoading: isSetTodoistAPIKeyLoading 
+  const {
+    mutate: setTodoistAPIKey,
+    isLoading: isSetTodoistAPIKeyLoading
   } = api.main.setTodoistAPIKey.useMutation();
   const {
     mutate: removeTodoistAPIKey,
@@ -62,6 +62,8 @@ export default function TodoistSettingsPage() {
     isLoading: isSetTodoistProjectLoading
   } = api.main.setTodoistProject.useMutation();
 
+  const projectId = todoistProjectForm.watch("projectId");
+
   React.useEffect(() => {
     if (session) {
       todoistAPIKeyForm.setValue(
@@ -78,7 +80,7 @@ export default function TodoistSettingsPage() {
       todoistProjectForm.setValue(
         "projectId",
         session!.user.todoistProjectId,
-        { shouldValidate: true }
+        { shouldDirty: true }
       );
     }
   }, [isGetTodoistProjectsLoading])
@@ -142,11 +144,12 @@ export default function TodoistSettingsPage() {
                 >
                   <FormField
                     control={todoistProjectForm.control}
+                    defaultValue={projectId}
                     name="projectId"
                     render={({ field }) => (
                       <FormItem className="max-w-xs">
                         <FormLabel className="text-base">Project</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select a project" />

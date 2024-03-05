@@ -1,18 +1,17 @@
+import { IconTrash } from "@tabler/icons-react"
 import React from "react"
+
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogHeader,
   DialogFooter,
+  DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Subscription } from "@/lib/types"
-import { ModalState, useDeleteSubscription } from "@/lib/hooks"
-import { IconTrash } from "@tabler/icons-react"
-import { api } from "@/utils/api"
+import { useDeleteSubscription, type ModalState } from "@/lib/hooks"
+import { type Subscription } from "@/lib/types"
 
 type DeleteSubscriptionModalProps = {
   state: ModalState
@@ -21,7 +20,12 @@ type DeleteSubscriptionModalProps = {
 
 export default function DeleteSubscriptionModal ({ state, subscription_id }: DeleteSubscriptionModalProps) {
 
-  const { deleteSubscription, isDeleteSubscriptionLoading } = useDeleteSubscription(subscription_id, () => {}, () => state.setState("closed"))
+  const { deleteSubscription, isDeleteSubscriptionLoading } = useDeleteSubscription()
+
+  async function onSubmit() {
+    await deleteSubscription(subscription_id)
+    state.setState("closed")
+  }
 
   return (
     <Dialog open={state.state === "open" ? true : false} onOpenChange={(open) => !open && state.setState("closed")}>
@@ -34,7 +38,7 @@ export default function DeleteSubscriptionModal ({ state, subscription_id }: Del
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button type="submit" variant={"destructive"} isLoading={isDeleteSubscriptionLoading} onClick={() => deleteSubscription(subscription_id)} className="gap-1">
+          <Button type="submit" variant={"destructive"} isLoading={isDeleteSubscriptionLoading} onClick={onSubmit} className="gap-1">
             <IconTrash size={20} strokeWidth={1.75} />
             <span>Delete</span>
           </Button>

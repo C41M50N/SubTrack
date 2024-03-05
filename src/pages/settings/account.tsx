@@ -1,9 +1,10 @@
 import z from "zod"
+import React from "react";
 import { useForm } from "react-hook-form"
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { api } from "@/utils/api";
+import { useUserName } from "@/lib/hooks";
 import MainLayout from "@/layouts/main";
 import SettingsLayout from "@/layouts/settings";
 import { Input } from "@/components/ui/input"
@@ -23,17 +24,26 @@ const AccountFormSchema = z.object({
 })
 
 export default function AccountSettingsPage() {
-  const { data: session } = useSession()
+  const { data: session, update: refreshSessionData } = useSession()
   const form = useForm<z.infer<typeof AccountFormSchema>>({
     resolver: zodResolver(AccountFormSchema),
     defaultValues: { name: session?.user.name || "" }
   })
 
-  const { mutate, isLoading } = api.main.updateName.useMutation()
+  const { setUserName, isSetUserNameLoading } = useUserName()
 
   function onSubmit(values: z.infer<typeof AccountFormSchema>) {
-    mutate(values.name);
+    if (values.name !== session!.user.name) {
+      setUserName(values.name);
+      refreshSessionData({ name: values.name })
+    }
   }
+
+  React.useEffect(() => {
+    if (session) {
+      form.setValue("name", session.user.name || "")
+    }
+  }, [session])
 
   return (
     <MainLayout>
@@ -43,8 +53,7 @@ export default function AccountSettingsPage() {
             <h3 className="text-lg font-medium">Account</h3>
             <p className="text-sm text-muted-foreground">
               View your account information.
-              Update your account settings. Set your preferred language and
-              timezone.
+              Update your account settings.
             </p>
           </div>
           <Separator />
@@ -74,11 +83,18 @@ export default function AccountSettingsPage() {
                 </FormItem>
               </div>
 
-              <Button type="submit" isLoading={isLoading} className="gap-1">
+              <Button type="submit" isLoading={isSetUserNameLoading} className="gap-1">
                 <span>Save</span>
               </Button>
             </form>
           </Form>
+
+          <div className="pt-4 space-y-2">
+            <h3 className="text-base font-medium">Sign Out of Account</h3>
+            <Button variant="destructive" onClick={() => signOut({ callbackUrl: '/', redirect: true })}>
+              Sign Out
+            </Button>
+          </div>
         </div>
       </SettingsLayout>
     </MainLayout>

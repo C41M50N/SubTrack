@@ -1,36 +1,35 @@
-import React from "react"
 import Image from "next/image"
-import { useSession } from "next-auth/react"
 
-import z from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { IconCalendarEvent } from "@tabler/icons-react"
+import { format } from "date-fns"
 import { Loader2 } from "lucide-react"
 import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { IconCalendar, IconCalendarEvent, IconDeviceFloppy } from "@tabler/icons-react"
-import { format } from "date-fns"
+import z from "zod"
 
-import { api } from "@/utils/api"
-import { ModalState, useCategories, useCreateSubscription } from "@/lib/hooks"
-import { cn, toXCase } from "@/lib/utils"
-import { FREQUENCIES, ICONS, SubscriptionSchema } from "@/lib/types"
+import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogHeader,
   DialogFooter,
-  DialogTitle,
-  DialogTrigger,
+  DialogHeader,
+  DialogTitle
 } from "@/components/ui/dialog"
 import {
   Form,
-  FormControl,
-  FormDescription,
-  FormField,
+  FormControl, FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormMessage
 } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import {
   Select,
   SelectContent,
@@ -38,15 +37,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { Calendar } from "@/components/ui/calendar"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Checkbox } from "@/components/ui/checkbox"
+import { ModalState, useCategories, useCreateSubscription } from "@/lib/hooks"
+import { FREQUENCIES, ICONS, SubscriptionSchema } from "@/lib/types"
+import { cn, toXCase } from "@/lib/utils"
 
 type NewSubscriptionModalProps = {
   state: ModalState
@@ -55,10 +48,7 @@ type NewSubscriptionModalProps = {
 export default function NewSubscriptionModal({ state }: NewSubscriptionModalProps) {
 
   const { categories, isCategoriesLoading } = useCategories()
-  const { createSubscription, isCreateSubscriptionLoading } = useCreateSubscription(() => {}, () => {
-    form.reset()
-    state.setState("closed")
-  })
+  const { createSubscription, isCreateSubscriptionLoading } = useCreateSubscription()
 
   const form = useForm<z.infer<typeof SubscriptionSchema>>({
     resolver: zodResolver(SubscriptionSchema),
@@ -72,8 +62,10 @@ export default function NewSubscriptionModal({ state }: NewSubscriptionModalProp
     }
   })
 
-  function onSubmit(values: z.infer<typeof SubscriptionSchema>) {
-    createSubscription(values)
+  async function onSubmit(values: z.infer<typeof SubscriptionSchema>) {
+    await createSubscription(values)
+    form.reset()
+    state.setState("closed")
   }
 
   return (

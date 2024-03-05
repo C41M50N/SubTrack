@@ -30,6 +30,16 @@ export default function CategoriesSettingsPage() {
     setCurrentCategories(currentCategories.filter((cat) => cat !== category))
   }
 
+  function onSubmit() {
+    setCategories(currentCategories)
+  }
+
+  React.useEffect(() => {
+    if (categories) {
+      setCurrentCategories(categories)
+    }
+  }, [categories])
+
   return (
     <MainLayout>
       <SettingsLayout>
@@ -48,14 +58,14 @@ export default function CategoriesSettingsPage() {
             </div>
           )}
 
-          {!isCategoriesLoading && (
+          {categories && !isCategoriesLoading && (
             <div className="space-y-3">
               <Label className="text-base">Current Catgeories</Label>
               <div className="flex flex-wrap gap-x-3 gap-y-2">
                 {currentCategories.map((name) => (
-                  <Badge key={name} variant={"secondary"} className="flex flex-row gap-1 text-lg font-normal">
+                  <Badge key={name} variant={"secondary"} className="flex flex-row gap-1 text-lg font-medium">
                     {name}
-                    <X className="hover:cursor-pointer" onClick={() => removeCategory(name)} />
+                    <X strokeWidth={2.5} className="hover:cursor-pointer" onClick={() => removeCategory(name)} />
                   </Badge>
                 ))}
               </div>
@@ -76,7 +86,7 @@ export default function CategoriesSettingsPage() {
                 <Label className="text-gray-500 text-xs">Press [ENTER] to add</Label>
               </div>
 
-              <Button isLoading={isSetCategoriesLoading} onClick={() => setCategories(currentCategories)}>Save</Button>
+              <Button isLoading={isSetCategoriesLoading} onClick={onSubmit}>Save</Button>
             </div>
           )}
         </div>

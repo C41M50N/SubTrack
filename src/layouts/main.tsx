@@ -1,6 +1,6 @@
 import React from "react"
 import Link from "next/link"
-import { RedirectType, redirect, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 
 import { 
@@ -10,11 +10,11 @@ import {
   IconSettings
 } from "@tabler/icons-react"
 
+import { useModalState } from "@/lib/hooks"
 import { Button } from "@/components/ui/button"
 import { Toaster } from "@/components/ui/toaster"
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import NewSubscriptionModal from "@/components/subscriptions/NewSubscriptionModal"
-import { useModalState } from "@/lib/hooks"
 
 type MainLayoutProps = {
   children: React.ReactNode
@@ -54,7 +54,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
               </Link>
             </nav>
             <div className="ml-auto mr-14">
-              <Button className="gap-2" variant="secondary" onClick={() => {
+              <Button className="gap-2" onClick={() => {
                 newModalState.setState("open");
               }}>
                 <IconPlus />

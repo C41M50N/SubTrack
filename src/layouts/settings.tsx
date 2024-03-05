@@ -22,6 +22,14 @@ const SettingsNavItems: Array<NavItem> = [
   {
     title: "Todoist Integration",
     href: "/settings/todoist"
+  },
+  {
+    title: "Todoist Debug",
+    href: "/settings/todoist-debug"
+  },
+  {
+    title: "Toast Debug",
+    href: "/settings/toast-debug"
   }
   // {
   //   title: "Notifications",

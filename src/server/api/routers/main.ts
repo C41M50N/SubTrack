@@ -96,7 +96,7 @@ export const mainRouter = createTRPCRouter({
     .mutation(async ({ ctx }) => {
       await ctx.prisma.user.update({
         where: { id: ctx.session.user.id },
-        data: { todoistAPIKey: "" }
+        data: { todoistAPIKey: "", todoistProjectId: "" }
       })
     }),
 
@@ -104,6 +104,7 @@ export const mainRouter = createTRPCRouter({
     .query(async ({ ctx }) => {
       const todoist = createTodoistAPI(ctx.session.user.todoistAPIKey);
       const projects = await getProjects(todoist);
+      await sleep(1000);
       return projects;
     }),
 

@@ -1,4 +1,4 @@
-import { CheckCircle, Trash } from "lucide-react"
+import { AlertTriangle, CheckCircle, Trash } from "lucide-react"
 import {
   Toast,
   ToastClose,
@@ -17,9 +17,10 @@ export function Toaster() {
       {toasts.map(function ({ id, title, description, action, ...props }) {
         return (
           <Toast key={id} {...props}>
-            <div className="flex flex-row items-center space-x-4">
-              { props.variant === "success" && <CheckCircle className="w-8 h-8 text-green-600" /> }
-              { props.variant === "destructive" && <Trash className="w-8 h-8 text-red-600" /> }
+            <div className="flex flex-row items-center gap-3">
+              { props.variant === "success" && <CheckCircle className="w-6 h-6 text-green-600" /> }
+              { props.variant === "error" && <AlertTriangle className="w-6 h-6 text-[#d84750]" /> }
+              { props.variant === "destructive" && <Trash className="w-6 h-6 text-red-600" /> }
 
               <div className="grid gap-1">
                 {title && <ToastTitle>{title}</ToastTitle>}

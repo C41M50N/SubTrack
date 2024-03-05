@@ -1,35 +1,29 @@
-import React from "react"
 import Image from "next/image"
-import { useSession } from "next-auth/react"
 
 import z from "zod"
 import { Loader2 } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { IconCalendar, IconCalendarEvent, IconDeviceFloppy } from "@tabler/icons-react"
+import { IconCalendarEvent, IconDeviceFloppy } from "@tabler/icons-react"
 import { format } from "date-fns"
 
-import { api } from "@/utils/api"
 import { ModalState, useCategories, useUpdateSubscription } from "@/lib/hooks"
-import { cn, sleep, toXCase } from "@/lib/utils"
+import { cn, toXCase } from "@/lib/utils"
 import { FREQUENCIES, ICONS, SubscriptionSchema, Subscription } from "@/lib/types"
 import {
   Dialog,
-  DialogContent,
-  DialogDescription,
+  DialogContent, 
   DialogHeader,
   DialogFooter,
-  DialogTitle,
-  DialogTrigger,
+  DialogTitle
 } from "@/components/ui/dialog"
 import {
   Form,
-  FormControl,
-  FormDescription,
+  FormControl, 
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormMessage
 } from "@/components/ui/form"
 import {
   Select,
@@ -56,15 +50,16 @@ type EditSubscriptionModalProps = {
 export default function EditSubscriptionModal ({ state, subscription }: EditSubscriptionModalProps) {
 
   const { categories, isCategoriesLoading } = useCategories()
-  const { updateSubscription, isUpdateSubscriptionLoading } = useUpdateSubscription(() => {}, () => state.setState("closed"))
+  const { updateSubscription, isUpdateSubscriptionLoading } = useUpdateSubscription()
 
   const form = useForm<z.infer<typeof SubscriptionSchema>>({
     resolver: zodResolver(SubscriptionSchema),
     defaultValues: subscription,
   })
 
-  function onSubmit(values: z.infer<typeof SubscriptionSchema>) {
-    updateSubscription({ id: subscription.id, ...values })
+  async function onSubmit(values: z.infer<typeof SubscriptionSchema>) {
+    await updateSubscription({ id: subscription.id, ...values })
+    state.setState("closed")
   }
 
   return (
