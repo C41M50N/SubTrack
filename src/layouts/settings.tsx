@@ -30,6 +30,10 @@ const SettingsNavItems: Array<NavItem> = [
   {
     title: "Toast Debug",
     href: "/settings/toast-debug"
+  },
+  {
+    title: "UI Debug",
+    href: "/settings/ui-debug"
   }
   // {
   //   title: "Notifications",

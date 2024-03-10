@@ -7,6 +7,10 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function toXCase(str: string): string {
+  if (str.includes('.')) {
+    str = str.split('.')[0]!
+  }
+
   let parts: string[] = []
   if (str.includes('-')) {
     parts = str.split('-')

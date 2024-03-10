@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Roboto, Lato } from 'next/font/google';
+import { useSession } from "next-auth/react";
 
 import dayjs from "@/lib/dayjs";
 import { ColumnDef } from "@tanstack/react-table"
@@ -7,7 +8,7 @@ import { ArrowUpDown, MoreHorizontal } from "lucide-react"
 import { IconAlarm, IconDotsVertical, IconPencil, IconTrash } from "@tabler/icons-react"
 
 import { Subscription } from "@/lib/types";
-import { toMoneyString } from "@/lib/utils";
+import { toMoneyString, toXCase } from "@/lib/utils";
 import { useSelectedSubscriptions } from "@/lib/stores";
 import { useAllSubscriptions, useModalState } from "@/lib/hooks";
 
@@ -24,7 +25,6 @@ import { Checkbox } from "@/components/ui/checkbox"
 import EditSubscriptionModal from "@/components/subscriptions/EditSubscriptionModal";
 import DeleteSubscriptionModal from "@/components/subscriptions/DeleteSubscriptionModal";
 import SetCancelReminderModal from "@/components/subscriptions/SetCancelReminderModal";
-import { useSession } from "next-auth/react";
 
 const roboto = Roboto({
   weight: ['400', '500', '700'],
@@ -85,14 +85,13 @@ export const columns: ColumnDef<Subscription>[] = [
 		accessorKey: "name",
 		header: () => (<div>Name</div>),
 		cell: ({ row }) => {
+			const icon_ref = row.original.icon_ref;
 			return (
 				<div className="flex flex-row space-x-3 items-center">
-					{row.original.icon_ref !== "default" && (
-						<Image alt={row.original.name} src={`/${row.original.icon_ref}.svg`} height={24} width={24} />
-					)}
-					{row.original.icon_ref === "default" && (
-						<Image alt={row.original.name} src={`/default.svg`} height={24} width={24} />
-					)}
+					{ icon_ref.includes('.') 
+						? <Image alt={toXCase(icon_ref)} src={`/${icon_ref}`} height={24} width={24} className="w-[24px] h-[24px]" />
+						: <Image alt={toXCase(icon_ref)} src={`/${icon_ref}.svg`} height={24} width={24} className="w-[24px] h-[24px]" />
+					}
 					<div className="text-lg font-medium">{row.original.name}</div>
 				</div>	
 			)

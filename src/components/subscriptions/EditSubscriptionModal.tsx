@@ -1,7 +1,7 @@
 import Image from "next/image"
 
 import z from "zod"
-import { Loader2 } from "lucide-react"
+import { Check, ChevronsUpDown, Loader2 } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { IconCalendarEvent, IconDeviceFloppy } from "@tabler/icons-react"
@@ -10,6 +10,14 @@ import { format } from "date-fns"
 import { ModalState, useCategories, useUpdateSubscription } from "@/lib/hooks"
 import { cn, toXCase } from "@/lib/utils"
 import { FREQUENCIES, ICONS, SubscriptionSchema, Subscription } from "@/lib/types"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
 import {
   Dialog,
   DialogContent, 
@@ -101,27 +109,62 @@ export default function EditSubscriptionModal ({ state, subscription }: EditSubs
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Icon</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {[...ICONS].map((v) => {
-                              const xcase = toXCase(v)
-                              return (
-                                <SelectItem value={v} key={v}>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant="outline"
+                                  role="combobox"
+                                  className={cn(
+                                    "w-[200px] justify-between",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
                                   <span className="flex flex-row items-center gap-2">
-                                    {v === "default" && <Image alt={xcase} src={`/default.svg`} height={16} width={16} className="w-[16px] h-[16px]" />}
-                                    {v !== "default" && <Image alt={xcase} src={`/${v}.svg`} height={16} width={16} className="w-[16px] h-[16px]" />}
-                                    {xcase}
+                                    { field.value.includes('.') 
+                                      ? <Image alt={toXCase(field.value)} src={`/${field.value}`} height={16} width={16} className="w-[16px] h-[16px]" />
+                                      : <Image alt={toXCase(field.value)} src={`/${field.value}.svg`} height={16} width={16} className="w-[16px] h-[16px]" /> 
+                                    }
+                                    {toXCase(field.value)}
                                   </span>
-                                </SelectItem>
-                              )
-                            })}
-                          </SelectContent>
-                        </Select>
+                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="p-0 w-64">
+                              <Command onValueChange={field.onChange} defaultValue={field.value}>
+                                <CommandInput placeholder="Search icons..." />
+                                <CommandEmpty>No icon found.</CommandEmpty>
+                                <CommandList>
+                                  {ICONS.map((icon) => (
+                                    <CommandItem
+                                      value={icon}
+                                      key={icon}
+                                      onSelect={() => {
+                                        form.setValue("icon_ref", icon)
+                                      }}
+                                    >
+                                      <Check
+                                        className={cn(
+                                          "mr-2 h-4 w-4",
+                                          icon === field.value
+                                          ? "opacity-100"
+                                          : "opacity-0"
+                                          )}
+                                          />
+                                      <span className="flex flex-row items-center gap-2">
+                                        { icon.includes('.') 
+                                          ? <Image alt={toXCase(icon)} src={`/${icon}`} height={16} width={16} className="w-[16px] h-[16px]" />
+                                          : <Image alt={toXCase(icon)} src={`/${icon}.svg`} height={16} width={16} className="w-[16px] h-[16px]" />
+                                        }
+                                        {toXCase(icon)}
+                                      </span>
+                                    </CommandItem>
+                                  ))}
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
                         <FormMessage />
                       </FormItem>
                     )}
