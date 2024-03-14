@@ -22,7 +22,7 @@ export const ICONS = [
 	// tools
 	"todoist", "obsidian", "workona.jpeg", "proton", "termius", "dropbox", "google-drive", "evernote", 
 	// miscellaneous
-	"google-one", "audible.jpg", "masterclass", "brilliant", "kindle-unlimited", "coursera.webp"
+	"google-one", "audible.jpg", "masterclass", "brilliant", "kindle-unlimited", "coursera.png"
 ] as const;
 
 export type Subscription = SubscriptionDTO & {

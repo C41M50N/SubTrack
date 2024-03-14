@@ -33,7 +33,7 @@ export default async function handler() {
     const user = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { name: true, email: true } });
 
     resend.sendEmail({
-      from: 'blahblahblah@subtrack.com',
+      from: 'alert@subtrack.cbuff.dev',
       to: user.email,
       subject: `${dayjs().subtract(1, 'month').format('MMMM')} Subscriptions Review`,
       react: MonthlyReviewEmail({

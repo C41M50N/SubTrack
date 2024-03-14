@@ -1,10 +1,10 @@
 {
-  "name": "SubscriptionsDashboard",
-  "version": "0.1.0",
+  "name": "subtrack",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "next dev",
+    "dev": "op run --env-file='.env' -- next dev",
     "postinstall": "prisma generate",
     "lint": "next lint",
     "start": "next start",

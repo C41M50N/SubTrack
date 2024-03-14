@@ -1,5 +1,6 @@
 import React from "react"
 import Link from "next/link"
+import Head from "next/head"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 
@@ -18,9 +19,10 @@ import NewSubscriptionModal from "@/components/subscriptions/NewSubscriptionModa
 
 type MainLayoutProps = {
   children: React.ReactNode
+  title?: string
 }
 
-export default function MainLayout({ children }: MainLayoutProps) {
+export default function MainLayout({ children, title }: MainLayoutProps) {
   const { data: session } = useSession();
   const router = useRouter();
 
@@ -36,6 +38,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
   return (
     <>
+      <Head>
+        <title>{title}</title>
+      </Head>
       <div className="border-b">
         <section className="ml-auto mr-auto max-w-[1600px]">
           <div className="flex h-16 items-center px-4">

@@ -41,7 +41,7 @@ export default function CategoriesSettingsPage() {
   }, [categories])
 
   return (
-    <MainLayout>
+    <MainLayout title="Category Settings | SubTrack">
       <SettingsLayout>
         <div className="space-y-6">
           <div>

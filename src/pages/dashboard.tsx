@@ -1,5 +1,4 @@
 import React from "react"
-import Head from "next/head"
 
 import { api } from "@/utils/api";
 import { Subscription } from "@/lib/types";
@@ -134,11 +133,7 @@ export default function DashboardPage() {
   const { subscriptions: selectedSubscriptions } = useSelectedSubscriptions();
 
   return (
-    <MainLayout>
-      <Head>
-        <title>Dashboard | SubTrack</title>
-      </Head>
-
+    <MainLayout title="Dashboard | SubTrack">
       <h1 className="text-2xl pt-4 pb-1">Dashboard</h1>
       <p className="text-muted-foreground">
         Track your subscriptions here.
@@ -175,7 +170,7 @@ export default function DashboardPage() {
               />
             ))}
 
-            <Card>
+            {/* <Card>
               <Accordion type="single" className="px-4">
                 <AccordionItem value="monthly-cost-breakdown">
                   <AccordionTrigger className="text-md font-semibold py-2">Monthly Cost Breakdown</AccordionTrigger>
@@ -192,7 +187,7 @@ export default function DashboardPage() {
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
-            </Card>
+            </Card> */}
           </div>
         </div>
       </div>

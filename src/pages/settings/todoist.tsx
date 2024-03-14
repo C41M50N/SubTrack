@@ -86,7 +86,7 @@ export default function TodoistSettingsPage() {
   }, [isGetTodoistProjectsLoading])
 
   return (
-    <MainLayout>
+    <MainLayout title="Todoist Settings | SubTrack">
       <SettingsLayout>
         <div className="space-y-6">
           <div>

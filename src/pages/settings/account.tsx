@@ -46,7 +46,7 @@ export default function AccountSettingsPage() {
   }, [session])
 
   return (
-    <MainLayout>
+    <MainLayout title="Account Settings | SubTrack">
       <SettingsLayout>
         <div className="space-y-6">
           <div>
