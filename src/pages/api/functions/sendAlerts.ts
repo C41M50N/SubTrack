@@ -36,7 +36,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const renewedRecentlySubs = groupRenewedRecentlySubscriptions[userId];
     const user = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { name: true, email: true } });
 
-    resend.sendEmail({
+    const res = await resend.sendEmail({
       from: 'alert@subtrack.cbuff.dev',
       to: user.email,
       subject: `${dayjs().subtract(1, 'month').format('MMMM')} Subscriptions Review`,
@@ -46,6 +46,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         renewed_recently: renewedRecentlySubs
       })
     })
+
+    console.log(res);
   }
 
   return res.send({})
