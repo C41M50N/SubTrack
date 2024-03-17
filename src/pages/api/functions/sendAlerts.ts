@@ -3,6 +3,7 @@ import { prisma } from "@/server/db"
 import { Subscription as SubscriptionDTO } from "@prisma/client"
 import { resend } from '@/lib/resend'
 import { MonthlyReviewEmail } from '@/emails/monthly-review'
+import { NextApiRequest, NextApiResponse } from 'next'
 
 function groupBy<T>(arr: T[], fn: (item: T) => any) {
   return arr.reduce<Record<string, T[]>>((prev, curr) => {
@@ -13,7 +14,7 @@ function groupBy<T>(arr: T[], fn: (item: T) => any) {
   }, {});
 }
 
-export default async function handler() {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const renewingSoonSubscriptions = await prisma.subscription.findMany({ where: {
     next_invoice: { lte: dayjs().add(32, 'days').toDate(), gte: dayjs().toDate() },
     send_alert: { equals: true }
@@ -43,4 +44,6 @@ export default async function handler() {
       })
     })
   }
+
+  return res.send({})
 }

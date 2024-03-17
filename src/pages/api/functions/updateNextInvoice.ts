@@ -1,8 +1,9 @@
 import dayjs from 'dayjs'
 import { prisma } from "@/server/db";
 import { Subscription } from "@/lib/types";
+import { NextApiRequest, NextApiResponse } from 'next';
 
-export default async function handler() {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const subscriptions = await prisma.subscription.findMany({
     where: {
       next_invoice: { lte: new Date() }
@@ -48,4 +49,6 @@ export default async function handler() {
   })
 
   console.log(`Updated the 'next_invoice' field on ${subscriptions.length} subscriptions`)
+
+  return res.send({})
 }
