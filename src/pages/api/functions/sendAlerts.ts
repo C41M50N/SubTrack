@@ -28,6 +28,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const groupRenewingSoonSubscriptions = groupBy(renewingSoonSubscriptions, (sub: SubscriptionDTO) => sub.userId);
   const groupRenewedRecentlySubscriptions = groupBy(renewedRecentlySubscriptions, (sub: SubscriptionDTO) => sub.userId);
 
+  console.log(groupRenewedRecentlySubscriptions);
+  console.log(groupRenewingSoonSubscriptions);
+
   for (const userId in new Set([...Object.keys(groupRenewingSoonSubscriptions), ...Object.keys(groupRenewedRecentlySubscriptions)])) {
     const renewingSoonSubs = groupRenewingSoonSubscriptions[userId];
     const renewedRecentlySubs = groupRenewedRecentlySubscriptions[userId];
