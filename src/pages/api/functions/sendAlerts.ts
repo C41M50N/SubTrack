@@ -31,12 +31,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   console.log(groupRenewedRecentlySubscriptions);
   console.log(groupRenewingSoonSubscriptions);
 
-  for (const userId in new Set([...Object.keys(groupRenewingSoonSubscriptions), ...Object.keys(groupRenewedRecentlySubscriptions)])) {
+  const userIds = new Set([...Object.keys(groupRenewingSoonSubscriptions), ...Object.keys(groupRenewedRecentlySubscriptions)]);
+  for (const userId of userIds) {
     const renewingSoonSubs = groupRenewingSoonSubscriptions[userId];
     const renewedRecentlySubs = groupRenewedRecentlySubscriptions[userId];
     const user = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { name: true, email: true } });
 
-    const res = await resend.sendEmail({
+    resend.sendEmail({
       from: 'alert@subtrack.cbuff.dev',
       to: user.email,
       subject: `${dayjs().subtract(1, 'month').format('MMMM')} Subscriptions Review`,
@@ -47,7 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       })
     })
 
-    console.log(res);
+    console.log(`Sending alert email to ${user}`);
   }
 
   return res.send({})
