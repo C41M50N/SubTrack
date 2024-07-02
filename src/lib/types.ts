@@ -30,6 +30,21 @@ export type Subscription = SubscriptionDTO & {
 	icon_ref: typeof ICONS[number]
 }
 
+export const DEMO_CATEGORIES = [
+	"entertainment",
+	"health",
+	"storage",
+	"miscellaneous"
+] as const;
+
+// export type DemoCategory = typeof DEMO_CATEGORIES[number];
+
+export type DemoSubscription = Omit<SubscriptionDTO, 'last_invoice' | 'userId'> & {
+	frequency: typeof FREQUENCIES[number]
+	icon_ref: typeof ICONS[number]
+	category: string
+}
+
 export const SubscriptionSchema = z.object({
   name: z.string()
           .min(2, { message: "Name must be at least 2 characters" })
@@ -48,3 +63,8 @@ export const SubscriptionSchema = z.object({
 export const SubscriptionSchemaWithId = SubscriptionSchema.merge(z.object({
 	id: z.string()
 }))
+
+export type StatisticItem = {
+  description: string
+  getResult: (subscriptions: Array<Subscription | DemoSubscription>) => number
+}

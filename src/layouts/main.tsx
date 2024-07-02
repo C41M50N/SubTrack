@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button"
 import { Toaster } from "@/components/ui/toaster"
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import NewSubscriptionModal from "@/components/subscriptions/NewSubscriptionModal"
+import { BarChart3Icon } from "lucide-react"
 
 type MainLayoutProps = {
   children: React.ReactNode
@@ -69,8 +70,6 @@ export default function MainLayout({ children, title }: MainLayoutProps) {
             <Link href={"/settings/account"} className="flex items-center space-x-4 p-2 px-3 border border-gray-500 border-opacity-30 rounded-md hover:bg-muted hover:cursor-pointer">
               <span className="text-lg font-normal text-black/80">{session?.user.name}</span>
               <Avatar>
-                {/* <AvatarImage src="https://github.com/shadcn.png" /> */}
-                {/* <AvatarImage src={"https://img.icons8.com/cotton/64/gender-neutral-user--v1.png"} /> */}
                 <AvatarImage src={session?.user.image || "https://img.icons8.com/cotton/64/gender-neutral-user--v1.png"} />
               </Avatar>
             </Link>

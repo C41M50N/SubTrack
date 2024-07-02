@@ -5,11 +5,13 @@ import { Check, ChevronsUpDown, Loader2 } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { IconCalendarEvent, IconDeviceFloppy } from "@tabler/icons-react"
-import { format } from "date-fns"
+import dayjs from "dayjs"
+import LocalizedFormat from 'dayjs/plugin/localizedFormat'
+dayjs.extend(LocalizedFormat)
 
 import { ModalState, useCategories, useUpdateSubscription } from "@/lib/hooks"
-import { cn, toXCase } from "@/lib/utils"
-import { FREQUENCIES, ICONS, SubscriptionSchema, Subscription } from "@/lib/types"
+import { cn, sleep, toXCase } from "@/lib/utils"
+import { FREQUENCIES, ICONS, SubscriptionSchema, Subscription, DEMO_CATEGORIES, DemoSubscription } from "@/lib/types"
 import {
   Command,
   CommandEmpty,
@@ -49,16 +51,19 @@ import { Calendar } from "@/components/ui/calendar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
+import { useDemoSubscriptions } from "@/lib/stores/demo-subscriptions"
 
 type EditSubscriptionModalProps = {
   state: ModalState
-  subscription: Subscription
+  subscription: Subscription | DemoSubscription
+  demo?: boolean
 }
 
-export default function EditSubscriptionModal ({ state, subscription }: EditSubscriptionModalProps) {
+export default function EditSubscriptionModal ({ state, subscription, demo = false }: EditSubscriptionModalProps) {
 
-  const { categories, isCategoriesLoading } = useCategories()
+  const { categories, isCategoriesLoading } = useCategories(!demo)
   const { updateSubscription, isUpdateSubscriptionLoading } = useUpdateSubscription()
+  const { updateDemoSubscription } = useDemoSubscriptions()
 
   const form = useForm<z.infer<typeof SubscriptionSchema>>({
     resolver: zodResolver(SubscriptionSchema),
@@ -66,7 +71,13 @@ export default function EditSubscriptionModal ({ state, subscription }: EditSubs
   })
 
   async function onSubmit(values: z.infer<typeof SubscriptionSchema>) {
-    await updateSubscription({ id: subscription.id, ...values })
+    if (demo) {
+      await sleep(500)
+      updateDemoSubscription({ id: subscription.id, ...values })
+    } else {
+      await updateSubscription({ id: subscription.id, ...values })
+    }
+
     state.setState("closed")
   }
 
@@ -74,16 +85,16 @@ export default function EditSubscriptionModal ({ state, subscription }: EditSubs
     <Dialog open={state.state === "open" ? true : false} onOpenChange={(open) => !open && state.setState("closed")}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>New Subscription</DialogTitle>
+          <DialogTitle>Edit Subscription</DialogTitle>
         </DialogHeader>
 
-        {isCategoriesLoading && (
+        {!demo && isCategoriesLoading && (
           <div className="flex items-center justify-center">
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           </div>
         )}
 
-        {!isCategoriesLoading && (
+        {(demo || !isCategoriesLoading) && (
           <>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -222,7 +233,10 @@ export default function EditSubscriptionModal ({ state, subscription }: EditSubs
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {categories && categories.map((v) => (
+                            {demo && DEMO_CATEGORIES.map((v) => (
+                              <SelectItem value={v} key={v}>{v}</SelectItem>
+                            ))}
+                            {!demo && categories && categories.map((v) => (
                               <SelectItem value={v} key={v}>{v}</SelectItem>
                             ))}
                           </SelectContent>
@@ -252,7 +266,7 @@ export default function EditSubscriptionModal ({ state, subscription }: EditSubs
                               >
                                 <IconCalendarEvent stroke={1.50}/>
                                 {field.value ? (
-                                  format(field.value, "PPP")
+                                  <span>{dayjs(field.value).format('ll')}</span>
                                 ) : (
                                   <span>Pick a date</span>
                                 )}
