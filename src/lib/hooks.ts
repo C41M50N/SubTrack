@@ -35,11 +35,11 @@ export const useUserName = () => {
 	return { setUserName, isSetUserNameLoading }
 }
 
-export const useCategories = () => {
+export const useCategories = (enabled: boolean = true) => {
   const { 
 		data: categories, 
 		isLoading: isCategoriesLoading 
-	} = api.main.getCategories.useQuery(undefined, { staleTime: Infinity })
+	} = api.main.getCategories.useQuery(undefined, { staleTime: Infinity, enabled: enabled })
 	return { categories, isCategoriesLoading } as const
 }
 
@@ -99,7 +99,7 @@ export const useCreateSubscription = () => {
 	return { createSubscription, isCreateSubscriptionLoading }
 }
 
-export const useUpdateSubscription = () => {
+export const useUpdateSubscription = (enabled: boolean = true) => {
 	const ctx = api.useContext()
 	const { 
 		mutateAsync: updateSubscription, 

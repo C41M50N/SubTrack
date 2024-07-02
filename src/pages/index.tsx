@@ -10,6 +10,7 @@ import { IconExternalLink, IconEdit } from "@tabler/icons-react";
 import { authOptions } from "@/server/auth";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { BarChart3Icon } from "lucide-react";
 
 export default function SignInPage({
   provider,
@@ -26,7 +27,8 @@ export default function SignInPage({
       <div>
         <header className="h-24 mx-auto max-w-[1440px] px-8 2xl:p-0 flex flex-row items-center gap-2">
           <a href="/" className="flex flex-row gap-2 items-center">
-            <IconEdit size={52} strokeWidth={2.0} />
+            <BarChart3Icon size={52} strokeWidth={2.0} className="text-[#337c96]" />
+            {/* <IconEdit size={52} strokeWidth={2.0} /> */}
             <h1 className="text-4xl font-bold">SubTrack</h1>
           </a>
 
@@ -36,6 +38,15 @@ export default function SignInPage({
             <a href="https://cbuff.dev/projects/subtrack">
               <Button variant="link" className="flex flex-row gap-1">
                 <span className="text-2xl">About</span>
+                <IconExternalLink strokeWidth={1.5} /> 
+              </Button>
+            </a>
+
+            <span className="text-lg font-bold self-center">·</span>
+
+            <a href="/demo">
+              <Button variant="link" className="flex flex-row gap-1">
+                <span className="text-2xl">Demo</span>
                 <IconExternalLink strokeWidth={1.5} /> 
               </Button>
             </a>

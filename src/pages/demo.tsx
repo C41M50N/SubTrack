@@ -1,23 +1,17 @@
-import React from "react"
-
-import { api } from "@/utils/api";
-import { StatisticItem, Subscription } from "@/lib/types";
-import { getNextNMonths, toMoneyString } from "@/lib/utils";
-import { useSelectedSubscriptions } from "@/lib/stores";
-import MainLayout from "@/layouts/main"
-import { columns } from "@/components/subscriptions-table/columns";
+import { columns, demoColumns } from "@/components/subscriptions-table/columns";
 import DataTable from "@/components/subscriptions-table/table";
-import { Separator } from "@/components/ui/separator";
 import StatisticCard from "@/components/subscriptions/StatisticCard";
-import SkeletonStatisticCard from "@/components/subscriptions/SkeletonStatisticCard";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Card } from "@/components/ui/card";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import DemoLayout from "@/layouts/demo";
+import { useDemoSubscriptions, useSelectedDemoSubscriptions } from "@/lib/stores/demo-subscriptions";
+import { DemoSubscription, StatisticItem } from "@/lib/types";
+import { Separator } from "@radix-ui/react-select";
+import dynamic from "next/dynamic";
+import React from "react";
 
 const Statistics: Array<StatisticItem> = [
   {
     description: "cost per week",
-    getResult: (subscriptions) => {
+    getResult: (subscriptions: Array<DemoSubscription>) => {
       let result = 0.0;
       for (let i = 0; i < subscriptions.length; i++) {
         const subscription = subscriptions[i]!;
@@ -52,7 +46,7 @@ const Statistics: Array<StatisticItem> = [
   },
   {
     description: "cost per month",
-    getResult: (subscriptions) => {
+    getResult: (subscriptions: Array<DemoSubscription>) => {
       let result = 0.0;
       for (let i = 0; i < subscriptions.length; i++) {
         const subscription = subscriptions[i]!;
@@ -87,7 +81,7 @@ const Statistics: Array<StatisticItem> = [
   },
   {
     description: "cost per year",
-    getResult: (subscriptions) => {
+    getResult: (subscriptions: Array<DemoSubscription>) => {
       let result = 0.0;
       for (let i = 0; i < subscriptions.length; i++) {
         const subscription = subscriptions[i]!;
@@ -122,13 +116,12 @@ const Statistics: Array<StatisticItem> = [
   }
 ]
 
-
-export default function DashboardPage() {
-  const { data: subscriptions, isLoading: isSubsLoading } = api.main.getSubscriptions.useQuery();
-  const { subscriptions: selectedSubscriptions } = useSelectedSubscriptions();
+function DemoPage() {
+  const { subscriptions } = useDemoSubscriptions()
+  const { subscriptions: selectedSubscriptions } = useSelectedDemoSubscriptions()
 
   return (
-    <MainLayout title="Dashboard | SubTrack">
+    <DemoLayout title="Demo | SubTrack">
       <h1 className="text-2xl pt-4 pb-1">Dashboard</h1>
       <p className="text-muted-foreground">
         Track your subscriptions here.
@@ -137,55 +130,24 @@ export default function DashboardPage() {
 
       <div className="flex flex-row space-x-8">
         <div className="w-9/12">
-          {isSubsLoading && (
-            <div className="w-full space-y-2 p-2">
-              <Skeleton className="h-12" />
-              <div className="py-2 space-y-3">
-                {[...Array(7)].map((v, idx) => (
-                  <Skeleton className="h-8" key={idx} />
-                ))}
-              </div>
-              <Skeleton className="h-12" />
-            </div>
-          )}
-          {!isSubsLoading && !subscriptions && <span className="text-xl">No Subscriptions</span>}
-          {!isSubsLoading && subscriptions && <DataTable columns={columns} data={subscriptions} />}
+          {!subscriptions && <span className="text-xl">No Subscriptions</span>}
+          {subscriptions && <DataTable columns={demoColumns} data={subscriptions} />}
         </div>
 
         <div className="flex-1">
           <div className="flex flex-col space-y-4">
-            {isSubsLoading && Statistics.map((_, idx) => (
-              <SkeletonStatisticCard key={idx} />
-            ))}
-            {!isSubsLoading && subscriptions && Statistics.map((item, idx) => (
+            {subscriptions && Statistics.map((item, idx) => (
               <StatisticCard
                 key={idx}
                 description={item.description}
                 value={item.getResult(selectedSubscriptions.length > 0 ? selectedSubscriptions : subscriptions)}
               />
             ))}
-
-            {/* <Card>
-              <Accordion type="single" className="px-4">
-                <AccordionItem value="monthly-cost-breakdown">
-                  <AccordionTrigger className="text-md font-semibold py-2">Monthly Cost Breakdown</AccordionTrigger>
-                  <AccordionContent>
-                    {getNextNMonths(10).map(((data) => {
-                      const [month, year] = data
-                      return (
-                        <div key={`${month}-${year}`} className="p-2 flex flex-row">
-                          <span className="flex-1">{`${month} ${year}`}</span>
-                          <span>{toMoneyString(0.00)}</span>
-                        </div>
-                      )
-                    }))}
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </Card> */}
           </div>
         </div>
       </div>
-    </MainLayout>
-  )  
+    </DemoLayout>
+  )
 }
+
+export default dynamic(() => Promise.resolve(DemoPage), { ssr: false })

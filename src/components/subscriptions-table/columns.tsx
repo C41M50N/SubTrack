@@ -7,7 +7,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown, MoreHorizontal } from "lucide-react"
 import { IconAlarm, IconDotsVertical, IconPencil, IconTrash } from "@tabler/icons-react"
 
-import { Subscription } from "@/lib/types";
+import { DemoSubscription, Subscription } from "@/lib/types";
 import { toMoneyString, toXCase } from "@/lib/utils";
 import { useSelectedSubscriptions } from "@/lib/stores";
 import { useAllSubscriptions, useModalState } from "@/lib/hooks";
@@ -25,6 +25,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import EditSubscriptionModal from "@/components/subscriptions/EditSubscriptionModal";
 import DeleteSubscriptionModal from "@/components/subscriptions/DeleteSubscriptionModal";
 import SetCancelReminderModal from "@/components/subscriptions/SetCancelReminderModal";
+import { useDemoSubscriptions, useSelectedDemoSubscriptions } from "@/lib/stores/demo-subscriptions";
 
 const roboto = Roboto({
   weight: ['400', '500', '700'],
@@ -218,3 +219,87 @@ export const columns: ColumnDef<Subscription>[] = [
     },
   },
 ]
+
+export const demoColumns = [
+	{
+    id: "select",
+    header: ({ table }) => {
+			const { subscriptions } = useDemoSubscriptions()
+			const { setSubscriptions, resetSubscriptions } = useSelectedDemoSubscriptions()
+
+			return (
+				<Checkbox
+					checked={table.getIsAllPageRowsSelected()}
+					onCheckedChange={(value) => {
+						table.toggleAllPageRowsSelected(!!value)
+						if (value === true) {
+							setSubscriptions(subscriptions || [])
+						} else {
+							resetSubscriptions()
+						}
+					}}
+					aria-label="Select all"
+				/>
+			)
+		},
+		cell: ({ row }) => {
+			const { addSubscription, removeSubscription } = useSelectedDemoSubscriptions()
+
+			return (
+				<Checkbox
+					checked={row.getIsSelected()}
+					onCheckedChange={(value) => {
+						row.toggleSelected(!!value)
+						if (value === true) {
+							addSubscription(row.original)
+						} else {
+							removeSubscription(row.original.id)
+						}
+					}}
+					aria-label="Select row"
+				/>
+			)
+		},
+    enableSorting: true,
+    enableHiding: false,
+	},
+	...columns.slice(1, columns.length-1),
+	{
+    id: "actions",
+    cell: ({ row }) => {
+      const subscription = row.original;
+
+			const deleteModalState = useModalState();
+			const editModalState = useModalState();
+ 
+      return (
+				<>
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button variant="ghost" className="h-8 w-8 p-0">
+								<span className="sr-only">Open menu</span>
+								<IconDotsVertical />
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="center" side="right">
+							<DropdownMenuItem className="cursor-pointer" onClick={() => editModalState.setState("open")}>
+								<IconPencil stroke={1.75} />
+								<span className={`text-base font-medium pl-2 ${lato.className}`}>Edit</span>
+							</DropdownMenuItem>
+
+							<DropdownMenuSeparator />
+
+							<DropdownMenuItem className="cursor-pointer text-red-700" onClick={() => deleteModalState.setState("open")}>
+								<IconTrash stroke={1.75} />
+								<span className={`text-base font-medium pl-2 ${lato.className}`}>Delete</span>
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
+
+					<EditSubscriptionModal demo state={editModalState} subscription={subscription} />
+					<DeleteSubscriptionModal demo state={deleteModalState} subscription_id={subscription.id} />
+				</>
+      )
+    },
+  },
+] as ColumnDef<DemoSubscription>[]

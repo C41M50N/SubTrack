@@ -4,7 +4,7 @@ import Image from "next/image"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { IconCalendarEvent } from "@tabler/icons-react"
 import { format } from "date-fns"
-import { Check, ChevronsUpDown, Loader2, Search } from "lucide-react"
+import { Check, ChevronsUpDown, Loader2 } from "lucide-react"
 import { useForm } from "react-hook-form"
 import z from "zod"
 
@@ -49,31 +49,20 @@ import {
 } from "@/components/ui/select"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { ModalState, useCategories, useCreateSubscription } from "@/lib/hooks"
-import { FREQUENCIES, ICONS, SubscriptionSchema } from "@/lib/types"
-import { cn, toXCase } from "@/lib/utils"
+import { DEMO_CATEGORIES, FREQUENCIES, ICONS, SubscriptionSchema } from "@/lib/types"
+import { cn, sleep, toXCase } from "@/lib/utils"
+import { useDemoSubscriptions } from "@/lib/stores/demo-subscriptions"
 
 type NewSubscriptionModalProps = {
   state: ModalState
+  demo?: boolean
 }
 
-export default function NewSubscriptionModal({ state }: NewSubscriptionModalProps) {
+export default function NewSubscriptionModal({ state, demo = false }: NewSubscriptionModalProps) {
 
   const { categories, isCategoriesLoading } = useCategories()
   const { createSubscription, isCreateSubscriptionLoading } = useCreateSubscription()
-
-  const [iconSearchTerm, setIconSearchTerm] = React.useState<string>("")
-  const [icons, setIcons] = React.useState<(typeof ICONS[number])[] | null>(ICONS.slice())
-
-  React.useEffect(() => {
-    if (iconSearchTerm.trim().length === 0) {
-      setIcons(ICONS.slice())
-    } else {
-      const searchTerm = iconSearchTerm.toLowerCase()
-      const filteredIcons = ICONS.filter(icon => icon.includes(searchTerm))
-      setIcons(filteredIcons)
-      setIcons(filteredIcons.length > 0 ? filteredIcons : null)
-    }
-  }, [iconSearchTerm])
+  const { addSubscription: addDemoSubscription } = useDemoSubscriptions()
 
   const form = useForm<z.infer<typeof SubscriptionSchema>>({
     resolver: zodResolver(SubscriptionSchema),
@@ -88,7 +77,13 @@ export default function NewSubscriptionModal({ state }: NewSubscriptionModalProp
   })
 
   async function onSubmit(values: z.infer<typeof SubscriptionSchema>) {
-    await createSubscription(values)
+    if (demo) {
+      await sleep(500)
+      addDemoSubscription(values)
+    } else {
+      await createSubscription(values)
+    }
+
     form.reset()
     state.setState("closed")
   }
@@ -188,60 +183,6 @@ export default function NewSubscriptionModal({ state }: NewSubscriptionModalProp
                             </Command>
                           </PopoverContent>
                         </Popover>
-
-                        {/* <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent onKeyDown={(e) => {
-                            // e.stopPropagation()
-                            e.preventDefault()
-                          }}>
-                            <div className="pb-1">
-                              <div className="flex items-center border-b px-3">
-                                <Search className="mr-0.5 h-4 w-4 shrink-0 opacity-50" />
-                                <Input
-                                  placeholder="Search icons..."
-                                  onKeyDown={(e) => {
-                                    console.log(e.target.value)
-                                  }}
-                                  onChange={(e) => {
-                                    console.log(e.target.value)
-                                    // e.preventDefault();
-                                    // e.stopPropagation();
-                                    setIconSearchTerm(e.target.value);
-                                  }}
-                                  value={iconSearchTerm}
-                                  className="flex h-11 focus-visible:ring-0 focus-visible:ring-offset-0 w-full rounded-md bg-transparent border-none py-3 text-sm outline-none"
-                                />
-                              </div>
-                            </div>
-
-                            <ScrollArea className="w-full h-52">
-                              { icons === null
-                              ? <span className="w-full text-sm text-center text-muted-foreground">No icons found.</span>
-                              : (
-                                [...icons].map((icon_ref) => {
-                                  const xcase = toXCase(icon_ref)
-                                  return (
-                                    <SelectItem value={icon_ref} key={icon_ref}>
-                                      <span className="flex flex-row items-center gap-2">
-                                        { icon_ref.includes('.')
-                                          ? <Image alt={xcase} src={`/${icon_ref}`} height={16} width={16} className="w-[16px] h-[16px]" />
-                                          : <Image alt={xcase} src={`/${icon_ref}.svg`} height={16} width={16} className="w-[16px] h-[16px]" />
-                                        }
-                                        {xcase}
-                                      </span>
-                                    </SelectItem>
-                                  )
-                                })
-                              )
-                              }
-                            </ScrollArea>
-                          </SelectContent>
-                        </Select> */}
                         <FormMessage />
                       </FormItem>
                     )}
@@ -299,7 +240,11 @@ export default function NewSubscriptionModal({ state }: NewSubscriptionModalProp
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {categories && categories.map((v) => (
+                            {demo && DEMO_CATEGORIES.map((v) => (
+                              <SelectItem value={v} key={v}>{v}</SelectItem>
+                            ))}
+
+                            {!demo && categories && categories.map((v) => (
                               <SelectItem value={v} key={v}>{v}</SelectItem>
                             ))}
                           </SelectContent>
