@@ -1,8 +1,7 @@
 import React from "react"
 
 import { api } from "@/utils/api";
-import { StatisticItem, Subscription } from "@/lib/types";
-import { getNextNMonths, toMoneyString } from "@/lib/utils";
+import { StatisticItem } from "@/lib/types";
 import { useSelectedSubscriptions } from "@/lib/stores";
 import MainLayout from "@/layouts/main"
 import { columns } from "@/components/subscriptions-table/columns";
@@ -11,8 +10,6 @@ import { Separator } from "@/components/ui/separator";
 import StatisticCard from "@/components/subscriptions/StatisticCard";
 import SkeletonStatisticCard from "@/components/subscriptions/SkeletonStatisticCard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card } from "@/components/ui/card";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 const Statistics: Array<StatisticItem> = [
   {

@@ -16,7 +16,6 @@ import { Button } from "@/components/ui/button"
 import { Toaster } from "@/components/ui/toaster"
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import NewSubscriptionModal from "@/components/subscriptions/NewSubscriptionModal"
-import { BarChart3Icon } from "lucide-react"
 
 type MainLayoutProps = {
   children: React.ReactNode
@@ -43,7 +42,7 @@ export default function MainLayout({ children, title }: MainLayoutProps) {
         <title>{title}</title>
       </Head>
       <div className="border-b">
-        <section className="ml-auto mr-auto max-w-[1600px]">
+        <section className="ml-auto mr-auto max-w-[1200px]">
           <div className="flex h-16 items-center px-4">
             <Link href={"/"} className="flex flex-row gap-1 items-center cursor-pointer">
               <IconEdit size={28} />
