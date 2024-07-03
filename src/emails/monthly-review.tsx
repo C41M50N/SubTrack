@@ -31,7 +31,7 @@ export function MonthlyReviewEmail({
       <Tailwind>
         <Body className="bg-white my-auto mx-auto font-sans">
           <Container className="border border-solid border-[#eaeaea] rounded my-[40px] mx-auto p-[20px] w-[465px]">
-            <Heading className="">Hey {user_name}!</Heading>
+            <Heading>Hey {user_name}!</Heading>
             {renewing_soon && (
               <div className="flex flex-col gap-2">
                 <Text className="text-xl">Subscriptions that are renewing soon:</Text>

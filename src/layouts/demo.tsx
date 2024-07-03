@@ -1,6 +1,7 @@
 import React from "react"
 import Link from "next/link"
 import Head from "next/head"
+import Image from "next/image"
 
 import { 
   IconEdit,
@@ -28,9 +29,8 @@ export default function DemoLayout({ children, title }: DemoLayoutProps) {
       <div className="border-b">
         <section className="ml-auto mr-auto max-w-[1200px]">
           <div className="flex h-16 items-center px-4">
-            <Link href={"/"} className="flex flex-row gap-1 items-center cursor-pointer">
-              <IconEdit size={28} />
-              <h1 className="text-2xl">SubTrack</h1>
+            <Link href={"/"} className="cursor-pointer">
+              <Image alt="SubTrack" width={265} height={30} src={"/subtrack_full.jpg"} />
             </Link>
             <div className="ml-auto">
               <Button className="gap-2" onClick={() => {

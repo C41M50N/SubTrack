@@ -303,7 +303,7 @@ export default function EditSubscriptionModal ({ state, subscription, demo = fal
                 </div>
 
                 <DialogFooter>
-                  <Button type="submit" isLoading={isUpdateSubscriptionLoading} className="gap-1">
+                  <Button type="submit" isLoading={isUpdateSubscriptionLoading} className="gap-1 ">
                     <IconDeviceFloppy size={20} strokeWidth={1.75} />
                     <span>Save</span>
                   </Button>

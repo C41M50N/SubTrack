@@ -83,7 +83,7 @@ export default function AccountSettingsPage() {
                 </FormItem>
               </div>
 
-              <Button type="submit" isLoading={isSetUserNameLoading} className="gap-1">
+              <Button type="submit" isLoading={isSetUserNameLoading} className="gap-1 ">
                 <span>Save</span>
               </Button>
             </form>
