@@ -80,7 +80,7 @@ export default function DataTable<TData, TValue>({
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
+              <TableCell colSpan={columns.length} className="h-24 text-center text-gray-500">
                 You're not tracking any subscriptions yet.
               </TableCell>
             </TableRow>
