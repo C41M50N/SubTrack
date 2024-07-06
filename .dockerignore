@@ -1,0 +1,11 @@
+Dockerfile
+README.md
+node_modules
+.gitignore
+.git
+.idea
+.terraform
+terraform.tfstate
+terraform.tfstate.backup
+.terraform.lock.hcl
+*.tf
