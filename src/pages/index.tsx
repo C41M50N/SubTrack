@@ -6,11 +6,11 @@ import Head from "next/head";
 import Image from "next/image";
 import { getServerSession } from "next-auth/next";
 import { getProviders, signIn } from "next-auth/react";
-import { IconExternalLink, IconEdit } from "@tabler/icons-react";
+import { IconExternalLink } from "@tabler/icons-react";
 import { authOptions } from "@/server/auth";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { BarChart3Icon } from "lucide-react";
+import Link from "next/link";
 
 export default function SignInPage({
   provider,
@@ -26,11 +26,9 @@ export default function SignInPage({
 
       <div>
         <header className="h-24 mx-auto max-w-[1440px] px-8 2xl:p-0 flex flex-row items-center gap-2">
-          <a href="/" className="flex flex-row gap-2 items-center">
-            <BarChart3Icon size={52} strokeWidth={2.0} className="text-[#337c96]" />
-            {/* <IconEdit size={52} strokeWidth={2.0} /> */}
-            <h1 className="text-4xl font-bold">SubTrack</h1>
-          </a>
+          <Link href={"/"} className="cursor-pointer">
+            <Image alt="SubTrack" width={265} height={30} src={"/subtrack_full.jpg"} />
+          </Link>
 
           <div className="flex-1"></div>
 
@@ -63,7 +61,7 @@ export default function SignInPage({
 
           <Separator orientation="vertical" className="h-2/5 bg-gray-500" />
 
-          <Button className="ml-5 flex flex-row gap-4" variant="default" size="lg" onClick={() => signIn(provider.id)}>
+          <Button className="ml-5 bg-black hover:bg-black/80 flex flex-row gap-4" variant="default" size="lg" onClick={() => signIn(provider.id)}>
             <Image alt="Google Icon" src="/google.svg" width={1} height={1} className="w-6 h-6" />
             <span className="font-semibold text-lg">Sign In with Google</span>
           </Button>
@@ -78,8 +76,19 @@ export default function SignInPage({
         </section>
 
         <section className="pt-24 pb-14 mx-auto max-w-[1200px] px-8 2xl:px-0">
-          <Image className="border-[5px] border-black/70 rounded-xl" src={'/dashboard.png'} width={3000} height={2000} alt={"Dashboard Image"} />
+          <div className="border-[5px] border-black/70 rounded-xl">
+            <Image className="mt-1" src={'/dashboard.png'} width={3000} height={2000} alt={"Dashboard Image"} />
+          </div>
         </section>
+
+        <footer className="bg-gray-50 h-16 flex">
+          <div className="mx-auto my-auto">
+            <span className="text-xs font-medium">
+              Made by <Link href="https://www.linkedin.com/in/charles-buffington/" className="font-bold">Charles Buffington</Link>.
+              All rights reserved.
+            </span>
+          </div>
+        </footer>
       </div>
     </>
   )
