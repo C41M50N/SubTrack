@@ -24,8 +24,8 @@ export default function SignInPage({
       {/* Subtle Grid Backdrop */}
       <div className="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]"></div>
 
-      <div>
-        <header className="h-24 mx-auto max-w-[1440px] px-8 2xl:p-0 flex flex-row items-center gap-2">
+      <div className="h-screen flex flex-col justify-between">
+        <header className="h-24 mx-auto w-full max-w-[1440px] px-8 2xl:p-0 flex flex-row items-center gap-2">
           <Link href={"/"} className="cursor-pointer">
             <Image alt="SubTrack" width={265} height={30} src={"/subtrack_full.jpg"} />
           </Link>
@@ -75,7 +75,7 @@ export default function SignInPage({
           </h2>
         </section>
 
-        <section className="pt-24 pb-14 mx-auto max-w-[1200px] px-8 2xl:px-0">
+        <section className="pt-24 pb-14 mx-auto max-w-[1200px] mb-auto px-8 2xl:px-0">
           <div className="border-[5px] border-black/70 rounded-xl">
             <Image className="mt-1" src={'/dashboard.png'} width={3000} height={2000} alt={"Dashboard Image"} />
           </div>

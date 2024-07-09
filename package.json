@@ -10,7 +10,8 @@
     "start": "next start",
     "email": "email dev --dir ./src/emails",
     "prisma-studio": "op run --env-file='.env' -- prisma studio",
-    "update-db": "op run --env-file='.env' -- prisma db push"
+    "update-db": "op run --env-file='.env' -- prisma db push",
+    "create-prod-env": "op inject -i .env -o .env.production"
   },
   "dependencies": {
     "@doist/todoist-api-typescript": "^3.0.2",
