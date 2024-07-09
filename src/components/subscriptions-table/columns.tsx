@@ -125,10 +125,10 @@ export const columns: ColumnDef<Subscription>[] = [
 			}
 	
 			return (
-			<div className="text-left">
-				<div className={`font-medium text-lg ${roboto.className}`}>{formatted}</div>
-				every {toX(row.original.frequency)}
-			</div>
+				<div className="text-left">
+					<div className={`font-semibold text-lg`}>{formatted}</div>
+					every {toX(row.original.frequency)}
+				</div>
 			)
 		}
 	},
@@ -159,7 +159,7 @@ export const columns: ColumnDef<Subscription>[] = [
 		cell: ({ row }) => {
 			return (
 				<div className="text-left">
-					<span className="text-[16px]">{dayjs(row.original.next_invoice).format("MMM D, YYYY")}</span>
+					<span className="text-[16px] font-medium">{dayjs(row.original.next_invoice).format("MMM D, YYYY")}</span>
 					<p className="text-muted-foreground">({dayjs(row.original.next_invoice).fromNow()})</p>
 				</div>
 			)
