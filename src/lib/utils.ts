@@ -34,10 +34,10 @@ export async function sleep(ms: number) {
 type Month = 'January' | 'February' | 'March' | 'April' | 'May' | 'June' | 'July' | 'August' | 'September' | 'October' | 'November' | 'December'
 type Year = number
 export function getNextNMonths(n: number) {
-  const res: Array<[Month, Year]> = []
+  const res: Array<[Month, number, Year]> = []
   for (let offset = 0; offset < n; offset++) {
     const day = dayjs().add(1 + offset, 'month')
-    res.push([day.format('MMMM') as Month, day.year()])
+    res.push([day.format('MMMM') as Month, day.month(), day.year()])
   }
   return res;
 }

@@ -1,15 +1,18 @@
 import React from "react"
-
 import { api } from "@/utils/api";
 import { StatisticItem } from "@/lib/types";
 import { useSelectedSubscriptions } from "@/lib/stores";
+import { getNextNMonths, toMoneyString } from "@/lib/utils";
 import MainLayout from "@/layouts/main"
 import { columns } from "@/components/subscriptions-table/columns";
 import DataTable from "@/components/subscriptions-table/table";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card } from "@/components/ui/card";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import StatisticCard from "@/components/subscriptions/StatisticCard";
 import SkeletonStatisticCard from "@/components/subscriptions/SkeletonStatisticCard";
-import { Skeleton } from "@/components/ui/skeleton";
+import { getMonthCost } from "@/lib/helper";
 
 const Statistics: Array<StatisticItem> = [
   {
@@ -138,8 +141,8 @@ export default function DashboardPage() {
             <div className="w-full space-y-2 p-2">
               <Skeleton className="h-12" />
               <div className="py-2 space-y-3">
-                {[...Array(7)].map((v, idx) => (
-                  <Skeleton className="h-8" key={idx} />
+                {[...Array(7)].map((v) => (
+                  <Skeleton className="h-8" key={v} />
                 ))}
               </div>
               <Skeleton className="h-12" />
@@ -151,6 +154,8 @@ export default function DashboardPage() {
 
         <div className="flex-1">
           <div className="flex flex-col space-y-4">
+
+            {/* Statistic Cards */}
             {isSubsLoading && Statistics.map((_, idx) => (
               <SkeletonStatisticCard key={idx} />
             ))}
@@ -162,24 +167,46 @@ export default function DashboardPage() {
               />
             ))}
 
-            {/* <Card>
-              <Accordion type="single" className="px-4">
+            {/* Monthly Cost Breakdown */}
+            <Card>
+              <Accordion type="single" collapsible defaultValue="monthly-cost-breakdown">
                 <AccordionItem value="monthly-cost-breakdown">
-                  <AccordionTrigger className="text-md font-semibold py-2">Monthly Cost Breakdown</AccordionTrigger>
-                  <AccordionContent>
-                    {getNextNMonths(10).map(((data) => {
-                      const [month, year] = data
-                      return (
-                        <div key={`${month}-${year}`} className="p-2 flex flex-row">
-                          <span className="flex-1">{`${month} ${year}`}</span>
-                          <span>{toMoneyString(0.00)}</span>
+                  <AccordionTrigger className="text-md font-semibold px-4 py-2">Monthly Cost Breakdown</AccordionTrigger>
+                  {isSubsLoading && (
+                    <AccordionContent>
+                      {[...Array(12)].map((v) => (
+                        <div key={v} className="w-full odd:bg-white even:bg-slate-50">
+                          <Skeleton className="w-full" />
                         </div>
-                      )
-                    }))}
-                  </AccordionContent>
+                      ))}
+                    </AccordionContent>
+                  )}
+                  {!isSubsLoading && subscriptions && (
+                    <AccordionContent>
+                      {getNextNMonths(12).map(((data) => {
+                        const [monthStr, month, year] = data
+                        return (
+                          <div key={`${monthStr}-${year}`} className="w-full odd:bg-white even:bg-slate-50">
+                            <div className="px-4 py-1.5 flex flex-row">
+                              <span className="flex-1">{`${monthStr} ${year}`}</span>
+                              <span>{
+                                toMoneyString(
+                                  getMonthCost(
+                                    selectedSubscriptions.length > 0 ? selectedSubscriptions : subscriptions,
+                                    month,
+                                    year
+                                  )
+                                )
+                              }</span>
+                            </div>
+                          </div>
+                        )
+                      }))}
+                    </AccordionContent>
+                  )}
                 </AccordionItem>
               </Accordion>
-            </Card> */}
+            </Card>
           </div>
         </div>
       </div>
