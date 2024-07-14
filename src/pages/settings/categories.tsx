@@ -1,5 +1,5 @@
 import React from "react";
-import { Loader2, X } from "lucide-react";
+import { X } from "lucide-react";
 
 import {
   useCategories, 
@@ -7,6 +7,7 @@ import {
 } from "@/lib/hooks";
 import MainLayout from "@/layouts/main";
 import SettingsLayout from "@/layouts/settings";
+import { LoadingSpinner } from "@/components/common/loading-spinner";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -53,9 +54,7 @@ export default function CategoriesSettingsPage() {
           <Separator />
           
           {isCategoriesLoading && (
-            <div className="flex items-center justify-center">
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            </div>
+            <LoadingSpinner />
           )}
 
           {categories && !isCategoriesLoading && (

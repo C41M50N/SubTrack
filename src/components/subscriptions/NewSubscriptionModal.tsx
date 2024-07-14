@@ -1,13 +1,18 @@
 import React from "react"
 import Image from "next/image"
 
+import z from "zod"
+import { format } from "date-fns"
+import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { IconCalendarEvent } from "@tabler/icons-react"
-import { format } from "date-fns"
-import { Check, ChevronsUpDown, Loader2 } from "lucide-react"
-import { useForm } from "react-hook-form"
-import z from "zod"
+import { Check, ChevronsUpDown } from "lucide-react"
 
+import { cn, toXCase } from "@/lib/utils"
+import { ModalState, useCategories, useCreateSubscription } from "@/lib/hooks"
+import { FREQUENCIES, ICONS, SubscriptionSchema } from "@/lib/types"
+
+import { LoadingSpinner } from "@/components/common/loading-spinner"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -47,22 +52,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { ModalState, useCategories, useCreateSubscription } from "@/lib/hooks"
-import { DEMO_CATEGORIES, FREQUENCIES, ICONS, SubscriptionSchema } from "@/lib/types"
-import { cn, sleep, toXCase } from "@/lib/utils"
-import { useDemoSubscriptions } from "@/lib/stores/demo-subscriptions"
 
 type NewSubscriptionModalProps = {
   state: ModalState
-  demo?: boolean
 }
 
-export default function NewSubscriptionModal({ state, demo = false }: NewSubscriptionModalProps) {
+export default function NewSubscriptionModal({ state }: NewSubscriptionModalProps) {
 
   const { categories, isCategoriesLoading } = useCategories()
   const { createSubscription, isCreateSubscriptionLoading } = useCreateSubscription()
-  const { addSubscription: addDemoSubscription } = useDemoSubscriptions()
 
   const form = useForm<z.infer<typeof SubscriptionSchema>>({
     resolver: zodResolver(SubscriptionSchema),
@@ -77,13 +75,7 @@ export default function NewSubscriptionModal({ state, demo = false }: NewSubscri
   })
 
   async function onSubmit(values: z.infer<typeof SubscriptionSchema>) {
-    if (demo) {
-      await sleep(500)
-      addDemoSubscription(values)
-    } else {
-      await createSubscription(values)
-    }
-
+    await createSubscription(values)
     form.reset()
     state.setState("closed")
   }
@@ -96,9 +88,7 @@ export default function NewSubscriptionModal({ state, demo = false }: NewSubscri
         </DialogHeader>
 
         {isCategoriesLoading && (
-          <div className="flex items-center justify-center">
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          </div>
+          <LoadingSpinner />
         )}
 
         {!isCategoriesLoading && (
@@ -240,11 +230,7 @@ export default function NewSubscriptionModal({ state, demo = false }: NewSubscri
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {demo && DEMO_CATEGORIES.map((v) => (
-                              <SelectItem value={v} key={v}>{v}</SelectItem>
-                            ))}
-
-                            {!demo && categories && categories.map((v) => (
+                            {categories && categories.map((v) => (
                               <SelectItem value={v} key={v}>{v}</SelectItem>
                             ))}
                           </SelectContent>

@@ -1,17 +1,17 @@
 import Image from "next/image"
 
 import z from "zod"
-import { Check, ChevronsUpDown, Loader2 } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { Check, ChevronsUpDown } from "lucide-react"
 import { IconCalendarEvent, IconDeviceFloppy } from "@tabler/icons-react"
-import dayjs from "dayjs"
-import LocalizedFormat from 'dayjs/plugin/localizedFormat'
-dayjs.extend(LocalizedFormat)
 
-import { ModalState, useCategories, useUpdateSubscription } from "@/lib/hooks"
+import dayjs from "@/lib/dayjs"
 import { cn, sleep, toXCase } from "@/lib/utils"
+import { ModalState, useCategories, useUpdateSubscription } from "@/lib/hooks"
 import { FREQUENCIES, ICONS, SubscriptionSchema, Subscription, DEMO_CATEGORIES, DemoSubscription } from "@/lib/types"
+
+import { LoadingSpinner } from "@/components/common/loading-spinner"
 import {
   Command,
   CommandEmpty,
@@ -51,19 +51,16 @@ import { Calendar } from "@/components/ui/calendar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
-import { useDemoSubscriptions } from "@/lib/stores/demo-subscriptions"
 
 type EditSubscriptionModalProps = {
   state: ModalState
-  subscription: Subscription | DemoSubscription
-  demo?: boolean
+  subscription: Subscription
 }
 
-export default function EditSubscriptionModal ({ state, subscription, demo = false }: EditSubscriptionModalProps) {
+export default function EditSubscriptionModal ({ state, subscription }: EditSubscriptionModalProps) {
 
-  const { categories, isCategoriesLoading } = useCategories(!demo)
+  const { categories, isCategoriesLoading } = useCategories()
   const { updateSubscription, isUpdateSubscriptionLoading } = useUpdateSubscription()
-  const { updateDemoSubscription } = useDemoSubscriptions()
 
   const form = useForm<z.infer<typeof SubscriptionSchema>>({
     resolver: zodResolver(SubscriptionSchema),
@@ -71,13 +68,7 @@ export default function EditSubscriptionModal ({ state, subscription, demo = fal
   })
 
   async function onSubmit(values: z.infer<typeof SubscriptionSchema>) {
-    if (demo) {
-      await sleep(500)
-      updateDemoSubscription({ id: subscription.id, ...values })
-    } else {
-      await updateSubscription({ id: subscription.id, ...values })
-    }
-
+    await updateSubscription({ id: subscription.id, ...values })
     state.setState("closed")
   }
 
@@ -88,13 +79,11 @@ export default function EditSubscriptionModal ({ state, subscription, demo = fal
           <DialogTitle>Edit Subscription</DialogTitle>
         </DialogHeader>
 
-        {!demo && isCategoriesLoading && (
-          <div className="flex items-center justify-center">
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          </div>
+        {isCategoriesLoading && (
+          <LoadingSpinner />
         )}
 
-        {(demo || !isCategoriesLoading) && (
+        {!isCategoriesLoading && (
           <>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -233,10 +222,7 @@ export default function EditSubscriptionModal ({ state, subscription, demo = fal
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {demo && DEMO_CATEGORIES.map((v) => (
-                              <SelectItem value={v} key={v}>{v}</SelectItem>
-                            ))}
-                            {!demo && categories && categories.map((v) => (
+                            {categories && categories.map((v) => (
                               <SelectItem value={v} key={v}>{v}</SelectItem>
                             ))}
                           </SelectContent>

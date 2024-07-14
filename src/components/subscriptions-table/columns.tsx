@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 
 import dayjs from "@/lib/dayjs";
 import { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, MoreHorizontal } from "lucide-react"
+import { ArrowUpDown } from "lucide-react"
 import { IconAlarm, IconDotsVertical, IconPencil, IconTrash } from "@tabler/icons-react"
 
 import { DemoSubscription, Subscription } from "@/lib/types";
@@ -24,6 +24,8 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import EditSubscriptionModal from "@/components/subscriptions/EditSubscriptionModal";
 import DeleteSubscriptionModal from "@/components/subscriptions/DeleteSubscriptionModal";
+import DemoEditSubscriptionModal from "@/components/demo-subscriptions/EditSubscriptionModal";
+import DemoDeleteSubscriptionModal from "@/components/demo-subscriptions/DeleteSubscriptionModal";
 import SetCancelReminderModal from "@/components/subscriptions/SetCancelReminderModal";
 import { useDemoSubscriptions, useSelectedDemoSubscriptions } from "@/lib/stores/demo-subscriptions";
 
@@ -84,7 +86,7 @@ export const columns: ColumnDef<Subscription>[] = [
   },
 	{
 		accessorKey: "name",
-		header: () => (<div>Name</div>),
+		header: "Name",
 		cell: ({ row }) => {
 			const icon_ref = row.original.icon_ref;
 			return (
@@ -100,7 +102,7 @@ export const columns: ColumnDef<Subscription>[] = [
 	},
 	{
 		accessorKey: "amount",
-		header: () => (<div>Cost</div>),
+		header: "Cost",
 		cell: ({ row }) => {
 			const amount = parseFloat(row.getValue("amount"))
 			const formatted = toMoneyString(amount);
@@ -134,7 +136,7 @@ export const columns: ColumnDef<Subscription>[] = [
 	},
 	{
 		accessorKey: "category",
-		header: () => (<div>Category</div>),
+		header: "Category",
 		cell: ({ row }) => {
 			return (
 				<Badge className="text-md" variant={"secondary"}>{row.original.category}</Badge>
@@ -296,8 +298,8 @@ export const demoColumns = [
 						</DropdownMenuContent>
 					</DropdownMenu>
 
-					<EditSubscriptionModal demo state={editModalState} subscription={subscription} />
-					<DeleteSubscriptionModal demo state={deleteModalState} subscription_id={subscription.id} />
+					<DemoEditSubscriptionModal state={editModalState} subscription={subscription} />
+					<DemoDeleteSubscriptionModal state={deleteModalState} subscription_id={subscription.id} />
 				</>
       )
     },
