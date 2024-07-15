@@ -8,7 +8,8 @@ import {
   Container,
   Heading,
   Text,
-  Tailwind
+  Tailwind,
+  Img
 } from "@react-email/components"
 import { Subscription } from "@prisma/client";
 import dayjs from "@/lib/dayjs";
@@ -32,8 +33,11 @@ export function MonthlyReviewEmail({
       <Tailwind>
         <Body className="bg-white my-auto mx-auto font-sans">
           <Container className="mx-auto px-4 pt-5">
-            <Heading>Hey {user_name}!</Heading>
-            <Text className="text-sm text-muted-foreground -mt-2">Here is your subscriptions review for {dayjs().format('MMMM')}.</Text>
+            <div className="flex flex-row gap-2">
+              <Img src="../../public/subtrack_full.jpg" alt="SubTrack" height={200} />
+              <Text className="text-3xl font-bold">Subscriptions Review</Text>
+            </div>
+            <Text className="text-sm text-muted-foreground">Hey {user_name}! Here is your subscriptions review for {dayjs().format('MMMM')}.</Text>
             {renewing_soon && (
               <>
                 <Text className="text-2xl font-semibold">Subscriptions that are renewing soon</Text>
@@ -50,7 +54,7 @@ export function MonthlyReviewEmail({
 
             {renewed_recently && (
               <>
-                <Text className="text-2xl font-semibold">Subscriptions that have renewed recently:</Text>
+                <Text className="text-2xl font-semibold">Subscriptions that have renewed recently</Text>
                 <ul className="mt-1">
                   {renewed_recently.map((sub) => (
                     <li key={sub.id}>
