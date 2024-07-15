@@ -34,7 +34,7 @@ export function MonthlyReviewEmail({
         <Body className="bg-white my-auto mx-auto font-sans">
           <Container className="mx-auto px-4 pt-5">
             <div className="flex flex-row gap-2">
-              <Img src="https://subtrack.cbuff.dev/subtrack_full.jpg" alt="SubTrack" height={100} />
+              <Img src="https://subtrack.cbuff.dev/subtrack_full.jpg" alt="SubTrack" height={30} width={200} />
               <Text className="text-3xl font-bold">Subscriptions Review</Text>
             </div>
             <Text className="text-sm text-muted-foreground">Hey {user_name}! Here is your subscriptions review for {dayjs().format('MMMM')}.</Text>
