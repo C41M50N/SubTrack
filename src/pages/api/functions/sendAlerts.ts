@@ -43,7 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       subject: `Your Subscriptions Review for ${dayjs().format('MMMM')}`,
       react: MonthlyReviewEmail({
         user_name: user.name,
-        renewing_soon: renewingSoonSubs,
+        renewing_soon: renewingSoonSubs?.sort((sub1, sub2) => sub1.next_invoice.getTime() - sub2.next_invoice.getTime()),
         renewed_recently: renewedRecentlySubs
       })
     })
