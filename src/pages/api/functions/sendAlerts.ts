@@ -38,9 +38,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const user = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { name: true, email: true } });
 
     await resend.sendEmail({
-      from: 'alert@subtrack.cbuff.dev',
+      from: 'SubTrack Alerts <alert@subtrack.cbuff.dev>',
       to: user.email,
-      subject: `${dayjs().subtract(1, 'month').format('MMMM')} Subscriptions Review`,
+      subject: `Your Subscriptions Review for ${dayjs().format('MMMM')}`,
       react: MonthlyReviewEmail({
         user_name: user.name,
         renewing_soon: renewingSoonSubs,
