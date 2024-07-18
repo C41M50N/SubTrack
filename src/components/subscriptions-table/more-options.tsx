@@ -1,5 +1,8 @@
 "use client"
-
+import { mkConfig, generateCsv, download } from "export-to-csv";
+import { CircleEllipsisIcon } from "lucide-react"
+import { useSelectedSubscriptions } from "@/lib/stores"
+import dayjs from "@/lib/dayjs"
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -10,9 +13,32 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { CircleEllipsisIcon } from "lucide-react"
 
 export default function MoreOptions() {
+
+  const { subscriptions } = useSelectedSubscriptions()
+
+  function exportSubscriptionsToCSV() {
+    const csvConfig = mkConfig({
+      filename: `SubTrack Subscriptions - ${dayjs().format('YYYY-MM-DD')}`,
+      useKeysAsHeaders: true
+    });
+
+    const csv = generateCsv(csvConfig)(
+      subscriptions
+        .map(({ id, userId, icon_ref, ...rest }) => rest)
+        .map(
+          ({ next_invoice, last_invoice, ...rest }) => ({
+            ...rest,
+            next_invoice: dayjs(next_invoice).format('MM/DD/YYYY'), 
+            last_invoice: last_invoice !== null ? dayjs(last_invoice).format('MM/DD/YYYY') : '', 
+          })
+        )
+    );
+
+    download(csvConfig)(csv);
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -28,7 +54,7 @@ export default function MoreOptions() {
       <DropdownMenuContent align="end" className="w-[150px]">
         <DropdownMenuLabel>Options</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => {}}>
+        <DropdownMenuItem onClick={exportSubscriptionsToCSV}>
           Export to CSV
         </DropdownMenuItem>
       </DropdownMenuContent>
