@@ -5,7 +5,7 @@ import { useSelectedSubscriptions } from "@/lib/stores";
 import { getNextNMonths, toMoneyString } from "@/lib/utils";
 import MainLayout from "@/layouts/main"
 import { columns } from "@/components/subscriptions-table/columns";
-import DataTable from "@/components/subscriptions-table/table";
+import DataTable from "@/components/subscriptions-table/data-table";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/
 import StatisticCard from "@/components/subscriptions/StatisticCard";
 import SkeletonStatisticCard from "@/components/subscriptions/SkeletonStatisticCard";
 import { getMonthCost } from "@/lib/helper";
+import { useCategories } from "@/lib/hooks";
 
 const Statistics: Array<StatisticItem> = [
   {
@@ -126,6 +127,7 @@ const Statistics: Array<StatisticItem> = [
 export default function DashboardPage() {
   const { data: subscriptions, isLoading: isSubsLoading } = api.main.getSubscriptions.useQuery();
   const { subscriptions: selectedSubscriptions } = useSelectedSubscriptions();
+  const { categories, isCategoriesLoading } = useCategories()
 
   return (
     <MainLayout title="Dashboard | SubTrack">
@@ -149,7 +151,9 @@ export default function DashboardPage() {
             </div>
           )}
           {!isSubsLoading && !subscriptions && <span className="text-xl">No Subscriptions</span>}
-          {!isSubsLoading && subscriptions && <DataTable columns={columns} data={subscriptions} />}
+          {!isSubsLoading && subscriptions && !isCategoriesLoading && categories && 
+           <DataTable columns={columns} data={subscriptions} categories={categories} />
+          }
         </div>
 
         <div className="flex-1">

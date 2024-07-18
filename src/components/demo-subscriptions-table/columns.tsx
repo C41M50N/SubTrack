@@ -1,13 +1,12 @@
 import Image from "next/image";
 import { Roboto, Lato } from 'next/font/google';
-import { useSession } from "next-auth/react";
 
 import dayjs from "@/lib/dayjs";
 import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
-import { IconAlarm, IconDotsVertical, IconPencil, IconTrash } from "@tabler/icons-react"
+import { IconDotsVertical, IconPencil, IconTrash } from "@tabler/icons-react"
 
-import { Subscription } from "@/lib/types";
+import { DemoSubscription, Subscription } from "@/lib/types";
 import { toMoneyString, toXCase } from "@/lib/utils";
 import { useModalState } from "@/lib/hooks";
 
@@ -21,9 +20,9 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import EditSubscriptionModal from "@/components/subscriptions/EditSubscriptionModal";
-import DeleteSubscriptionModal from "@/components/subscriptions/DeleteSubscriptionModal";
-import SetCancelReminderModal from "@/components/subscriptions/SetCancelReminderModal";
+import DemoEditSubscriptionModal from "@/components/demo-subscriptions/EditSubscriptionModal";
+import DemoDeleteSubscriptionModal from "@/components/demo-subscriptions/DeleteSubscriptionModal";
+import { useDemoSubscriptions, useSelectedDemoSubscriptions } from "@/lib/stores/demo-subscriptions";
 
 const roboto = Roboto({
   weight: ['400', '500', '700'],
@@ -37,28 +36,41 @@ const lato = Lato({
 	subsets: ['latin']
 })
 
-export const columns: ColumnDef<Subscription>[] = [
+export const columns: ColumnDef<DemoSubscription>[] = [
 	{
     id: "select",
     header: ({ table }) => {
+			const { subscriptions } = useDemoSubscriptions()
+			const { setSubscriptions, resetSubscriptions } = useSelectedDemoSubscriptions()
 
 			return (
 				<Checkbox
 					checked={table.getIsAllPageRowsSelected()}
 					onCheckedChange={(value) => {
 						table.toggleAllPageRowsSelected(!!value)
+						if (value === true) {
+							setSubscriptions(subscriptions || [])
+						} else {
+							resetSubscriptions()
+						}
 					}}
 					aria-label="Select all"
 				/>
 			)
 		},
-    cell: ({ row }) => {
+		cell: ({ row }) => {
+			const { addSubscription, removeSubscription } = useSelectedDemoSubscriptions()
 
 			return (
 				<Checkbox
 					checked={row.getIsSelected()}
 					onCheckedChange={(value) => {
 						row.toggleSelected(!!value)
+						if (value === true) {
+							addSubscription(row.original)
+						} else {
+							removeSubscription(row.original.id)
+						}
 					}}
 					aria-label="Select row"
 				/>
@@ -66,8 +78,8 @@ export const columns: ColumnDef<Subscription>[] = [
 		},
     enableSorting: true,
     enableHiding: false,
-  },
-	{
+	},
+  {
 		accessorKey: "name",
 		header: "Name",
 		cell: ({ row }) => {
@@ -79,10 +91,9 @@ export const columns: ColumnDef<Subscription>[] = [
 						: <Image alt={toXCase(icon_ref)} src={`/${icon_ref}.svg`} height={24} width={24} className="w-[24px] h-[24px]" />
 					}
 					<div className="text-lg font-medium">{row.original.name}</div>
-				</div>
+				</div>	
 			)
-		},
-		enableHiding: false
+		}
 	},
 	{
 		accessorKey: "amount",
@@ -125,10 +136,7 @@ export const columns: ColumnDef<Subscription>[] = [
 			return (
 				<Badge className="text-md" variant={"secondary"}>{row.original.category}</Badge>
 			)
-		},
-		filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id))
-    },
+		}
 	},
 	{
 		accessorKey: "next_invoice",
@@ -159,11 +167,8 @@ export const columns: ColumnDef<Subscription>[] = [
     cell: ({ row }) => {
       const subscription = row.original;
 
-			const { data: session } = useSession();
-
 			const deleteModalState = useModalState();
 			const editModalState = useModalState();
-			const setReminderModalState = useModalState();
  
       return (
 				<>
@@ -182,17 +187,6 @@ export const columns: ColumnDef<Subscription>[] = [
 
 							<DropdownMenuSeparator />
 
-							{session?.user.todoistAPIKey !== "" && (
-								<>
-									<DropdownMenuItem className="cursor-pointer" onClick={() => setReminderModalState.setState("open")}>
-										<IconAlarm stroke={1.75} />
-										<span className={`text-base font-medium pl-2 ${lato.className}`}>Set Cancel Reminder</span>
-									</DropdownMenuItem>
-
-									<DropdownMenuSeparator />
-								</>
-							)}
-
 							<DropdownMenuItem className="cursor-pointer text-red-700" onClick={() => deleteModalState.setState("open")}>
 								<IconTrash stroke={1.75} />
 								<span className={`text-base font-medium pl-2 ${lato.className}`}>Delete</span>
@@ -200,11 +194,10 @@ export const columns: ColumnDef<Subscription>[] = [
 						</DropdownMenuContent>
 					</DropdownMenu>
 
-					<EditSubscriptionModal state={editModalState} subscription={subscription} />
-					<DeleteSubscriptionModal state={deleteModalState} subscription_id={subscription.id} />
-					<SetCancelReminderModal state={setReminderModalState} subscription={subscription} />
+					<DemoEditSubscriptionModal state={editModalState} subscription={subscription} />
+					<DemoDeleteSubscriptionModal state={deleteModalState} subscription_id={subscription.id} />
 				</>
       )
     },
   },
-]
+] as ColumnDef<DemoSubscription>[]

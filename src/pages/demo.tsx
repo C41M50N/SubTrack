@@ -4,7 +4,7 @@ import { Separator } from "@radix-ui/react-select";
 import { DemoSubscription, StatisticItem } from "@/lib/types";
 import { useDemoSubscriptions, useSelectedDemoSubscriptions } from "@/lib/stores/demo-subscriptions";
 import DemoLayout from "@/layouts/demo";
-import DataTable from "@/components/subscriptions-table/table";
+import DemoDataTable from "@/components/demo-subscriptions-table/data-table";
 import { demoColumns } from "@/components/subscriptions-table/columns";
 import StatisticCard from "@/components/subscriptions/StatisticCard";
 
@@ -131,7 +131,7 @@ function DemoPage() {
       <div className="flex flex-row space-x-8">
         <div className="w-9/12">
           {!subscriptions && <span className="text-xl">No Subscriptions</span>}
-          {subscriptions && <DataTable columns={demoColumns} data={subscriptions} />}
+          {subscriptions && <DemoDataTable columns={demoColumns} data={subscriptions} />}
         </div>
 
         <div className="flex-1">
