@@ -69,7 +69,19 @@ export const columns: ColumnDef<Subscription>[] = [
   },
 	{
 		accessorKey: "name",
-		header: "Name",
+		header: ({ column }) => {
+			return (
+				<Button
+          variant="ghost"
+          onClick={() => {
+						column.toggleSorting(false)
+					}}
+        >
+          Name
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+			)
+		},
 		cell: ({ row }) => {
 			const icon_ref = row.original.icon_ref;
 			return (
