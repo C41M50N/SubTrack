@@ -38,8 +38,8 @@ export const useUserName = () => {
 export const useCategories = (enabled: boolean = true) => {
   const { 
 		data: categories, 
-		isLoading: isCategoriesLoading 
-	} = api.main.getCategories.useQuery(undefined, { staleTime: Infinity, enabled: enabled })
+		isInitialLoading: isCategoriesLoading,
+	} = api.categories.getCategories.useQuery(undefined, { staleTime: Infinity, enabled: enabled })
 	return { categories, isCategoriesLoading } as const
 }
 
@@ -48,13 +48,13 @@ export const useSetCategories = () => {
 	const { 
 		mutateAsync: setCategories, 
 		isLoading: isSetCategoriesLoading 
-	} = api.main.setCategories.useMutation({
+	} = api.categories.setCategories.useMutation({
 		onSuccess: () => {
 			toast({
 				variant: "success",
 				title: "Successfully set categories!"
 			})
-			ctx.main.getCategories.refetch()
+			ctx.categories.getCategories.refetch()
 		},
 		onError: (err) => {
 			toast({
@@ -70,7 +70,7 @@ export const useSetCategories = () => {
 export const useAllSubscriptions = () => {
   const {
 		data: subscriptions, 
-	} = api.main.getSubscriptions.useQuery(undefined, { staleTime: Infinity })
+	} = api.subscriptions.getSubscriptions.useQuery(undefined, { staleTime: Infinity })
 	return { subscriptions } as const
 }
 
@@ -79,13 +79,13 @@ export const useCreateSubscription = () => {
 	const { 
 		mutateAsync: createSubscription, 
 		isLoading: isCreateSubscriptionLoading 
-	} = api.main.createSubscription.useMutation({
+	} = api.subscriptions.createSubscription.useMutation({
     onSuccess: (_, newSubscription) => {
 			toast({
 				variant: "success",
 				title: `Successfully created ${newSubscription.name} subscription!`
 			})
-			ctx.main.getSubscriptions.refetch()
+			ctx.subscriptions.getSubscriptionsFromCollection.invalidate()
     },
 		onError: (err) => {
 			toast({
@@ -104,13 +104,13 @@ export const useUpdateSubscription = (enabled: boolean = true) => {
 	const { 
 		mutateAsync: updateSubscription, 
 		isLoading: isUpdateSubscriptionLoading 
-	} = api.main.updateSubscription.useMutation({
+	} = api.subscriptions.updateSubscription.useMutation({
 		onSuccess: () => {
 			toast({
 				variant: "success",
 				title: "Successfully updated subscription!"
 			})
-			ctx.main.getSubscriptions.refetch()
+			ctx.subscriptions.getSubscriptions.refetch()
 		},
 		onError: (err) => {
 			toast({
@@ -129,13 +129,13 @@ export const useDeleteSubscription = () => {
 	const { 
 		mutateAsync: deleteSubscription, 
 		isLoading: isDeleteSubscriptionLoading 
-	} = api.main.deleteSubscription.useMutation({
+	} = api.subscriptions.deleteSubscription.useMutation({
 		onSuccess: () => {
 			toast({
 				variant: "success",
 				title: `Successfully deleted subscription!`
 			})
-			ctx.main.getSubscriptions.refetch()
+			ctx.subscriptions.getSubscriptions.refetch()
 		},
 		onError: (err) => {
 			toast({
@@ -147,4 +147,14 @@ export const useDeleteSubscription = () => {
 	})
 
 	return { deleteSubscription, isDeleteSubscriptionLoading }
+}
+
+export const useCollections = () => {
+	const ctx = api.useContext()
+  const {
+		data: collections,
+		isLoading: isGetCollectionsLoading,
+	} = api.collections.getCollections.useQuery(undefined, { staleTime: Infinity })
+	
+	return { collections, isGetCollectionsLoading }
 }

@@ -35,6 +35,8 @@ declare module "next-auth" {
   }
 }
 
+const adapter = PrismaAdapter(prisma)
+
 /**
  * Options for NextAuth.js used to configure adapters, providers, callbacks, etc.
  *
@@ -52,7 +54,19 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   },
-  adapter: PrismaAdapter(prisma),
+  adapter: {
+    ...adapter,
+    async createUser(user) {
+      const u = await adapter.createUser!(user)
+      await prisma.collection.create({
+        data: {
+          title: 'Personal',
+          userId: u.id,
+        }
+      })
+      return u
+    },
+  },
   providers: [
     GoogleProvider({
       clientId: env.GOOGLE_CLIENT_ID,

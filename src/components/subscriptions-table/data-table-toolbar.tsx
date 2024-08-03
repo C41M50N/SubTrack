@@ -5,6 +5,7 @@ import { IconCircleX } from "@tabler/icons-react"
 import { DataTableFilter } from "./data-table-filter"
 import { DataTableViewOptions } from "./data-table-view-options"
 import MoreOptions from "./more-options"
+import CollectionSelector from "../collections/collection-selector"
 
 type Props<TData> = {
   table: Table<TData>
@@ -15,8 +16,10 @@ export default function DataTableToolbar<TData>({ table, categories }: Props<TDa
   const isFiltered = table.getState().columnFilters.length > 0
 
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex flex-1 items-center space-x-2">
+    <div className="flex justify-between items-end">
+      <div className="flex flex-1 space-x-2 items-end">
+        <CollectionSelector />
+
         <Input
           placeholder="Filter subscriptions..."
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}

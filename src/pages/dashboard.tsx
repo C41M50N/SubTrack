@@ -1,131 +1,41 @@
 import React from "react"
 import { api } from "@/utils/api";
-import { StatisticItem } from "@/lib/types";
 import { useSelectedSubscriptions } from "@/lib/stores";
 import { getNextNMonths, toMoneyString } from "@/lib/utils";
+import { getMonthCost } from "@/lib/helper";
+import { useCategories } from "@/lib/hooks";
+import { Statistics } from "@/lib/subscription-stats";
 import MainLayout from "@/layouts/main"
-import { columns } from "@/components/subscriptions-table/columns";
-import DataTable from "@/components/subscriptions-table/data-table";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import {
+  Accordion, 
+  AccordionItem, 
+  AccordionTrigger, 
+  AccordionContent
+} from "@/components/ui/accordion";
 import StatisticCard from "@/components/subscriptions/StatisticCard";
 import SkeletonStatisticCard from "@/components/subscriptions/SkeletonStatisticCard";
-import { getMonthCost } from "@/lib/helper";
-import { useCategories } from "@/lib/hooks";
-
-const Statistics: Array<StatisticItem> = [
-  {
-    description: "cost per week",
-    getResult: (subscriptions) => {
-      let result = 0.0;
-      for (let i = 0; i < subscriptions.length; i++) {
-        const subscription = subscriptions[i]!;
-        switch (subscription.frequency) {
-          case "weekly":
-            result += subscription.amount;
-          break;
-          
-          case "bi-weekly":
-            result += subscription.amount / 2.0;
-          break;
-            
-          case "monthly":
-            result += subscription.amount / 4.3;  // around 4.3 weeks in a month
-          break;
-
-          case "bi-monthly":
-            result += subscription.amount / (4.3 * 2);
-          break;
-
-          case "yearly":
-            result += subscription.amount / 52.0;  // around 52 weeks in a year
-          break;
-
-          case "bi-yearly":
-            result += subscription.amount / (52.0 * 2);
-          break;
-        }
-      }
-      return result;
-    }
-  },
-  {
-    description: "cost per month",
-    getResult: (subscriptions) => {
-      let result = 0.0;
-      for (let i = 0; i < subscriptions.length; i++) {
-        const subscription = subscriptions[i]!;
-        switch (subscription.frequency) {
-          case "weekly":
-            result += subscription.amount * 4.3;  // around 4.3 weeks in a month
-          break;
-          
-          case "bi-weekly":
-            result += subscription.amount * (4.3 / 2.0);
-          break;
-            
-          case "monthly":
-            result += subscription.amount;
-          break;
-
-          case "bi-monthly":
-            result += subscription.amount / 2.0;
-          break;
-
-          case "yearly":
-            result += subscription.amount / 12.0;  // 12 months in a year
-          break;
-
-          case "bi-yearly":
-            result += subscription.amount / (12.0 * 2);
-          break;
-        }
-      }
-      return result;
-    }
-  },
-  {
-    description: "cost per year",
-    getResult: (subscriptions) => {
-      let result = 0.0;
-      for (let i = 0; i < subscriptions.length; i++) {
-        const subscription = subscriptions[i]!;
-        switch (subscription.frequency) {
-          case "weekly":
-            result += subscription.amount * 52.0;   // around 52 weeks in a year
-          break;
-          
-          case "bi-weekly":
-            result += subscription.amount * (52.0 / 2.0);
-          break;
-            
-          case "monthly":
-            result += subscription.amount * 12.0;   // 12 months in a year
-          break;
-
-          case "bi-monthly":
-            result += subscription.amount * (12.0 / 2.0);
-          break;
-
-          case "yearly":
-            result += subscription.amount;
-          break;
-
-          case "bi-yearly":
-            result += subscription.amount / 2.0;
-          break;
-        }
-      }
-      return result;
-    }
-  }
-]
-
+import { columns } from "@/components/subscriptions-table/columns";
+import DataTable from "@/components/subscriptions-table/data-table";
+import { useAtom } from "jotai";
+import { selectedCollectionIdAtom } from "@/lib/stores/selected-collection";
 
 export default function DashboardPage() {
-  const { data: subscriptions, isLoading: isSubsLoading } = api.main.getSubscriptions.useQuery();
+
+  const [selectedCollectionId, setSelectedCollectionId] = useAtom(selectedCollectionIdAtom);
+  const { data: collections } = api.collections.getCollections.useQuery(undefined, { staleTime: Infinity })
+  React.useEffect(() => {
+    if (collections && collections[0]) {
+      setSelectedCollectionId(collections[0].id)
+    }
+  }, [collections])
+
+  const {
+    data: subscriptions, 
+    isInitialLoading: isSubsLoading
+  } = api.subscriptions.getSubscriptionsFromCollection.useQuery(selectedCollectionId || '', { enabled: selectedCollectionId !== null });
   const { subscriptions: selectedSubscriptions } = useSelectedSubscriptions();
   const { categories, isCategoriesLoading } = useCategories()
 
@@ -143,8 +53,8 @@ export default function DashboardPage() {
             <div className="w-full space-y-2 p-2">
               <Skeleton className="h-12" />
               <div className="py-2 space-y-3">
-                {[...Array(7)].map((v) => (
-                  <Skeleton className="h-8" key={v} />
+                {[...Array(7)].map((_, idx) => (
+                  <Skeleton className="h-8" key={idx} />
                 ))}
               </div>
               <Skeleton className="h-12" />
@@ -152,7 +62,7 @@ export default function DashboardPage() {
           )}
           {!isSubsLoading && !subscriptions && <span className="text-xl">No Subscriptions</span>}
           {!isSubsLoading && subscriptions && !isCategoriesLoading && categories && 
-           <DataTable columns={columns} data={subscriptions} categories={categories} />
+            <DataTable columns={columns} data={subscriptions} categories={categories} />
           }
         </div>
 
@@ -178,8 +88,8 @@ export default function DashboardPage() {
                   <AccordionTrigger className="text-md font-semibold px-4 py-2">Monthly Cost Breakdown</AccordionTrigger>
                   {isSubsLoading && (
                     <AccordionContent>
-                      {[...Array(12)].map((v) => (
-                        <div key={v} className="w-full odd:bg-white even:bg-slate-50">
+                      {[...Array(12)].map((_, idx) => (
+                        <div key={idx} className="w-full odd:bg-white even:bg-slate-50">
                           <Skeleton className="w-full" />
                         </div>
                       ))}

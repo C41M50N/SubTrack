@@ -12,12 +12,19 @@ import {
   IconSettings
 } from "@tabler/icons-react"
 
-import { useModalState } from "@/lib/hooks"
+import { useCategories, useCollections, useModalState } from "@/lib/hooks"
 import { Button } from "@/components/ui/button"
 import { Toaster } from "@/components/ui/toaster"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import NewSubscriptionModal from "@/components/subscriptions/NewSubscriptionModal"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuLabel, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu"
 
 type MainLayoutProps = {
   children: React.ReactNode
@@ -28,7 +35,10 @@ export default function MainLayout({ children, title }: MainLayoutProps) {
   const { data: session } = useSession();
   const router = useRouter();
 
-  const newModalState = useModalState();
+  const newSubscriptionModalState = useModalState();
+
+  const { categories, isCategoriesLoading } = useCategories()
+  const { collections, isGetCollectionsLoading } = useCollections()
   
   React.useEffect(() => {
     return () => {
@@ -48,12 +58,12 @@ export default function MainLayout({ children, title }: MainLayoutProps) {
         <link rel="manifest" href="/site.webmanifest" />
       </Head>
       <div className="border-b">
-        <section className="ml-auto mr-auto max-w-[1200px]">
+        <section className="ml-auto mr-auto max-w-[1400px]">
           <div className="flex h-16 items-center px-4">
             <Link href={"/"} className="cursor-pointer">
-              <Image alt="SubTrack" width={265} height={30} src={"/subtrack_full.jpg"} />
+              <Image alt="SubTrack" width={200} height={30} src={"/subtrack_full.jpg"} />
             </Link>
-            <nav className="flex items-center space-x-4 mx-6 pl-8 lg:space-x-6">
+            <nav className="flex items-center space-x-4 mx-6 pl-4 lg:space-x-6">
               <Link href={"/dashboard"} className="text-md font-medium text-muted-foreground transition-colors rounded-md p-2 px-2 flex flex-row gap-1 hover:text-primary">
                 <IconDashboard />
                 Dashboard
@@ -63,14 +73,20 @@ export default function MainLayout({ children, title }: MainLayoutProps) {
                 Settings
               </Link>
             </nav>
-            <div className="ml-auto mr-14">
-              <Button className="gap-2 " onClick={() => {
-                newModalState.setState("open");
-              }}>
-                <IconPlus />
-                Add Subscription
-              </Button>
+
+            <div className="ml-auto"></div>
+
+            <div className="mr-14">
+              {!isCategoriesLoading && !isGetCollectionsLoading && (
+                <Button className="gap-2 " onClick={() => {
+                  newSubscriptionModalState.setState("open");
+                }}>
+                  <IconPlus />
+                  Add Subscription
+                </Button>
+              )}
             </div>
+
             {
               session &&
               <DropdownMenu>
@@ -107,10 +123,10 @@ export default function MainLayout({ children, title }: MainLayoutProps) {
           </div>
         </section>
       </div>
-      <main className="ml-auto mr-auto max-w-[1200px] pb-8 px-6">
+      <main className="ml-auto mr-auto max-w-[1400px] pb-8 px-6">
         {children}
         <Toaster />
-        <NewSubscriptionModal state={newModalState} />
+        <NewSubscriptionModal state={newSubscriptionModalState} categories={categories || []} collections={collections || []} />
       </main>
     </>
   )

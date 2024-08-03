@@ -1,0 +1,27 @@
+version: '3.5'
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      PGDATA: /data/postgres
+    volumes:
+       - db:/data/postgres
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  adminer:
+    image: adminer
+    environment:
+      ADMINER_DESIGN: pepa-linha-dark
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    depends_on:
+      - db
+
+volumes:
+    db:
+    adminer:

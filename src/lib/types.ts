@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { Subscription as SubscriptionDTO } from "@prisma/client"
+import { Collection, Subscription as SubscriptionDTO } from "@prisma/client"
 
 // export const CATEGORIES = ["entertainment", "health", "finance", "productivity"] as const
 export const FREQUENCIES = [
@@ -57,7 +57,8 @@ export const SubscriptionSchema = z.object({
   category: z.string(),
   icon_ref: z.enum(ICONS),
   next_invoice: z.date(),
-  send_alert: z.boolean()
+  send_alert: z.boolean(),
+	collectionId: z.string()
 })
 
 export const SubscriptionSchemaWithId = SubscriptionSchema.merge(z.object({
@@ -68,3 +69,5 @@ export type StatisticItem = {
   description: string
   getResult: (subscriptions: Array<Subscription | DemoSubscription>) => number
 }
+
+export type CollectionDTO = Omit<Collection, 'userId'>;

@@ -30,7 +30,7 @@ export default function SetCancelReminderModal({
   const {
     data: projectName,
     isLoading: isProjectNameLoading
-  } = api.main.getTodoistProjectName.useQuery();
+  } = api.main.getTodoistProjectName.useQuery(undefined, { enabled: session ? session.user.todoistAPIKey !== '' : false });
 
   const {
     mutate: createTodoistReminder,

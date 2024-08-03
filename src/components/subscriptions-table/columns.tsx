@@ -9,7 +9,7 @@ import { IconAlarm, IconDotsVertical, IconPencil, IconTrash } from "@tabler/icon
 
 import { Subscription } from "@/lib/types";
 import { toMoneyString, toXCase } from "@/lib/utils";
-import { useModalState } from "@/lib/hooks";
+import { useCategories, useCollections, useModalState } from "@/lib/hooks";
 
 import {
 	DropdownMenu,
@@ -172,6 +172,8 @@ export const columns: ColumnDef<Subscription>[] = [
       const subscription = row.original;
 
 			const { data: session } = useSession();
+			const { categories } = useCategories();
+			const { collections } = useCollections();
 
 			const deleteModalState = useModalState();
 			const editModalState = useModalState();
@@ -212,7 +214,7 @@ export const columns: ColumnDef<Subscription>[] = [
 						</DropdownMenuContent>
 					</DropdownMenu>
 
-					<EditSubscriptionModal state={editModalState} subscription={subscription} />
+					<EditSubscriptionModal state={editModalState} subscription={subscription} categories={categories || []} collections={collections || []} />
 					<DeleteSubscriptionModal state={deleteModalState} subscription_id={subscription.id} />
 					<SetCancelReminderModal state={setReminderModalState} subscription={subscription} />
 				</>
