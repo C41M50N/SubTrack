@@ -45,7 +45,7 @@ export default function DeleteCollectionModal({ state, collectionId }: Props) {
   })
 
   async function onSubmit() {
-    await deleteCollection(collectionId)
+    await deleteCollection({ collectionId })
     state.setState('closed')
   }
 

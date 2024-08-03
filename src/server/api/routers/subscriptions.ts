@@ -8,7 +8,6 @@ import {
   SubscriptionSchema,
   SubscriptionSchemaWithId,
 } from "@/lib/types"
-import { sleep } from "@/lib/utils"
 
 export const subscriptionsRouter = createTRPCRouter({
   createSubscription: protectedProcedure

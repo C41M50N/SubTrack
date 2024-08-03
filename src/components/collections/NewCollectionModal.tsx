@@ -61,7 +61,7 @@ export default function NewCollectionModal({ state }: Props) {
   })
 
   async function onSubmit(values: z.infer<typeof FormSchema>) {
-    await createCollection(values.title)
+    await createCollection({ collectionTitle: values.title })
     state.setState('closed')
   }
 

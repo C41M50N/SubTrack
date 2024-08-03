@@ -15,12 +15,12 @@ export const collectionsRouter = createTRPCRouter({
     }),
   
   createCollection: protectedProcedure
-    .input(z.string())
-    .mutation(async ({ ctx, input: title }) => {
+    .input(z.object({ collectionTitle: z.string() }))
+    .mutation(async ({ ctx, input }) => {
       await ctx.prisma.collection.create({
         data: {
           userId: ctx.session.user.id,
-          title: title,
+          title: input.collectionTitle,
         }
       })
     }),
@@ -43,8 +43,8 @@ export const collectionsRouter = createTRPCRouter({
     }),
 
   deleteCollection: protectedProcedure
-    .input(z.string())
-    .mutation(async ({ ctx, input: collection_id }) => {
+    .input(z.object({ collectionId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
       const count = await ctx.prisma.collection.count()
       if (count === 1) {
         throw new Error("You must keep at least one collection")
@@ -52,7 +52,7 @@ export const collectionsRouter = createTRPCRouter({
 
       await ctx.prisma.collection.delete({
         where: {
-          id: collection_id,
+          id: input.collectionId,
           userId: ctx.session.user.id,
         }
       })

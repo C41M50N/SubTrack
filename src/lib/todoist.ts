@@ -1,4 +1,4 @@
-import dayjs, { Dayjs } from "dayjs"
+import dayjs from "dayjs"
 import { TodoistApi } from "@doist/todoist-api-typescript"
 
 export const TodoistColors = [
