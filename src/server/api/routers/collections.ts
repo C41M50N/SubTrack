@@ -47,7 +47,7 @@ export const collectionsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input: collection_id }) => {
       const count = await ctx.prisma.collection.count()
       if (count === 1) {
-        throw new Error("You must keep at least collection")
+        throw new Error("You must keep at least one collection")
       }
 
       await ctx.prisma.collection.delete({
