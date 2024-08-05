@@ -1,10 +1,7 @@
 import React from "react"
 import { api } from "@/utils/api";
-import { useSelectedSubscriptions } from "@/lib/stores";
-import { getNextNMonths, toMoneyString } from "@/lib/utils";
-import { getMonthCost } from "@/lib/helper";
+import { getMonthCost, getNextNMonths } from "@/features/common/calculations-helpers";
 import { useCategories } from "@/lib/hooks";
-import { Statistics } from "@/lib/subscription-stats";
 import MainLayout from "@/layouts/main"
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -20,7 +17,9 @@ import SkeletonStatisticCard from "@/components/subscriptions/SkeletonStatisticC
 import { columns } from "@/components/subscriptions-table/columns";
 import DataTable from "@/components/subscriptions-table/data-table";
 import { useAtom } from "jotai";
-import { selectedCollectionIdAtom } from "@/lib/stores/selected-collection";
+import { selectedSubscriptionsAtom, selectedCollectionIdAtom } from "@/features/common/atoms";
+import { toMoneyString } from "@/utils";
+import { Statistics } from "@/features/common/subscription-stats";
 
 export default function DashboardPage() {
 
@@ -36,7 +35,7 @@ export default function DashboardPage() {
     data: subscriptions, 
     isInitialLoading: isSubsLoading
   } = api.subscriptions.getSubscriptionsFromCollection.useQuery(selectedCollectionId || '', { enabled: selectedCollectionId !== null });
-  const { subscriptions: selectedSubscriptions } = useSelectedSubscriptions();
+  const [selectedSubscriptions,] = useAtom(selectedSubscriptionsAtom);
   const { categories, isCategoriesLoading } = useCategories()
 
   return (

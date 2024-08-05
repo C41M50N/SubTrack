@@ -3,17 +3,15 @@ import {
   createTRPCRouter,
   protectedProcedure,
 } from "@/server/api/trpc"
-import { 
+import {
   type Subscription,
   SubscriptionSchema,
-  SubscriptionSchemaWithId,
-} from "@/lib/types"
+  SubscriptionWithoutIdSchema
+} from "@/features/subscriptions/types"
 
 export const subscriptionsRouter = createTRPCRouter({
   createSubscription: protectedProcedure
-    .input(
-      SubscriptionSchema
-    )
+    .input(SubscriptionWithoutIdSchema)
     .mutation(async ({ ctx, input }) => {
       console.log(`Creating new subscription for <${ctx.session.user.name}>: ${JSON.stringify(input)}`)
       await ctx.prisma.subscription.create({
@@ -44,7 +42,7 @@ export const subscriptionsRouter = createTRPCRouter({
     }),
 
   updateSubscription: protectedProcedure
-    .input(SubscriptionSchemaWithId)
+    .input(SubscriptionSchema)
     .mutation(async ({ ctx, input }) => {
       await ctx.prisma.subscription.update({ where: { id: input.id, userId: ctx.session.user.id }, data: input })
     }),

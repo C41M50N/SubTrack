@@ -3,7 +3,7 @@ import {
   createTRPCRouter,
   protectedProcedure,
 } from "@/server/api/trpc";
-import { sleep } from "@/lib/utils";
+import { sleep } from "@/utils";
 import {
   createReminder,
   createTodoistAPI,

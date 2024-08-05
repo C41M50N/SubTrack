@@ -1,7 +1,19 @@
-import dayjs from "dayjs";
-import { Subscription } from "./types";
+import dayjs from "dayjs"
+import { SubscriptionFrequency } from "./types"
+import { Subscription } from "../subscriptions/types"
 
-export function stepByFrequency(d: dayjs.Dayjs, frequency: Subscription["frequency"]): dayjs.Dayjs {
+type Month = 'January' | 'February' | 'March' | 'April' | 'May' | 'June' | 'July' | 'August' | 'September' | 'October' | 'November' | 'December'
+type Year = number
+export function getNextNMonths(n: number) {
+  const res: Array<[Month, number, Year]> = []
+  for (let offset = 0; offset < n; offset++) {
+    const day = dayjs().add(1 + offset, 'month')
+    res.push([day.format('MMMM') as Month, day.month(), day.year()])
+  }
+  return res;
+}
+
+function stepByFrequency(d: dayjs.Dayjs, frequency: SubscriptionFrequency): dayjs.Dayjs {
   let res: [number, dayjs.ManipulateType] = [1, "week"];
   switch (frequency) {
     case "weekly":

@@ -1,12 +1,13 @@
 import React from "react";
 import dynamic from "next/dynamic";
 import { Separator } from "@radix-ui/react-select";
-import { DemoSubscription, StatisticItem } from "@/lib/types";
-import { useDemoSubscriptions, useSelectedDemoSubscriptions } from "@/lib/stores/demo-subscriptions";
 import DemoLayout from "@/layouts/demo";
 import DemoDataTable from "@/components/demo-subscriptions-table/data-table";
 import { columns as demoColumns } from "@/components/demo-subscriptions-table/columns";
 import StatisticCard from "@/components/subscriptions/StatisticCard";
+import { StatisticItem } from "@/features/common/types";
+import { DemoSubscription } from "@/features/demo-subscriptions/types";
+import { useDemoSubscriptions, useSelectedDemoSubscriptions } from "@/features/demo-subscriptions/stores";
 
 const Statistics: Array<StatisticItem> = [
   {

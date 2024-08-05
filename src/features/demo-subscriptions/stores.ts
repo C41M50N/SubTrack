@@ -2,7 +2,7 @@ import { create } from "zustand"
 import { persist, createJSONStorage } from "zustand/middleware";
 import dayjs from "dayjs";
 import { v4 as uuidv4 } from "uuid";
-import { DemoSubscription } from "../types";
+import { DemoSubscription } from "./types";
 
 type State = {
   subscriptions: Array<DemoSubscription>;

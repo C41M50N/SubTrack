@@ -8,10 +8,10 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { IconCalendarEvent } from "@tabler/icons-react"
 import { Check, ChevronsUpDown } from "lucide-react"
 
-import { cn, sleep, toXCase } from "@/lib/utils"
-import { useDemoSubscriptions } from "@/lib/stores/demo-subscriptions"
+import { cn, sleep, toProperCase } from "@/utils"
 import { type ModalState } from "@/lib/hooks"
-import { DEMO_CATEGORIES, FREQUENCIES, ICONS, SubscriptionSchema } from "@/lib/types"
+import { DEMO_CATEGORIES } from "@/features/demo-subscriptions/types"
+import { useDemoSubscriptions } from "@/features/demo-subscriptions/stores"
 
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -52,6 +52,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { SubscriptionWithoutIdSchema } from "@/features/subscriptions/types"
+import { FREQUENCIES, ICONS } from "@/features/common/types"
 
 type NewSubscriptionModalProps = {
   state: ModalState
@@ -62,8 +64,8 @@ export default function NewSubscriptionModal({ state }: NewSubscriptionModalProp
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const { addSubscription: addDemoSubscription } = useDemoSubscriptions()
 
-  const form = useForm<z.infer<typeof SubscriptionSchema>>({
-    resolver: zodResolver(SubscriptionSchema),
+  const form = useForm<z.infer<typeof SubscriptionWithoutIdSchema>>({
+    resolver: zodResolver(SubscriptionWithoutIdSchema),
     defaultValues: {
       name: "",
       amount: 10.00,
@@ -74,7 +76,7 @@ export default function NewSubscriptionModal({ state }: NewSubscriptionModalProp
     }
   })
 
-  async function onSubmit(values: z.infer<typeof SubscriptionSchema>) {
+  async function onSubmit(values: z.infer<typeof SubscriptionWithoutIdSchema>) {
     setIsLoading(true)
     await sleep(500)
     setIsLoading(false)
@@ -127,10 +129,10 @@ export default function NewSubscriptionModal({ state }: NewSubscriptionModalProp
                             >
                               <span className="flex flex-row items-center gap-2">
                                 { field.value.includes('.') 
-                                  ? <Image alt={toXCase(field.value)} src={`/${field.value}`} height={16} width={16} className="w-[16px] h-[16px]" />
-                                  : <Image alt={toXCase(field.value)} src={`/${field.value}.svg`} height={16} width={16} className="w-[16px] h-[16px]" /> 
+                                  ? <Image alt={toProperCase(field.value)} src={`/${field.value}`} height={16} width={16} className="w-[16px] h-[16px]" />
+                                  : <Image alt={toProperCase(field.value)} src={`/${field.value}.svg`} height={16} width={16} className="w-[16px] h-[16px]" /> 
                                 }
-                                {toXCase(field.value)}
+                                {toProperCase(field.value)}
                               </span>
                               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>
@@ -159,10 +161,10 @@ export default function NewSubscriptionModal({ state }: NewSubscriptionModalProp
                                       />
                                   <span className="flex flex-row items-center gap-2">
                                     { icon.includes('.') 
-                                      ? <Image alt={toXCase(icon)} src={`/${icon}`} height={16} width={16} className="w-[16px] h-[16px]" />
-                                      : <Image alt={toXCase(icon)} src={`/${icon}.svg`} height={16} width={16} className="w-[16px] h-[16px]" />
+                                      ? <Image alt={toProperCase(icon)} src={`/${icon}`} height={16} width={16} className="w-[16px] h-[16px]" />
+                                      : <Image alt={toProperCase(icon)} src={`/${icon}.svg`} height={16} width={16} className="w-[16px] h-[16px]" />
                                     }
-                                    {toXCase(icon)}
+                                    {toProperCase(icon)}
                                   </span>
                                 </CommandItem>
                               ))}

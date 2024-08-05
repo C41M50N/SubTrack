@@ -9,9 +9,8 @@ import { IconCalendarEvent } from "@tabler/icons-react"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { Collection } from "@prisma/client"
 
-import { cn, toXCase } from "@/lib/utils"
+import { cn, toProperCase } from "@/utils"
 import { ModalState, useCategories, useCollections, useCreateSubscription } from "@/lib/hooks"
-import { FREQUENCIES, ICONS, SubscriptionSchema } from "@/lib/types"
 
 import { LoadingSpinner } from "@/components/common/loading-spinner"
 import { Button } from "@/components/ui/button"
@@ -53,6 +52,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { SubscriptionWithoutIdSchema } from "@/features/subscriptions/types"
+import { FREQUENCIES, ICONS } from "@/features/common/types"
 
 type NewSubscriptionModalProps = {
   state: ModalState;
@@ -64,8 +65,8 @@ export default function NewSubscriptionModal({ state, categories, collections }:
 
   const { createSubscription, isCreateSubscriptionLoading } = useCreateSubscription()
 
-  const form = useForm<z.infer<typeof SubscriptionSchema>>({
-    resolver: zodResolver(SubscriptionSchema),
+  const form = useForm<z.infer<typeof SubscriptionWithoutIdSchema>>({
+    resolver: zodResolver(SubscriptionWithoutIdSchema),
     defaultValues: {
       name: "",
       amount: 10.00,
@@ -77,7 +78,7 @@ export default function NewSubscriptionModal({ state, categories, collections }:
     }
   })
 
-  async function onSubmit(values: z.infer<typeof SubscriptionSchema>) {
+  async function onSubmit(values: z.infer<typeof SubscriptionWithoutIdSchema>) {
     await createSubscription(values)
     form.reset()
     state.setState("closed")
@@ -126,10 +127,10 @@ export default function NewSubscriptionModal({ state, categories, collections }:
                               >
                                 <span className="flex flex-row items-center gap-2">
                                   { field.value.includes('.') 
-                                    ? <Image alt={toXCase(field.value)} src={`/${field.value}`} height={16} width={16} className="w-[16px] h-[16px]" />
-                                    : <Image alt={toXCase(field.value)} src={`/${field.value}.svg`} height={16} width={16} className="w-[16px] h-[16px]" /> 
+                                    ? <Image alt={toProperCase(field.value)} src={`/${field.value}`} height={16} width={16} className="w-[16px] h-[16px]" />
+                                    : <Image alt={toProperCase(field.value)} src={`/${field.value}.svg`} height={16} width={16} className="w-[16px] h-[16px]" /> 
                                   }
-                                  {toXCase(field.value)}
+                                  {toProperCase(field.value)}
                                 </span>
                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                               </Button>
@@ -158,10 +159,10 @@ export default function NewSubscriptionModal({ state, categories, collections }:
                                         />
                                     <span className="flex flex-row items-center gap-2">
                                       { icon.includes('.') 
-                                        ? <Image alt={toXCase(icon)} src={`/${icon}`} height={16} width={16} className="w-[16px] h-[16px]" />
-                                        : <Image alt={toXCase(icon)} src={`/${icon}.svg`} height={16} width={16} className="w-[16px] h-[16px]" />
+                                        ? <Image alt={toProperCase(icon)} src={`/${icon}`} height={16} width={16} className="w-[16px] h-[16px]" />
+                                        : <Image alt={toProperCase(icon)} src={`/${icon}.svg`} height={16} width={16} className="w-[16px] h-[16px]" />
                                       }
-                                      {toXCase(icon)}
+                                      {toProperCase(icon)}
                                     </span>
                                   </CommandItem>
                                 ))}

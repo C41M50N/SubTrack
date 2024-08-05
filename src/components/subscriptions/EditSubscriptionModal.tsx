@@ -8,9 +8,8 @@ import { Check, ChevronsUpDown } from "lucide-react"
 import { IconCalendarEvent, IconDeviceFloppy } from "@tabler/icons-react"
 
 import dayjs from "@/lib/dayjs"
-import { cn, sleep, toXCase } from "@/lib/utils"
+import { cn, sleep, toProperCase } from "@/utils"
 import { ModalState, useCategories, useUpdateSubscription } from "@/lib/hooks"
-import { FREQUENCIES, ICONS, SubscriptionSchema, Subscription, DEMO_CATEGORIES, DemoSubscription } from "@/lib/types"
 
 import { LoadingSpinner } from "@/components/common/loading-spinner"
 import {
@@ -52,6 +51,8 @@ import { Calendar } from "@/components/ui/calendar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Subscription, SubscriptionWithoutIdSchema } from "@/features/subscriptions/types"
+import { FREQUENCIES, ICONS } from "@/features/common/types"
 
 type EditSubscriptionModalProps = {
   state: ModalState;
@@ -64,12 +65,12 @@ export default function EditSubscriptionModal({ state, subscription, categories,
 
   const { updateSubscription, isUpdateSubscriptionLoading } = useUpdateSubscription()
 
-  const form = useForm<z.infer<typeof SubscriptionSchema>>({
-    resolver: zodResolver(SubscriptionSchema),
+  const form = useForm<z.infer<typeof SubscriptionWithoutIdSchema>>({
+    resolver: zodResolver(SubscriptionWithoutIdSchema),
     defaultValues: subscription,
   })
 
-  async function onSubmit(values: z.infer<typeof SubscriptionSchema>) {
+  async function onSubmit(values: z.infer<typeof SubscriptionWithoutIdSchema>) {
     await updateSubscription({ id: subscription.id, ...values })
     state.setState("closed")
   }
@@ -117,10 +118,10 @@ export default function EditSubscriptionModal({ state, subscription, categories,
                                 >
                                   <span className="flex flex-row items-center gap-2">
                                     { field.value.includes('.') 
-                                      ? <Image alt={toXCase(field.value)} src={`/${field.value}`} height={16} width={16} className="w-[16px] h-[16px]" />
-                                      : <Image alt={toXCase(field.value)} src={`/${field.value}.svg`} height={16} width={16} className="w-[16px] h-[16px]" /> 
+                                      ? <Image alt={toProperCase(field.value)} src={`/${field.value}`} height={16} width={16} className="w-[16px] h-[16px]" />
+                                      : <Image alt={toProperCase(field.value)} src={`/${field.value}.svg`} height={16} width={16} className="w-[16px] h-[16px]" /> 
                                     }
-                                    {toXCase(field.value)}
+                                    {toProperCase(field.value)}
                                   </span>
                                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                 </Button>
@@ -149,10 +150,10 @@ export default function EditSubscriptionModal({ state, subscription, categories,
                                           />
                                       <span className="flex flex-row items-center gap-2">
                                         { icon.includes('.') 
-                                          ? <Image alt={toXCase(icon)} src={`/${icon}`} height={16} width={16} className="w-[16px] h-[16px]" />
-                                          : <Image alt={toXCase(icon)} src={`/${icon}.svg`} height={16} width={16} className="w-[16px] h-[16px]" />
+                                          ? <Image alt={toProperCase(icon)} src={`/${icon}`} height={16} width={16} className="w-[16px] h-[16px]" />
+                                          : <Image alt={toProperCase(icon)} src={`/${icon}.svg`} height={16} width={16} className="w-[16px] h-[16px]" />
                                         }
-                                        {toXCase(icon)}
+                                        {toProperCase(icon)}
                                       </span>
                                     </CommandItem>
                                   ))}

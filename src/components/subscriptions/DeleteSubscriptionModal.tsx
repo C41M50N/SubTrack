@@ -1,6 +1,5 @@
 import React from "react"
 import { IconTrash } from "@tabler/icons-react"
-import { type Subscription } from "@/lib/types"
 import { useDeleteSubscription, type ModalState } from "@/lib/hooks"
 import { Button } from "@/components/ui/button"
 import {
@@ -11,10 +10,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { SubscriptionId } from "@/features/subscriptions/types"
 
 type DeleteSubscriptionModalProps = {
   state: ModalState
-  subscription_id: Subscription["id"]
+  subscription_id: SubscriptionId
 }
 
 export default function DeleteSubscriptionModal ({ state, subscription_id }: DeleteSubscriptionModalProps) {

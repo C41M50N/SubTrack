@@ -8,7 +8,7 @@ import { ArrowUpDown } from "lucide-react"
 import { IconAlarm, IconDotsVertical, IconPencil, IconTrash } from "@tabler/icons-react"
 
 import { Subscription } from "@/lib/types";
-import { toMoneyString, toXCase } from "@/lib/utils";
+import { toMoneyString, toProperCase } from "@/utils";
 import { useCategories, useCollections, useModalState } from "@/lib/hooks";
 
 import {
@@ -87,8 +87,8 @@ export const columns: ColumnDef<Subscription>[] = [
 			return (
 				<div className="flex flex-row space-x-3 items-center">
 					{ icon_ref.includes('.') 
-						? <Image alt={toXCase(icon_ref)} src={`/${icon_ref}`} height={24} width={24} className="w-[24px] h-[24px]" />
-						: <Image alt={toXCase(icon_ref)} src={`/${icon_ref}.svg`} height={24} width={24} className="w-[24px] h-[24px]" />
+						? <Image alt={toProperCase(icon_ref)} src={`/${icon_ref}`} height={24} width={24} className="w-[24px] h-[24px]" />
+						: <Image alt={toProperCase(icon_ref)} src={`/${icon_ref}.svg`} height={24} width={24} className="w-[24px] h-[24px]" />
 					}
 					<div className="text-lg font-medium">{row.original.name}</div>
 				</div>

@@ -15,7 +15,7 @@ import { api } from "@/utils/api";
 import { ScrollArea } from "../ui/scroll-area";
 import { LoadingSpinner } from "../common/loading-spinner";
 import { Separator } from "../ui/separator";
-import { toXCase } from '@/lib/utils';
+import { toProperCase } from '@/utils';
 import { toast } from '../ui/use-toast';
 
 type Props = {
@@ -72,8 +72,8 @@ export default function DeleteCollectionModal({ state, collectionId }: Props) {
                 <div key={sub.id} className='first:pt-3'>
                   <div className="flex flex-row space-x-3 items-center">
                     { sub.icon_ref.includes('.') 
-                      ? <Image alt={toXCase(sub.icon_ref)} src={`/${sub.icon_ref}`} height={18} width={18} className="w-[18px] h-[18px]" />
-                      : <Image alt={toXCase(sub.icon_ref)} src={`/${sub.icon_ref}.svg`} height={18} width={18} className="w-[18px] h-[18px]" />
+                      ? <Image alt={toProperCase(sub.icon_ref)} src={`/${sub.icon_ref}`} height={18} width={18} className="w-[18px] h-[18px]" />
+                      : <Image alt={toProperCase(sub.icon_ref)} src={`/${sub.icon_ref}.svg`} height={18} width={18} className="w-[18px] h-[18px]" />
                     }
                     <div className="text-base font-medium">{sub.name}</div>
                   </div>

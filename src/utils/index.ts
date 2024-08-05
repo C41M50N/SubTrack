@@ -1,4 +1,3 @@
-import dayjs from "dayjs"
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
  
@@ -6,7 +5,11 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function toXCase(str: string): string {
+export async function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+export function toProperCase(str: string): string {
   if (str.includes('.')) {
     str = str.split('.')[0]!
   }
@@ -25,19 +28,4 @@ export function toMoneyString(amount: number): string {
     style: "currency",
     currency: "USD",
   }).format(amount)
-}
-
-export async function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-type Month = 'January' | 'February' | 'March' | 'April' | 'May' | 'June' | 'July' | 'August' | 'September' | 'October' | 'November' | 'December'
-type Year = number
-export function getNextNMonths(n: number) {
-  const res: Array<[Month, number, Year]> = []
-  for (let offset = 0; offset < n; offset++) {
-    const day = dayjs().add(1 + offset, 'month')
-    res.push([day.format('MMMM') as Month, day.month(), day.year()])
-  }
-  return res;
 }

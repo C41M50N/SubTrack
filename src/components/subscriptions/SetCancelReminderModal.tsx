@@ -1,6 +1,4 @@
 import { ModalState } from "@/lib/hooks";
-import { Subscription } from "@/lib/types";
-
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,6 +12,7 @@ import { useSession } from "next-auth/react";
 import { LoadingSpinner } from "@/components/common/loading-spinner";
 import { api } from "@/utils/api";
 import dayjs from "dayjs";
+import { Subscription } from "@/features/subscriptions/types";
 
 
 type SetCancelReminderModalProps = {

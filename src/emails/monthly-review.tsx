@@ -13,7 +13,7 @@ import {
 } from "@react-email/components"
 import { Subscription } from "@prisma/client";
 import dayjs from "@/lib/dayjs";
-import { toMoneyString } from "@/lib/utils";
+import { toMoneyString } from "@/utils";
 
 type MonthlyReviewEmailProps = {
   user_name: string;

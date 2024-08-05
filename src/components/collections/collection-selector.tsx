@@ -22,9 +22,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import NewCollectionModal from "./NewCollectionModal"
 import DeleteCollectionModal from "./DeleteCollectionModal"
 import EditCollectionModal from "./EditCollectionModal"
-import { CollectionDTO } from "@/lib/types"
+import { CollectionWithoutUserId } from "@/features/collections/types"
 import { useAtom } from "jotai"
-import { selectedCollectionIdAtom } from "@/lib/stores/selected-collection"
+import { selectedCollectionIdAtom } from "@/features/common/atoms"
 
 export default function CollectionSelector() {
 
@@ -36,21 +36,20 @@ export default function CollectionSelector() {
   const editCollectionModalState = useModalState();
   const deleteCollectionModalState = useModalState();
 
-  const [selectedCollection, setSelectedCollection] = React.useState<CollectionDTO | null>(null);
+  const [selectedCollection, setSelectedCollection] = React.useState<CollectionWithoutUserId | null>(null);
 
-  function openEditModal(collection: CollectionDTO) {
+  function openEditModal(collection: CollectionWithoutUserId) {
     setSelectedCollection(collection)
     editCollectionModalState.setState('open')
   }
 
-  function openDeleteModal(collection: CollectionDTO) {
+  function openDeleteModal(collection: CollectionWithoutUserId) {
     setSelectedCollection(collection)
     deleteCollectionModalState.setState('open')
   }
 
   return (
     <div>
-      {/* <span className="text-sm font-semibold ml-0.5">Collection</span> */}
       {!collections && (
         <Skeleton className="w-[160px] lg:w-[200px] h-8" />
       )}

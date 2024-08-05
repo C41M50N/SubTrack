@@ -1,8 +1,7 @@
 import React from "react"
 import { IconTrash } from "@tabler/icons-react"
-import { sleep } from "@/lib/utils"
+import { sleep } from "@/utils"
 import { type ModalState } from "@/lib/hooks"
-import { useDemoSubscriptions } from "@/lib/stores/demo-subscriptions"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -12,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { useDemoSubscriptions } from "@/features/demo-subscriptions/stores"
 
 type DeleteSubscriptionModalProps = {
   state: ModalState

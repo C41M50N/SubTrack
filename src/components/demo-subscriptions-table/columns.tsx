@@ -6,8 +6,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
 import { IconDotsVertical, IconPencil, IconTrash } from "@tabler/icons-react"
 
-import { DemoSubscription, Subscription } from "@/lib/types";
-import { toMoneyString, toXCase } from "@/lib/utils";
+import { toMoneyString, toProperCase } from "@/utils";
 import { useModalState } from "@/lib/hooks";
 
 import {
@@ -22,7 +21,9 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import DemoEditSubscriptionModal from "@/components/demo-subscriptions/EditSubscriptionModal";
 import DemoDeleteSubscriptionModal from "@/components/demo-subscriptions/DeleteSubscriptionModal";
-import { useDemoSubscriptions, useSelectedDemoSubscriptions } from "@/lib/stores/demo-subscriptions";
+import { DemoSubscription } from "@/features/demo-subscriptions/types";
+import { useDemoSubscriptions, useSelectedDemoSubscriptions } from "@/features/demo-subscriptions/stores";
+import { SubscriptionFrequency } from "@/features/common/types";
 
 const roboto = Roboto({
   weight: ['400', '500', '700'],
@@ -99,8 +100,8 @@ export const columns: ColumnDef<DemoSubscription>[] = [
 			return (
 				<div className="flex flex-row space-x-3 items-center">
 					{ icon_ref.includes('.') 
-						? <Image alt={toXCase(icon_ref)} src={`/${icon_ref}`} height={24} width={24} className="w-[24px] h-[24px]" />
-						: <Image alt={toXCase(icon_ref)} src={`/${icon_ref}.svg`} height={24} width={24} className="w-[24px] h-[24px]" />
+						? <Image alt={toProperCase(icon_ref)} src={`/${icon_ref}`} height={24} width={24} className="w-[24px] h-[24px]" />
+						: <Image alt={toProperCase(icon_ref)} src={`/${icon_ref}.svg`} height={24} width={24} className="w-[24px] h-[24px]" />
 					}
 					<div className="text-lg font-medium">{row.original.name}</div>
 				</div>	
@@ -114,7 +115,7 @@ export const columns: ColumnDef<DemoSubscription>[] = [
 			const amount = parseFloat(row.getValue("amount"))
 			const formatted = toMoneyString(amount);
 
-			const toX = (data: Subscription["frequency"]): string => {
+			const toX = (data: SubscriptionFrequency): string => {
 				switch (data) {
 					case "weekly":
 						return "week"

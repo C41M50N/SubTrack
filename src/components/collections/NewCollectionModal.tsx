@@ -21,8 +21,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
-import { useAtom } from "jotai";
-import { selectedCollectionIdAtom } from "@/lib/stores/selected-collection";
 
 type Props = {
   state: ModalState;

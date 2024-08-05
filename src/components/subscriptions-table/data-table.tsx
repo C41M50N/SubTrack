@@ -24,9 +24,9 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import DataTableToolbar from "./data-table-toolbar"
-import { useSelectedSubscriptions } from "@/lib/stores"
 import { Subscription } from "@/lib/types"
-import CollectionSelector from "../collections/collection-selector"
+import { useAtom } from "jotai"
+import { selectedSubscriptionsAtom } from "@/features/common/atoms"
 
 interface DataTableProps {
   columns: ColumnDef<Subscription>[]
@@ -64,7 +64,7 @@ export default function DataTable({
     },
   })
 
-  const { setSubscriptions: setSelectedSubscriptions } = useSelectedSubscriptions()
+  const [_, setSelectedSubscriptions] = useAtom(selectedSubscriptionsAtom)
 
   function onTableChange() {
     const selectedRows = table.getFilteredSelectedRowModel().rows.length > 0
@@ -86,10 +86,7 @@ export default function DataTable({
 
   return (
     <div className="space-y-4">
-      {/* <div className="w-full flex flex-row space-x-1"> */}
-        {/* <CollectionSelector /> */}
-        <DataTableToolbar table={table} categories={categories} />
-      {/* </div> */}
+      <DataTableToolbar table={table} categories={categories} />
       
       <div className="rounded-md border">
         <Table>

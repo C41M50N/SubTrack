@@ -1,7 +1,6 @@
 "use client"
 import { mkConfig, generateCsv, download } from "export-to-csv";
 import { CircleEllipsisIcon } from "lucide-react"
-import { useSelectedSubscriptions } from "@/lib/stores"
 import dayjs from "@/lib/dayjs"
 import {
   DropdownMenu,
@@ -13,10 +12,12 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
+import { useAtom } from "jotai";
+import { selectedSubscriptionsAtom } from "@/features/common/atoms";
 
 export default function MoreOptions() {
 
-  const { subscriptions } = useSelectedSubscriptions()
+  const [subscriptions, ] = useAtom(selectedSubscriptionsAtom)
 
   function exportSubscriptionsToCSV() {
     const csvConfig = mkConfig({
