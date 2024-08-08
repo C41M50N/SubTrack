@@ -46,6 +46,12 @@ model VerificationToken {
 }
 
 
+enum LicenseType {
+    FREE
+    BASIC
+    PRO
+    SUPER
+}
 
 model User {
     id            String    @id @default(cuid())
@@ -56,6 +62,7 @@ model User {
     accounts      Account[]
     sessions      Session[]
 
+    licenseType   LicenseType @default(FREE)
     categories    String[] @default(["entertainment", "productivity", "finance"])
     collections   Collection[]
     subscriptions Subscription[]
