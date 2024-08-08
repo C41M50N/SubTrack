@@ -1,20 +1,25 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { authOptions } from "@/server/auth";
-import { IconExternalLink } from "@tabler/icons-react";
+import { IconArrowBadgeRight, IconArrowBadgeRightFilled, IconArrowBigRightFilled, IconExternalLink } from "@tabler/icons-react";
 import type {
 	GetServerSidePropsContext,
 	InferGetServerSidePropsType,
 } from "next";
 import { getServerSession } from "next-auth/next";
-import { getProviders, signIn } from "next-auth/react";
+import { getProviders, signIn, useSession } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function SignInPage({
 	provider,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+
+	const { data: session } = useSession()
+	const router = useRouter()
+
 	return (
 		<>
 			<Head>
@@ -84,21 +89,35 @@ export default function SignInPage({
 
 					<Separator orientation="vertical" className="h-2/5 bg-gray-500" />
 
-					<Button
-						className="ml-5 bg-black hover:bg-black/80 flex flex-row gap-4"
-						variant="default"
-						size="lg"
-						onClick={() => signIn(provider.id)}
-					>
-						<Image
-							alt="Google Icon"
-							src="/google.svg"
-							width={1}
-							height={1}
-							className="w-6 h-6"
-						/>
-						<span className="font-semibold text-lg">Sign In with Google</span>
-					</Button>
+					<div className="ml-5" />
+
+					{session === null && (
+						<Button
+							className="bg-black hover:bg-black/80 flex flex-row gap-4"
+							variant="default"
+							size="lg"
+							onClick={() => signIn(provider.id)}
+						>
+							<Image
+								alt="Google Icon"
+								src="/google.svg"
+								width={1}
+								height={1}
+								className="w-6 h-6"
+							/>
+							<span className="font-semibold text-lg">Sign In with Google</span>
+						</Button>
+					)}
+					{session !== null && (
+						<Button
+							variant="default"
+							size="lg"
+							onClick={() => router.push('/dashboard')}
+						>
+							<span className="font-semibold text-lg">Go to Dashboard</span>
+							<IconArrowBigRightFilled className="ml-3" size={20} />
+						</Button>
+					)}
 				</header>
 
 				<section className="pt-24 mx-auto flex flex-col items-center justify-center gap-9 w-[720px]">
@@ -112,7 +131,7 @@ export default function SignInPage({
 				</section>
 
 				<section className="pt-24 pb-14 mx-auto max-w-[1200px] mb-auto px-8 2xl:px-0">
-					<div className="border-[5px] border-black/70 rounded-xl">
+					<div className="border-[5px] pb-1 px-[1px] border-black/70 rounded-xl">
 						<Image
 							className="mt-1"
 							src={"/dashboard.png"}
@@ -143,15 +162,6 @@ export default function SignInPage({
 }
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-	const session = await getServerSession(context.req, context.res, authOptions);
-
-	// If the user is already logged in, redirect.
-	// Note: Make sure not to redirect to the same page
-	// To avoid an infinite loop!
-	if (session) {
-		return { redirect: { destination: "/dashboard" } };
-	}
-
 	const providers = await getProviders();
 
 	return {
