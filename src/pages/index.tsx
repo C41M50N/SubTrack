@@ -100,7 +100,7 @@ export default function SignInPage({
 							className="bg-black hover:bg-black/80 flex flex-row gap-4"
 							variant="default"
 							size="lg"
-							onClick={() => signIn(provider.id)}
+							onClick={() => signIn(provider.id, { callbackUrl: '/dashboard' })}
 						>
 							<Image
 								alt="Google Icon"
