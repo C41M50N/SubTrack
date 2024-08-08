@@ -76,6 +76,7 @@ export const columns: ColumnDef<Subscription>[] = [
 			return (
 				<Button
 					variant="ghost"
+					className="-ml-4"
 					onClick={() => {
 						column.toggleSorting(false);
 					}}
@@ -166,6 +167,7 @@ export const columns: ColumnDef<Subscription>[] = [
 			return (
 				<Button
 					variant="ghost"
+					className="-ml-4"
 					onClick={() => {
 						column.toggleSorting(false); // orders subscriptions by closest `next_invoice`
 					}}
