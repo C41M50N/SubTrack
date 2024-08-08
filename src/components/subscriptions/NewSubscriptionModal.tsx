@@ -60,6 +60,8 @@ import {
 } from "@/components/ui/select";
 import { FREQUENCIES, ICONS } from "@/features/common/types";
 import { SubscriptionWithoutIdSchema } from "@/features/subscriptions/types";
+import { useAtom } from "jotai";
+import { selectedCollectionIdAtom } from "@/features/common/atoms";
 
 type NewSubscriptionModalProps = {
 	state: ModalState;
@@ -75,6 +77,8 @@ export default function NewSubscriptionModal({
 	const { createSubscription, isCreateSubscriptionLoading } =
 		useCreateSubscription();
 
+	const [selectedCollectionId, _] = useAtom(selectedCollectionIdAtom);
+
 	const form = useForm<z.infer<typeof SubscriptionWithoutIdSchema>>({
 		resolver: zodResolver(SubscriptionWithoutIdSchema),
 		defaultValues: {
@@ -84,9 +88,18 @@ export default function NewSubscriptionModal({
 			icon_ref: "default",
 			next_invoice: new Date(),
 			send_alert: true,
-			collectionId: undefined,
 		},
 	});
+
+	React.useEffect(() => {
+		if (categories[0]) {
+			form.setValue('category', categories[0])
+		}
+
+		if (selectedCollectionId) {
+			form.setValue('collectionId', selectedCollectionId)
+		}
+	}, [state])
 
 	async function onSubmit(values: z.infer<typeof SubscriptionWithoutIdSchema>) {
 		await createSubscription(values);

@@ -67,7 +67,7 @@ export default function EditCollectionModal({
 
 	React.useEffect(() => {
 		form.setValue('title', collection.title)
-	}, [collection])
+	}, [state])
 
 	async function onSubmit(values: z.infer<typeof FormSchema>) {
 		await editCollectionTitle({
