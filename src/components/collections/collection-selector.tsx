@@ -60,6 +60,7 @@ export default function CollectionSelector() {
 				<Select
 					disabled={isLoading}
 					defaultValue={selectedCollectionId || undefined}
+					value={selectedCollectionId || undefined}
 					onValueChange={(collectionId) => setGlobalCollectionId(collectionId)}
 				>
 					<SelectTrigger className="w-[160px] lg:w-[200px] h-8 text-sm">
@@ -128,8 +129,7 @@ export default function CollectionSelector() {
 			{selectedCollection && (
 				<EditCollectionModal
 					state={editCollectionModalState}
-					collectionId={selectedCollection.id}
-					collectionTitle={selectedCollection.title}
+					collection={selectedCollection}
 				/>
 			)}
 			{selectedCollection && (

@@ -24,7 +24,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { selectedSubscriptionsAtom } from "@/features/common/atoms";
-import type { Subscription } from "@/lib/types";
+import type { Subscription } from "@/features/subscriptions/types";
 import { useAtom } from "jotai";
 import DataTableToolbar from "./data-table-toolbar";
 
@@ -75,12 +75,7 @@ export default function DataTable({
 				? table.getFilteredSelectedRowModel().rows
 				: table.getFilteredRowModel().rows;
 
-		console.log(table.getSelectedRowModel().rows.length);
-
 		const subscriptions = selectedRows.map((row) => row.original);
-
-		console.log(subscriptions.map((sub) => sub.name));
-
 		setSelectedSubscriptions(subscriptions);
 	}
 

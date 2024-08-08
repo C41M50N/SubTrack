@@ -16,18 +16,18 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
+import type { CollectionWithoutUserId } from "@/features/collections/types";
 import type { ModalState } from "@/lib/hooks";
 import { api } from "@/utils/api";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { Collection } from "@prisma/client";
 import { IconDeviceFloppy } from "@tabler/icons-react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 type Props = {
 	state: ModalState;
-	collectionId: Collection["id"];
-	collectionTitle: Collection["title"];
+	collection: CollectionWithoutUserId;
 };
 
 const FormSchema = z.object({
@@ -39,13 +39,12 @@ const FormSchema = z.object({
 
 export default function EditCollectionModal({
 	state,
-	collectionId,
-	collectionTitle,
+	collection
 }: Props) {
 	const form = useForm<z.infer<typeof FormSchema>>({
 		resolver: zodResolver(FormSchema),
 		defaultValues: {
-			title: collectionTitle,
+			title: collection.title,
 		},
 	});
 
@@ -66,10 +65,14 @@ export default function EditCollectionModal({
 		},
 	});
 
+	React.useEffect(() => {
+		form.setValue('title', collection.title)
+	}, [collection])
+
 	async function onSubmit(values: z.infer<typeof FormSchema>) {
 		await editCollectionTitle({
 			title: values.title,
-			collection_id: collectionId,
+			collection_id: collection.id,
 		});
 		state.setState("closed");
 	}
