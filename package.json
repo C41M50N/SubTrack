@@ -4,14 +4,13 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "op run --env-file='.env' -- next dev",
+    "dev": "next dev",
     "postinstall": "prisma generate",
     "lint": "next lint",
     "start": "next start",
     "email": "email dev --dir ./src/emails",
-    "prisma-studio": "op run --env-file='.env' -- prisma studio",
-    "update-db": "op run --env-file='.env' -- prisma db push",
-    "create-prod-env": "op inject -i .env -o .env.production",
+    "prisma-studio": "prisma studio",
+    "update-db": "prisma db push",
     "format": "biome check --write ./src/"
   },
   "dependencies": {
