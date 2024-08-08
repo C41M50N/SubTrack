@@ -58,10 +58,10 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { selectedCollectionIdAtom } from "@/features/common/atoms";
 import { FREQUENCIES, ICONS } from "@/features/common/types";
 import { SubscriptionWithoutIdSchema } from "@/features/subscriptions/types";
 import { useAtom } from "jotai";
-import { selectedCollectionIdAtom } from "@/features/common/atoms";
 
 type NewSubscriptionModalProps = {
 	state: ModalState;
@@ -93,13 +93,13 @@ export default function NewSubscriptionModal({
 
 	React.useEffect(() => {
 		if (categories[0]) {
-			form.setValue('category', categories[0])
+			form.setValue("category", categories[0]);
 		}
 
 		if (selectedCollectionId) {
-			form.setValue('collectionId', selectedCollectionId)
+			form.setValue("collectionId", selectedCollectionId);
 		}
-	}, [state])
+	}, [state]);
 
 	async function onSubmit(values: z.infer<typeof SubscriptionWithoutIdSchema>) {
 		await createSubscription(values);

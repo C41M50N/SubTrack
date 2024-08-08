@@ -37,10 +37,7 @@ const FormSchema = z.object({
 		.max(30, { message: "Title must be at most 30 characters" }),
 });
 
-export default function EditCollectionModal({
-	state,
-	collection
-}: Props) {
+export default function EditCollectionModal({ state, collection }: Props) {
 	const form = useForm<z.infer<typeof FormSchema>>({
 		resolver: zodResolver(FormSchema),
 		defaultValues: {
@@ -66,8 +63,8 @@ export default function EditCollectionModal({
 	});
 
 	React.useEffect(() => {
-		form.setValue('title', collection.title)
-	}, [state])
+		form.setValue("title", collection.title);
+	}, [state]);
 
 	async function onSubmit(values: z.infer<typeof FormSchema>) {
 		await editCollectionTitle({

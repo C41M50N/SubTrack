@@ -1,7 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { authOptions } from "@/server/auth";
-import { IconArrowBadgeRight, IconArrowBadgeRightFilled, IconArrowBigRightFilled, IconExternalLink } from "@tabler/icons-react";
+import {
+	IconArrowBadgeRight,
+	IconArrowBadgeRightFilled,
+	IconArrowBigRightFilled,
+	IconExternalLink,
+} from "@tabler/icons-react";
 import type {
 	GetServerSidePropsContext,
 	InferGetServerSidePropsType,
@@ -16,9 +21,8 @@ import { useRouter } from "next/navigation";
 export default function SignInPage({
 	provider,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-
-	const { data: session } = useSession()
-	const router = useRouter()
+	const { data: session } = useSession();
+	const router = useRouter();
 
 	return (
 		<>
@@ -112,7 +116,7 @@ export default function SignInPage({
 						<Button
 							variant="default"
 							size="lg"
-							onClick={() => router.push('/dashboard')}
+							onClick={() => router.push("/dashboard")}
 						>
 							<span className="font-semibold text-lg">Go to Dashboard</span>
 							<IconArrowBigRightFilled className="ml-3" size={20} />

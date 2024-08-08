@@ -42,10 +42,11 @@ export default function AccountSettingsPage() {
 	}
 
 	const router = useRouter();
-	const { mutateAsync: deleteAccount, isLoading: isDeleteAccountLoading } = api.main.deleteUser.useMutation();
+	const { mutateAsync: deleteAccount, isLoading: isDeleteAccountLoading } =
+		api.main.deleteUser.useMutation();
 	async function onDeleteAccountSubmit() {
-		await deleteAccount()
-		router.push('/')
+		await deleteAccount();
+		router.push("/");
 	}
 
 	React.useEffect(() => {
