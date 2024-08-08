@@ -18,6 +18,8 @@ import { Separator } from "@/components/ui/separator";
 import MainLayout from "@/layouts/main";
 import SettingsLayout from "@/layouts/settings";
 import { useUserName } from "@/lib/hooks";
+import { api } from "@/utils/api";
+import { useRouter } from "next/navigation";
 
 const AccountFormSchema = z.object({
 	name: z.string(),
@@ -37,6 +39,13 @@ export default function AccountSettingsPage() {
 			setUserName(values.name);
 			refreshSessionData({ name: values.name });
 		}
+	}
+
+	const router = useRouter();
+	const { mutateAsync: deleteAccount, isLoading: isDeleteAccountLoading } = api.main.deleteUser.useMutation();
+	async function onDeleteAccountSubmit() {
+		await deleteAccount()
+		router.push('/')
 	}
 
 	React.useEffect(() => {
@@ -99,6 +108,17 @@ export default function AccountSettingsPage() {
 							onClick={() => signOut({ callbackUrl: "/", redirect: true })}
 						>
 							Sign Out
+						</Button>
+					</div>
+
+					<div className="pt-4 space-y-2">
+						<h3 className="text-base font-medium">Delete Account</h3>
+						<Button
+							variant="destructive"
+							onClick={onDeleteAccountSubmit}
+							isLoading={isDeleteAccountLoading}
+						>
+							Delete Account
 						</Button>
 					</div>
 				</div>

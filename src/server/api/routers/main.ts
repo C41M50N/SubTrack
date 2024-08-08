@@ -24,6 +24,13 @@ export const mainRouter = createTRPCRouter({
 		});
 	}),
 
+	deleteUser: protectedProcedure
+		.mutation(async ({ ctx }) => {
+			await ctx.prisma.user.delete({
+				where: { id: ctx.session.user.id }
+			})
+		}),
+
 	setTodoistAPIKey: protectedProcedure
 		.input(z.string())
 		.mutation(async ({ ctx, input: apikey }) => {

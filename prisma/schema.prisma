@@ -68,7 +68,7 @@ model Collection {
     title           String
     subscriptions   Subscription[]
 
-    user            User @relation(fields: [userId], references: [id])
+    user            User @relation(fields: [userId], references: [id], onDelete: Cascade)
     userId          String
 }
 
@@ -86,6 +86,6 @@ model Subscription {
     collection    Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
     collectionId  String
 
-    user   User @relation(fields: [userId], references: [id])
+    user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
     userId String
 }

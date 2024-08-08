@@ -11,7 +11,8 @@
     "email": "email dev --dir ./src/emails",
     "prisma-studio": "op run --env-file='.env' -- prisma studio",
     "update-db": "op run --env-file='.env' -- prisma db push",
-    "create-prod-env": "op inject -i .env -o .env.production"
+    "create-prod-env": "op inject -i .env -o .env.production",
+    "format": "biome check --write ./src/"
   },
   "dependencies": {
     "@doist/todoist-api-typescript": "^3.0.2",
