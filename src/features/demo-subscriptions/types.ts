@@ -1,5 +1,5 @@
-import { Subscription } from "@prisma/client";
-import { SubscriptionFrequency, SubscriptionIcon } from "../common/types";
+import type { Subscription } from "@prisma/client";
+import type { SubscriptionFrequency, SubscriptionIcon } from "../common/types";
 
 export const DEMO_CATEGORIES = [
 	"entertainment",
@@ -8,8 +8,11 @@ export const DEMO_CATEGORIES = [
 	"miscellaneous",
 ] as const;
 
-export type DemoSubscription = Omit<Subscription, 'last_invoice' | 'userId' | 'collectionId'> & {
+export type DemoSubscription = Omit<
+	Subscription,
+	"last_invoice" | "userId" | "collectionId"
+> & {
 	frequency: SubscriptionFrequency;
 	icon_ref: SubscriptionIcon;
 	category: string;
-}
+};
