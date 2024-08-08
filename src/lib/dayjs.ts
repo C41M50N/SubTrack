@@ -1,8 +1,8 @@
 import dayjs from "dayjs";
-import RelativeTime from 'dayjs/plugin/relativeTime'
-import LocalizedFormat from 'dayjs/plugin/localizedFormat'
+import LocalizedFormat from "dayjs/plugin/localizedFormat";
+import RelativeTime from "dayjs/plugin/relativeTime";
 
-dayjs.extend(LocalizedFormat)
-dayjs.extend(RelativeTime)
+dayjs.extend(LocalizedFormat);
+dayjs.extend(RelativeTime);
 
-export default dayjs
+export default dayjs;
