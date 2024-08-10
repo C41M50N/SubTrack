@@ -13,28 +13,29 @@ export const collectionsRouter = createTRPCRouter({
 	createCollection: protectedProcedure
 		.input(z.object({ collectionTitle: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-
 			let maxNumCollections: number = Number.POSITIVE_INFINITY;
 			switch (ctx.session.user.licenseType) {
-				case 'FREE':
+				case "FREE":
 					maxNumCollections = 1;
 					break;
 
-				case 'BASIC':
+				case "BASIC":
 					maxNumCollections = 2;
 					break;
 
-				case 'PRO':
+				case "PRO":
 					maxNumCollections = 15;
 					break;
 			}
 
 			const currentNumCollections = await ctx.prisma.collection.count({
-				where: { userId: ctx.session.user.id }
-			})
+				where: { userId: ctx.session.user.id },
+			});
 
 			if (currentNumCollections + 1 > maxNumCollections) {
-				throw new Error('You have reached your collections limit. Upgrade your license in order to add more collections.')
+				throw new Error(
+					"You have reached your collections limit. Upgrade your license in order to add more collections.",
+				);
 			}
 
 			await ctx.prisma.collection.create({

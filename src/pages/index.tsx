@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { pricingInfo } from "@/features/pricing";
+import PricingCard from "@/features/pricing/pricing-card";
 import { authOptions } from "@/server/auth";
 import {
 	IconArrowBadgeRight,
@@ -67,14 +68,14 @@ export default function SignInPage({
 					<div className="flex-1" />
 
 					<div className="flex flex-row gap-0.5">
-						<a href="https://cbuff.dev/projects/subtrack">
+						{/* <a href="https://cbuff.dev/projects/subtrack">
 							<Button variant="link" className="flex flex-row gap-1">
 								<span className="text-2xl">About</span>
 								<IconExternalLink strokeWidth={1.5} />
 							</Button>
 						</a>
 
-						<span className="text-lg font-bold self-center">·</span>
+						<span className="text-lg font-bold self-center">·</span> */}
 
 						<a href="/demo">
 							<Button variant="link" className="flex flex-row gap-1">
@@ -102,7 +103,7 @@ export default function SignInPage({
 							className="bg-black hover:bg-black/80 flex flex-row gap-4"
 							variant="default"
 							size="lg"
-							onClick={() => signIn(provider.id, { callbackUrl: '/dashboard' })}
+							onClick={() => signIn(provider.id, { callbackUrl: "/dashboard" })}
 						>
 							<Image
 								alt="Google Icon"
@@ -150,47 +151,20 @@ export default function SignInPage({
 
 				<section className="pt-24 pb-24 mx-auto max-w-[1200px] mb-auto px-8 2xl:px-0">
 					<div className="mx-auto flex flex-col items-center">
-						<h3 className="text-4xl font-bold">
-							Pricing
-						</h3>
+						<h3 className="text-4xl font-bold">Pricing</h3>
 
 						<div className="mt-12 grid grid-cols-3 gap-8">
 							{pricingInfo.map((info) => (
-								<div key={info.title} className="min-w-[200px] px-6 py-6 flex flex-col border-2 border-gray-200 rounded-lg shadow-lg">
-									<div className="mx-auto text-center">
-										<h4 className="mx-auto text-xl font-bold">
-											{info.title}
-										</h4>
-
-										<div className="h-6" />
-
-										<h3 className="text-5xl font-bold tabular-nums">
-											${info.cost}
-										</h3>
-
-										<div className="h-2" />
-
-										<span className="text-muted-foreground">
-											{info.subtitle}
-										</span>
-									</div>
-
-									<div className="mt-8 flex flex-col gap-1">
-										{info.features.map((feature) => (
-											<div key={feature} className="flex flex-row gap-2 items-center text-sm">
-												<IconCircleCheck className="text-[#54617f]" />
-												<span className="leading-none text-muted-foreground">{feature}</span>
-											</div>
-										))}
-									</div>
-
-									<Button
-										className="mt-8"
-										onClick={() => router.push('/')}
-									>
-										Get Started
-									</Button>
-								</div>
+								<PricingCard
+									key={info.title}
+									title={info.title}
+									subtitle={info.subtitle}
+									cost={info.cost}
+									features={info.features}
+									actionLabel="Get Started"
+									actionType="navigate"
+									href={info.href}
+								/>
 							))}
 						</div>
 					</div>

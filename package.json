@@ -58,6 +58,7 @@
     "react-email": "1.9.5",
     "react-hook-form": "^7.46.1",
     "resend": "^1.1.0",
+    "stripe": "^16.7.0",
     "superjson": "^1.13.1",
     "tailwind-merge": "^1.14.0",
     "tailwindcss-animate": "^1.0.7",

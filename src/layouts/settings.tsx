@@ -16,6 +16,10 @@ const SettingsNavItems: Array<NavItem> = [
 		href: "/settings/account",
 	},
 	{
+		title: "License",
+		href: "/settings/license",
+	},
+	{
 		title: "Categories",
 		href: "/settings/categories",
 	},
