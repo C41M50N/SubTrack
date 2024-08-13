@@ -22,18 +22,20 @@ This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3
 - [Dev Containers extension for VSCode](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
 
 ### Steps
-1. **Clone repository**
+1. **Clone repository and open in VSCode**
     ```bash
     git clone https://github.com/C41M50N/SubTrack.git "subtrack"
-    ```
-
-2. **Open in VSCode**
-    ```bash
     cd subtrack
     code .
     ```
 
+2. **Open in VSCode Dev Container**
     - Open the Command Palette and run `Dev Containers: Reopen in Container`
+    - Wait a few minutes for the container to build
 
-3. **Wait**
-    - The container will likely take a few minutes to build. But after it's done you should be ready to start hacking. Don't forget to setup your `.env` file based on the given `.env.example`.
+3. **Move on to Post-setup Steps**
+    - [Post-setup Steps](#post-setup-steps)
+
+## Post-setup Steps
+### Add Environment Variables
+...
