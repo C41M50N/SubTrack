@@ -1,3 +1,7 @@
+import type { LicenseType } from "@prisma/client";
+
+export type PurchasableLicense = Extract<LicenseType, "BASIC" | "PRO">;
+
 type PricingTier = {
 	title: string;
 	cost: number;

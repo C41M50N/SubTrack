@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { IconCircleCheck } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
+import type { PurchasableLicense } from ".";
 
 type Props = {
 	title: string;
@@ -17,7 +18,7 @@ type Props = {
 			actionType: "submit-checkout-form";
 			userId: string;
 			userEmail: string;
-			licenseType: "BASIC" | "PRO";
+			licenseType: PurchasableLicense;
 	  }
 	| {
 			actionType: "none";

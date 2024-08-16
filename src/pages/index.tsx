@@ -152,8 +152,12 @@ export default function SignInPage({
 				<section className="pt-24 pb-24 mx-auto max-w-[1200px] mb-auto px-8 2xl:px-0">
 					<div className="mx-auto flex flex-col items-center">
 						<h3 className="text-4xl font-bold">Pricing</h3>
+						<span className="mt-4 text-xs font-semibold text-muted-foreground">
+							All prices are one-time payments. It would be quite ironic if
+							SubTrack ran on a subscription pricing model.
+						</span>
 
-						<div className="mt-12 grid grid-cols-3 gap-8">
+						<div className="mt-14 grid grid-cols-3 gap-8">
 							{pricingInfo.map((info) => (
 								<PricingCard
 									key={info.title}
@@ -169,6 +173,8 @@ export default function SignInPage({
 						</div>
 					</div>
 				</section>
+
+				<section className="pb-24" />
 
 				<footer className="bg-gray-50 h-16 flex">
 					<div className="mx-auto my-auto">

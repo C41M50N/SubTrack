@@ -62,6 +62,7 @@ model User {
     accounts      Account[]
     sessions      Session[]
 
+    currentStripeSession String?
     licenseType   LicenseType @default(FREE)
     categories    String[] @default(["entertainment", "productivity", "finance"])
     collections   Collection[]

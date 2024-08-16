@@ -20,6 +20,7 @@ export default async function handler(
 	const data = FormSchema.parse(req.body);
 	const session_url = await createPaymentSession(
 		req.headers.origin ?? "",
+		data.userId,
 		data.email,
 		data.licenseType,
 	);
