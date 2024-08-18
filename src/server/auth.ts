@@ -9,6 +9,7 @@ import GoogleProvider from "next-auth/providers/google";
 
 import { env } from "@/env.mjs";
 import { prisma } from "@/server/db";
+import type { LicenseType } from "@prisma/client";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -20,6 +21,7 @@ declare module "next-auth" {
 	interface Session extends DefaultSession {
 		user: DefaultSession["user"] & {
 			id: string;
+			licenseType: LicenseType;
 			todoistAPIKey: string;
 			todoistProjectId: string;
 			// ...other properties
@@ -28,6 +30,7 @@ declare module "next-auth" {
 	}
 
 	interface User {
+		licenseType: LicenseType;
 		todoistAPIKey: string;
 		todoistProjectId: string;
 		// ...other properties

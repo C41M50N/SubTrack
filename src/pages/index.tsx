@@ -1,10 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { pricingInfo } from "@/features/pricing";
+import PricingCard from "@/features/pricing/pricing-card";
 import { authOptions } from "@/server/auth";
 import {
 	IconArrowBadgeRight,
 	IconArrowBadgeRightFilled,
 	IconArrowBigRightFilled,
+	IconCircleCheck,
 	IconExternalLink,
 } from "@tabler/icons-react";
 import type {
@@ -65,14 +68,14 @@ export default function SignInPage({
 					<div className="flex-1" />
 
 					<div className="flex flex-row gap-0.5">
-						<a href="https://cbuff.dev/projects/subtrack">
+						{/* <a href="https://cbuff.dev/projects/subtrack">
 							<Button variant="link" className="flex flex-row gap-1">
 								<span className="text-2xl">About</span>
 								<IconExternalLink strokeWidth={1.5} />
 							</Button>
 						</a>
 
-						<span className="text-lg font-bold self-center">·</span>
+						<span className="text-lg font-bold self-center">·</span> */}
 
 						<a href="/demo">
 							<Button variant="link" className="flex flex-row gap-1">
@@ -100,7 +103,7 @@ export default function SignInPage({
 							className="bg-black hover:bg-black/80 flex flex-row gap-4"
 							variant="default"
 							size="lg"
-							onClick={() => signIn(provider.id, { callbackUrl: '/dashboard' })}
+							onClick={() => signIn(provider.id, { callbackUrl: "/dashboard" })}
 						>
 							<Image
 								alt="Google Icon"
@@ -145,6 +148,33 @@ export default function SignInPage({
 						/>
 					</div>
 				</section>
+
+				<section className="pt-24 pb-24 mx-auto max-w-[1200px] mb-auto px-8 2xl:px-0">
+					<div className="mx-auto flex flex-col items-center">
+						<h3 className="text-4xl font-bold">Pricing</h3>
+						<span className="mt-4 text-xs font-semibold text-muted-foreground">
+							All prices are one-time payments. It would be quite ironic if
+							SubTrack ran on a subscription pricing model.
+						</span>
+
+						<div className="mt-14 grid grid-cols-3 gap-8">
+							{pricingInfo.map((info) => (
+								<PricingCard
+									key={info.title}
+									title={info.title}
+									subtitle={info.subtitle}
+									cost={info.cost}
+									features={info.features}
+									actionLabel="Get Started"
+									actionType="navigate"
+									href={info.href}
+								/>
+							))}
+						</div>
+					</div>
+				</section>
+
+				<section className="pb-24" />
 
 				<footer className="bg-gray-50 h-16 flex">
 					<div className="mx-auto my-auto">
