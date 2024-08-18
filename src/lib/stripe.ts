@@ -3,16 +3,36 @@ import type { PurchasableLicense } from "@/features/pricing";
 import { prisma } from "@/server/db";
 import Stripe from "stripe";
 
-type ProductId =
-	| "prod_QdHlyETm3ryebm" // Basic License
-	| "prod_QdHlZdRWC5JVWv"; // Pro License
-
-const ProductMap: Record<ProductId, PurchasableLicense> = {
-	prod_QdHlyETm3ryebm: "BASIC",
-	prod_QdHlZdRWC5JVWv: "PRO",
-};
-
 const stripe = new Stripe(env.STRIPE_SECRET_KEY);
+
+export async function getProductMap() {
+	const { data: products } = await stripe.products.list();
+	const productMap: Record<string, PurchasableLicense> = {};
+	for (const product of products) {
+		console.log(product.metadata);
+		productMap[product.id] = product.metadata.licenseType as PurchasableLicense;
+	}
+	console.log(productMap);
+	return productMap;
+}
+
+export async function getPriceIdFromLicenseType(
+	licenseType: PurchasableLicense,
+) {
+	const productMap = await getProductMap();
+	let selectedProductId: string | undefined;
+	for (const [_productId, _licenseType] of Object.entries(productMap)) {
+		if (_licenseType === licenseType) {
+			selectedProductId = _productId;
+			break;
+		}
+	}
+
+	if (!selectedProductId) throw new Error("missing product");
+
+	const product = await stripe.products.retrieve(selectedProductId);
+	return product.default_price as string;
+}
 
 export async function createPaymentSession(
 	baseUrl: string,
@@ -26,10 +46,7 @@ export async function createPaymentSession(
 		currency: "USD",
 		line_items: [
 			{
-				price:
-					licenseType === "BASIC"
-						? "price_1Pm1C7Ii1eUsH1iyEDqx69MO"
-						: "price_1Pm1CNIi1eUsH1iyXq3yYCCG",
+				price: await getPriceIdFromLicenseType(licenseType),
 				quantity: 1,
 			},
 		],
@@ -55,13 +72,15 @@ export async function fulfillCheckout(session_id: string) {
 		expand: ["line_items"],
 	});
 	const productId = session.line_items?.data.at(0)?.price?.product as
-		| ProductId
+		| string
 		| undefined;
 	if (!productId) {
 		throw new Error("...");
 	}
 
-	const license = ProductMap[productId];
+	const productMap = await getProductMap();
+
+	const license = productMap[productId];
 	const userId = (
 		await prisma.user.findFirst({
 			where: { currentStripeSession: session.id },
