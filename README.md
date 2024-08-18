@@ -39,3 +39,7 @@ This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3
 ## Post-setup Steps
 ### Add Environment Variables
 ...
+
+## FAQ
+### How do I request more subscription icons?
+- Create an issue with the "icon request" label.
