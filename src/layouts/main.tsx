@@ -41,11 +41,9 @@ export default function MainLayout({ children, title }: MainLayoutProps) {
 	const { collections, isGetCollectionsLoading } = useCollections();
 
 	React.useEffect(() => {
-		return () => {
-			if (session === null) {
-				router.replace("/");
-			}
-		};
+		if (session === null) {
+			router.replace("/");
+		}
 	}, [session]);
 
 	return (
