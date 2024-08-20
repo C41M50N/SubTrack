@@ -107,7 +107,7 @@ export const useUpdateSubscription = (enabled = true) => {
 				variant: "success",
 				title: "Successfully updated subscription!",
 			});
-			ctx.subscriptions.getSubscriptions.refetch();
+			ctx.subscriptions.getSubscriptionsFromCollection.refetch();
 		},
 		onError: (err) => {
 			toast({

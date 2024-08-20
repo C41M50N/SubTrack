@@ -56,6 +56,8 @@ export default function PricingCard(props: Props) {
 				))}
 			</div>
 
+			<div className="flex-1" />
+
 			{props.actionType === "none" && (
 				<Button variant="ghost" className="w-full hover:cursor-default">
 					{props.actionLabel}

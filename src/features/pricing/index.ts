@@ -22,7 +22,11 @@ export const pricingInfo: Array<PricingTier> = [
 		cost: 10,
 		title: "Basic",
 		subtitle: "good enough for most people",
-		features: ["up to 2 collections", "up to 50 subscriptions per collection"],
+		features: [
+			"up to 2 collections",
+			"up to 50 subscriptions per collection",
+			"advanced subscription table",
+		],
 		href: "/settings/license",
 	},
 	{
@@ -32,6 +36,8 @@ export const pricingInfo: Array<PricingTier> = [
 		features: [
 			"up to 15 collections",
 			"unlimited subscriptions per collection",
+			"advanced subscription table",
+			"integrations for cancel reminders",
 		],
 		href: "/settings/license",
 	},

@@ -1,3 +1,4 @@
+import FeatureCard from "@/components/common/feature-card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { pricingInfo } from "@/features/pricing";
@@ -150,6 +151,89 @@ export default function SignInPage({
 				</section>
 
 				<section className="pt-24 pb-24 mx-auto max-w-[1200px] mb-auto px-8 2xl:px-0">
+					<div className="flex flex-col items-center">
+						<h3 className="text-5xl font-bold">Features</h3>
+
+						<div className="mt-14 2xl:w-[1350px] xl:w-[1150px] lg:w-full lg:px-2 grid lg:grid-cols-2 gap-x-14 gap-y-20">
+							<FeatureCard
+								title="Manage Subscriptions"
+								subtitle="Manage subscriptions via feature-rich dashboard table"
+								image={
+									<Image
+										className="rounded-lg"
+										width={500}
+										height={350}
+										alt=""
+										src="/assets/table.png"
+									/>
+								}
+							/>
+
+							<FeatureCard
+								title="Gain Insights"
+								subtitle="Gain insights on your subscriptions via cost metrics"
+								image={
+									<Image
+										className="rounded-lg"
+										width={350}
+										height={200}
+										alt=""
+										src="/assets/metrics.png"
+									/>
+								}
+							/>
+
+							<FeatureCard
+								title="Categorize"
+								subtitle="Organize subscriptions using custom categories"
+								image={
+									<Image
+										className="rounded-lg"
+										width={460}
+										height={380}
+										alt=""
+										src="/assets/categories.png"
+									/>
+								}
+							/>
+
+							<FeatureCard
+								title="Stay Organized"
+								subtitle="Separate subscriptions into various collections"
+								image={
+									<Image
+										className="rounded-lg"
+										width={380}
+										height={200}
+										alt=""
+										src="/assets/collections.png"
+									/>
+								}
+							/>
+
+							<FeatureCard
+								title="Export Your Data"
+								subtitle="Export your subscriptions to a CSV file"
+								image={
+									<Image
+										className="rounded-lg"
+										width={380}
+										height={200}
+										alt=""
+										src="/assets/export.png"
+									/>
+								}
+							/>
+
+							<FeatureCard
+								title="Stay Informed"
+								subtitle="Stay informed about your subscriptions with a monthly summary email"
+							/>
+						</div>
+					</div>
+				</section>
+
+				<section className="pt-24 pb-24 mx-auto max-w-[1200px] mb-auto px-8 2xl:px-0">
 					<div className="mx-auto flex flex-col items-center">
 						<h3 className="text-4xl font-bold">Pricing</h3>
 						<span className="mt-4 text-xs font-semibold text-muted-foreground">
@@ -157,7 +241,7 @@ export default function SignInPage({
 							SubTrack ran on a subscription pricing model.
 						</span>
 
-						<div className="mt-14 grid grid-cols-3 gap-8">
+						<div className="mt-14 grid grid-cols-1 lg:grid-cols-3 gap-8">
 							{pricingInfo.map((info) => (
 								<PricingCard
 									key={info.title}
