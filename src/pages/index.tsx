@@ -145,6 +145,8 @@ export default function SignInPage({
 							src={"/dashboard.png"}
 							width={3000}
 							height={2000}
+							quality={100}
+							priority
 							alt={"Dashboard Image"}
 						/>
 					</div>
@@ -152,7 +154,7 @@ export default function SignInPage({
 
 				<section className="pt-24 pb-24 mx-auto max-w-[1200px] mb-auto px-8 2xl:px-0">
 					<div className="flex flex-col items-center">
-						<h3 className="text-5xl font-bold">Features</h3>
+						<h3 className="text-4xl font-bold">Features</h3>
 
 						<div className="mt-14 2xl:w-[1350px] xl:w-[1150px] lg:w-full lg:px-2 grid lg:grid-cols-2 gap-x-14 gap-y-20">
 							<FeatureCard
@@ -163,6 +165,8 @@ export default function SignInPage({
 										className="rounded-lg"
 										width={500}
 										height={350}
+										quality={100}
+										priority
 										alt=""
 										src="/assets/table.png"
 									/>
@@ -177,6 +181,8 @@ export default function SignInPage({
 										className="rounded-lg"
 										width={350}
 										height={200}
+										quality={100}
+										priority
 										alt=""
 										src="/assets/metrics.png"
 									/>
@@ -191,6 +197,8 @@ export default function SignInPage({
 										className="rounded-lg"
 										width={460}
 										height={380}
+										quality={100}
+										priority
 										alt=""
 										src="/assets/categories.png"
 									/>
@@ -205,6 +213,8 @@ export default function SignInPage({
 										className="rounded-lg"
 										width={380}
 										height={200}
+										quality={100}
+										priority
 										alt=""
 										src="/assets/collections.png"
 									/>
@@ -219,6 +229,8 @@ export default function SignInPage({
 										className="rounded-lg"
 										width={380}
 										height={200}
+										quality={100}
+										priority
 										alt=""
 										src="/assets/export.png"
 									/>
@@ -228,6 +240,17 @@ export default function SignInPage({
 							<FeatureCard
 								title="Stay Informed"
 								subtitle="Stay informed about your subscriptions with a monthly summary email"
+								image={
+									<Image
+										className="rounded-lg"
+										width={380}
+										height={200}
+										quality={100}
+										priority
+										alt=""
+										src="/assets/email.png"
+									/>
+								}
 							/>
 						</div>
 					</div>
