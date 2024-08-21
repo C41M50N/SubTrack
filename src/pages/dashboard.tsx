@@ -25,6 +25,7 @@ import { useCategories } from "@/lib/hooks";
 import { toMoneyString } from "@/utils";
 import { api } from "@/utils/api";
 import { useAtom } from "jotai";
+import { useSession } from "next-auth/react";
 import React from "react";
 
 export default function DashboardPage() {
@@ -49,6 +50,7 @@ export default function DashboardPage() {
 		);
 	const [selectedSubscriptions] = useAtom(selectedSubscriptionsAtom);
 	const { categories, isCategoriesLoading } = useCategories();
+	const { data: session } = useSession();
 
 	return (
 		<MainLayout title="Dashboard | SubTrack">
@@ -72,7 +74,8 @@ export default function DashboardPage() {
 					{!isSubsLoading && !subscriptions && (
 						<span className="text-xl">No Subscriptions</span>
 					)}
-					{!isSubsLoading &&
+					{session &&
+						!isSubsLoading &&
 						subscriptions &&
 						!isCategoriesLoading &&
 						categories && (
@@ -80,6 +83,7 @@ export default function DashboardPage() {
 								columns={columns}
 								data={subscriptions}
 								categories={categories}
+								licenseType={session.user.licenseType}
 							/>
 						)}
 				</div>

@@ -10,11 +10,13 @@ import MoreOptions from "./more-options";
 type Props<TData> = {
 	table: Table<TData>;
 	categories: string[];
+	advancedTable: boolean;
 };
 
 export default function DataTableToolbar<TData>({
 	table,
 	categories,
+	advancedTable,
 }: Props<TData>) {
 	const isFiltered = table.getState().columnFilters.length > 0;
 
@@ -23,36 +25,42 @@ export default function DataTableToolbar<TData>({
 			<div className="flex flex-1 space-x-2 items-end">
 				<CollectionSelector />
 
-				<Input
-					placeholder="Filter subscriptions..."
-					value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-					onChange={(event) =>
-						table.getColumn("name")?.setFilterValue(event.target.value)
-					}
-					className="h-8 w-[200px] lg:w-[280px]"
-				/>
-				{table.getColumn("category") && (
-					<DataTableFilter
-						column={table.getColumn("category")}
-						title="Category"
-						options={categories.map((cat) => ({ label: cat, value: cat }))}
-					/>
-				)}
+				{advancedTable && (
+					<div className="flex flex-row space-x-2">
+						<Input
+							placeholder="Filter subscriptions..."
+							value={
+								(table.getColumn("name")?.getFilterValue() as string) ?? ""
+							}
+							onChange={(event) =>
+								table.getColumn("name")?.setFilterValue(event.target.value)
+							}
+							className="h-8 w-[200px] lg:w-[280px]"
+						/>
+						{table.getColumn("category") && (
+							<DataTableFilter
+								column={table.getColumn("category")}
+								title={isFiltered ? "" : "Category"}
+								options={categories.map((cat) => ({ label: cat, value: cat }))}
+							/>
+						)}
 
-				{isFiltered && (
-					<Button
-						variant="ghost"
-						onClick={() => table.resetColumnFilters()}
-						className="h-8 px-2 lg:px-3"
-					>
-						Reset
-						<IconCircleX className="ml-2 h-4 w-4" />
-					</Button>
+						{isFiltered && (
+							<Button
+								variant="ghost"
+								onClick={() => table.resetColumnFilters()}
+								className="h-8 px-2 lg:px-3"
+							>
+								Reset
+								<IconCircleX className="ml-2 h-4 w-4" />
+							</Button>
+						)}
+					</div>
 				)}
 			</div>
 
 			<div className="flex flex-row space-x-3">
-				<DataTableViewOptions table={table} />
+				{advancedTable && <DataTableViewOptions table={table} />}
 				<MoreOptions />
 			</div>
 		</div>
