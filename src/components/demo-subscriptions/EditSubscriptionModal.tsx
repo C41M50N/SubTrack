@@ -49,6 +49,7 @@ import {
 import { FREQUENCIES, ICONS } from "@/features/common/types";
 import { useDemoSubscriptions } from "@/features/demo-subscriptions/stores";
 import {
+	CreateDemoSubscriptionSchema,
 	DEMO_CATEGORIES,
 	type DemoSubscription,
 } from "@/features/demo-subscriptions/types";
@@ -69,12 +70,12 @@ export default function EditSubscriptionModal({
 	const [isLoading, setIsLoading] = React.useState<boolean>(false);
 	const { updateDemoSubscription } = useDemoSubscriptions();
 
-	const form = useForm<z.infer<typeof SubscriptionWithoutIdSchema>>({
-		resolver: zodResolver(SubscriptionWithoutIdSchema),
+	const form = useForm<z.infer<typeof CreateDemoSubscriptionSchema>>({
+		resolver: zodResolver(CreateDemoSubscriptionSchema),
 		defaultValues: subscription,
 	});
 
-	async function onSubmit(values: z.infer<typeof SubscriptionWithoutIdSchema>) {
+	async function onSubmit(values: z.infer<typeof CreateDemoSubscriptionSchema>) {
 		setIsLoading(true);
 		await sleep(500);
 		setIsLoading(false);

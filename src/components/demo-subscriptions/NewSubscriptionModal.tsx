@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 import type z from "zod";
 
 import { useDemoSubscriptions } from "@/features/demo-subscriptions/stores";
-import { DEMO_CATEGORIES } from "@/features/demo-subscriptions/types";
+import { CreateDemoSubscriptionSchema, DEMO_CATEGORIES } from "@/features/demo-subscriptions/types";
 import type { ModalState } from "@/lib/hooks";
 import { cn, sleep, toProperCase } from "@/utils";
 
@@ -66,8 +66,8 @@ export default function NewSubscriptionModal({
 	const [isLoading, setIsLoading] = React.useState<boolean>(false);
 	const { addSubscription: addDemoSubscription } = useDemoSubscriptions();
 
-	const form = useForm<z.infer<typeof SubscriptionWithoutIdSchema>>({
-		resolver: zodResolver(SubscriptionWithoutIdSchema),
+	const form = useForm<z.infer<typeof CreateDemoSubscriptionSchema>>({
+		resolver: zodResolver(CreateDemoSubscriptionSchema),
 		defaultValues: {
 			name: "",
 			amount: 10.0,
@@ -78,7 +78,7 @@ export default function NewSubscriptionModal({
 		},
 	});
 
-	async function onSubmit(values: z.infer<typeof SubscriptionWithoutIdSchema>) {
+	async function onSubmit(values: z.infer<typeof CreateDemoSubscriptionSchema>) {
 		setIsLoading(true);
 		await sleep(500);
 		setIsLoading(false);
