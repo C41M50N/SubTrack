@@ -79,7 +79,10 @@ export default function EditSubscriptionModal({
 
 	const form = useForm<z.infer<typeof SubscriptionWithoutIdSchema>>({
 		resolver: zodResolver(SubscriptionWithoutIdSchema),
-		defaultValues: subscription,
+		defaultValues: {
+			...subscription,
+			next_invoice: new Date(subscription.next_invoice),
+		},
 	});
 
 	async function onSubmit(values: z.infer<typeof SubscriptionWithoutIdSchema>) {
