@@ -42,6 +42,7 @@ export const subscriptionsRouter = createTRPCRouter({
 				data: {
 					userId: ctx.session.user.id,
 					...input,
+					amount: Math.floor(input.amount * 100)
 				},
 			});
 		}),
@@ -70,7 +71,7 @@ export const subscriptionsRouter = createTRPCRouter({
 		.mutation(async ({ ctx, input }) => {
 			await ctx.prisma.subscription.update({
 				where: { id: input.id, userId: ctx.session.user.id },
-				data: input,
+				data: { ...input, amount: input.amount * 100 },
 			});
 		}),
 
