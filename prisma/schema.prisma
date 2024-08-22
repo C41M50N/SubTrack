@@ -83,7 +83,7 @@ model Collection {
 model Subscription {
     id              String @id @default(cuid())
     name            String
-    amount          Float
+    amount          Int
     frequency       String
     category        String
     next_invoice    DateTime

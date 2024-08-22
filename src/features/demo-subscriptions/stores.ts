@@ -20,7 +20,7 @@ export const useDemoSubscriptions = create<State>()(
 				{
 					id: uuidv4(),
 					name: "Spotify",
-					amount: 4.99,
+					amount: 4.99 * 100,
 					frequency: "monthly",
 					category: "entertainment",
 					next_invoice: dayjs().add(3, "days").toDate(),
@@ -30,7 +30,7 @@ export const useDemoSubscriptions = create<State>()(
 				{
 					id: uuidv4(),
 					name: "Hulu",
-					amount: 7.99,
+					amount: 7.99 * 100,
 					frequency: "monthly",
 					category: "entertainment",
 					next_invoice: dayjs().add(2, "days").toDate(),
@@ -40,7 +40,7 @@ export const useDemoSubscriptions = create<State>()(
 				{
 					id: uuidv4(),
 					name: "Apple Music",
-					amount: 10.99,
+					amount: 10.99 * 100,
 					frequency: "monthly",
 					category: "entertainment",
 					next_invoice: dayjs().add(1, "days").toDate(),
@@ -50,7 +50,7 @@ export const useDemoSubscriptions = create<State>()(
 				{
 					id: uuidv4(),
 					name: "Amazon Prime",
-					amount: 139.0,
+					amount: 139.0 * 100,
 					frequency: "yearly",
 					category: "miscellaneous",
 					next_invoice: dayjs().add(4, "days").toDate(),
@@ -60,7 +60,7 @@ export const useDemoSubscriptions = create<State>()(
 				{
 					id: uuidv4(),
 					name: "Disney Plus",
-					amount: 140.0,
+					amount: 139.99 * 100,
 					frequency: "yearly",
 					category: "entertainment",
 					next_invoice: dayjs().add(5, "days").toDate(),
@@ -71,7 +71,7 @@ export const useDemoSubscriptions = create<State>()(
 
 			addSubscription(sub) {
 				set({
-					subscriptions: [...get().subscriptions, { ...sub, id: uuidv4() }],
+					subscriptions: [...get().subscriptions, { ...sub, amount: sub.amount * 100, id: uuidv4() }],
 				});
 			},
 
@@ -80,7 +80,10 @@ export const useDemoSubscriptions = create<State>()(
 				set({
 					subscriptions: [
 						...get().subscriptions.slice(0, idx),
-						sub,
+						{
+							...sub,
+							amount: sub.amount * 100
+						},
 						...get().subscriptions.slice(idx + 1),
 					],
 				});
