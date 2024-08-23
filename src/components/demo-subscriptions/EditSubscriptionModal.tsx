@@ -74,6 +74,7 @@ export default function EditSubscriptionModal({
 		resolver: zodResolver(CreateDemoSubscriptionSchema),
 		defaultValues: {
 			...subscription,
+			amount: subscription.amount / 100,
 			next_invoice: new Date(subscription.next_invoice),
 		},
 	});

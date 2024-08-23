@@ -132,7 +132,7 @@ export const useDeleteSubscription = () => {
 				variant: "success",
 				title: "Successfully deleted subscription!",
 			});
-			ctx.subscriptions.getSubscriptions.refetch();
+			ctx.subscriptions.getSubscriptionsFromCollection.refetch();
 		},
 		onError: (err) => {
 			toast({
