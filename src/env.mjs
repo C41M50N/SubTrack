@@ -26,6 +26,8 @@ export const env = createEnv({
 		RESEND_API_KEY: z.string(),
 		STRIPE_SECRET_KEY: z.string(),
 		STRIPE_WEBHOOK_SECRET: z.string(),
+		CLERK_SECRET_KEY: z.string(),
+		CLERK_WEBHOOK_SECRET: z.string(),
 	},
 
 	/**
@@ -35,6 +37,7 @@ export const env = createEnv({
 	 */
 	client: {
 		// NEXT_PUBLIC_CLIENTVAR: z.string().min(1),
+		NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string(),
 	},
 
 	/**
@@ -51,6 +54,10 @@ export const env = createEnv({
 		RESEND_API_KEY: process.env.RESEND_API_KEY,
 		STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
 		STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+		CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
+		NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
+			process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
+		CLERK_WEBHOOK_SECRET: process.env.CLERK_WEBHOOK_SECRET,
 	},
 	/**
 	 * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation.

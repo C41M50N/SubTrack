@@ -10,7 +10,9 @@ type Props = {
 export default function FeatureCard(props: Props) {
 	return (
 		<div className="flex flex-col">
-			<h3 className="text-2xl md:text-3xl font-semibold text-center">{props.title}</h3>
+			<h3 className="text-2xl md:text-3xl font-semibold text-center">
+				{props.title}
+			</h3>
 			<span className="mt-0.5 text-sm md:text-base text-muted-foreground font-light text-center">
 				{props.subtitle}
 			</span>

@@ -1,3 +1,4 @@
+import { deleteUser, updateUserInfo } from "@/lib/clerk";
 import {
 	createReminder,
 	createTodoistAPI,
@@ -12,59 +13,52 @@ export const mainRouter = createTRPCRouter({
 	updateName: protectedProcedure
 		.input(z.string())
 		.mutation(async ({ ctx, input: name }) => {
-			await ctx.prisma.user.update({
-				where: { id: ctx.session.user.id },
-				data: { name: name },
-			});
+			await updateUserInfo(ctx.user.id, name);
 		}),
 
 	getLicenseType: protectedProcedure.query(async ({ ctx }) => {
 		return await ctx.prisma.user.findUnique({
-			where: { id: ctx.session.user.id },
-			select: { licenseType: true },
+			where: { id: ctx.user.id },
+			select: { license_type: true },
 		});
 	}),
 
 	getCurrentUser: protectedProcedure.query(async ({ ctx }) => {
-		return await ctx.prisma.user.findUnique({
-			where: { id: ctx.session.user.id },
-		});
+		return ctx.user;
 	}),
 
 	deleteUser: protectedProcedure.mutation(async ({ ctx }) => {
-		await ctx.prisma.user.delete({
-			where: { id: ctx.session.user.id },
-		});
+		await deleteUser(ctx.user.id);
 	}),
 
 	setTodoistAPIKey: protectedProcedure
 		.input(z.string())
 		.mutation(async ({ ctx, input: apikey }) => {
 			await ctx.prisma.user.update({
-				where: { id: ctx.session.user.id },
+				where: { id: ctx.user.id },
 				data: { todoistAPIKey: apikey },
 			});
 		}),
 
 	removeTodoistAPIKey: protectedProcedure.mutation(async ({ ctx }) => {
 		await ctx.prisma.user.update({
-			where: { id: ctx.session.user.id },
+			where: { id: ctx.user.id },
 			data: { todoistAPIKey: "", todoistProjectId: "" },
 		});
 	}),
 
 	getTodoistProjects: protectedProcedure.query(async ({ ctx }) => {
-		const todoist = createTodoistAPI(ctx.session.user.todoistAPIKey);
+		const todoist = createTodoistAPI(ctx.user.todoistAPIKey);
 		const projects = await getProjects(todoist);
 		await sleep(1000);
 		return projects;
 	}),
 
 	getTodoistProjectName: protectedProcedure.query(async ({ ctx }) => {
-		const todoist = createTodoistAPI(ctx.session.user.todoistAPIKey);
+		const todoist = createTodoistAPI(ctx.user.todoistAPIKey);
 		const project_name = await getProjectName(
 			todoist,
-			ctx.session.user.todoistProjectId,
+			ctx.user.todoistProjectId,
 		);
 		return project_name;
 	}),
@@ -77,10 +71,10 @@ export const mainRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const todoist = createTodoistAPI(ctx.session.user.todoistAPIKey);
+			const todoist = createTodoistAPI(ctx.user.todoistAPIKey);
 			await createReminder(
 				todoist,
-				ctx.session.user.todoistProjectId,
+				ctx.user.todoistProjectId,
 				input.title,
 				input.reminder_date,
 			);
@@ -90,7 +84,7 @@ export const mainRouter = createTRPCRouter({
 		.input(z.string())
 		.mutation(async ({ ctx, input: projectId }) => {
 			await ctx.prisma.user.update({
-				where: { id: ctx.session.user.id },
+				where: { id: ctx.user.id },
 				data: { todoistProjectId: projectId },
 			});
 		}),

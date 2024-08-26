@@ -4,7 +4,7 @@ import { z } from "zod";
 export const collectionsRouter = createTRPCRouter({
 	getCollections: protectedProcedure.query(async ({ ctx }) => {
 		const collections = await ctx.prisma.collection.findMany({
-			where: { userId: ctx.session.user.id },
+			where: { user_id: ctx.user.id },
 			select: { id: true, title: true },
 		});
 		return collections;
@@ -14,7 +14,7 @@ export const collectionsRouter = createTRPCRouter({
 		.input(z.object({ collectionTitle: z.string() }))
 		.mutation(async ({ ctx, input }) => {
 			let maxNumCollections: number = Number.POSITIVE_INFINITY;
-			switch (ctx.session.user.licenseType) {
+			switch (ctx.user.license_type) {
 				case "FREE":
 					maxNumCollections = 1;
 					break;
@@ -29,7 +29,7 @@ export const collectionsRouter = createTRPCRouter({
 			}
 
 			const currentNumCollections = await ctx.prisma.collection.count({
-				where: { userId: ctx.session.user.id },
+				where: { user_id: ctx.user.id },
 			});
 
 			if (currentNumCollections + 1 > maxNumCollections) {
@@ -40,7 +40,7 @@ export const collectionsRouter = createTRPCRouter({
 
 			await ctx.prisma.collection.create({
 				data: {
-					userId: ctx.session.user.id,
+					user_id: ctx.user.id,
 					title: input.collectionTitle,
 				},
 			});
@@ -57,7 +57,7 @@ export const collectionsRouter = createTRPCRouter({
 			await ctx.prisma.collection.update({
 				where: {
 					id: input.collection_id,
-					userId: ctx.session.user.id,
+					user_id: ctx.user.id,
 				},
 				data: {
 					title: input.title,
@@ -76,7 +76,7 @@ export const collectionsRouter = createTRPCRouter({
 			await ctx.prisma.collection.delete({
 				where: {
 					id: input.collectionId,
-					userId: ctx.session.user.id,
+					user_id: ctx.user.id,
 				},
 			});
 		}),

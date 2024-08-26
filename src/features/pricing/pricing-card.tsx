@@ -72,9 +72,9 @@ export default function PricingCard(props: Props) {
 
 			{props.actionType === "submit-checkout-form" && (
 				<form action="/api/checkout" method="post">
-					<input hidden name="userId" value={props.userId} />
-					<input hidden name="email" value={props.userEmail} />
-					<input hidden name="licenseType" value={props.licenseType} />
+					<input hidden name="userId" value={props.userId} readOnly />
+					<input hidden name="email" value={props.userEmail} readOnly />
+					<input hidden name="licenseType" value={props.licenseType} readOnly />
 					<Button type="submit" className="w-full">
 						{props.actionLabel}
 					</Button>

@@ -12,7 +12,7 @@ export const useModalState = () => {
 export type ModalState = ReturnType<typeof useModalState>;
 
 export const useUserName = () => {
-	const { mutateAsync: setUserName, isLoading: isSetUserNameLoading } =
+	const { mutateAsync: updateUserName, isLoading: isSetUserNameLoading } =
 		api.main.updateName.useMutation({
 			onSuccess: () => {
 				toast({
@@ -29,7 +29,7 @@ export const useUserName = () => {
 			},
 		});
 
-	return { setUserName, isSetUserNameLoading };
+	return { setUserName: updateUserName, isSetUserNameLoading };
 };
 
 export const useCategories = (enabled = true) => {
@@ -155,3 +155,28 @@ export const useCollections = () => {
 
 	return { collections, isGetCollectionsLoading };
 };
+
+export function useUser() {
+	const { data: user, refetch: refreshUserData } =
+		api.main.getCurrentUser.useQuery(undefined, {
+			staleTime: Number.POSITIVE_INFINITY,
+		});
+	return { user, refreshUserData };
+}
+
+// export function useClerkUser() {
+// 	const { isSignedIn, user } = useUser();
+// 	const { data: dbUser } = api.main.getCurrentUser.useQuery(undefined, { staleTime: Number.POSITIVE_INFINITY });
+// 	if (!isSignedIn || !dbUser) {
+// 		return undefined;
+// 	}
+
+// 	return {
+// 		id: user.id,
+// 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+// 		name: user.fullName!,
+// 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+// 		email: user.primaryEmailAddress!.emailAddress,
+// 		profile_picture: user.imageUrl,
+// 	}
+// }

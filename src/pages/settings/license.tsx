@@ -1,5 +1,4 @@
 import { LoadingSpinner } from "@/components/common/loading-spinner";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
 	BASIC_PRICING_INFO,
@@ -10,34 +9,35 @@ import {
 import PricingCard from "@/features/pricing/pricing-card";
 import MainLayout from "@/layouts/main";
 import SettingsLayout from "@/layouts/settings";
+import { useUser } from "@/lib/hooks";
 import { api } from "@/utils/api";
 import { IconCircleCheck } from "@tabler/icons-react";
-import { useSession } from "next-auth/react";
 
 export default function LicenseSettingsPage() {
-	const { data: session } = useSession();
+	const { user } = useUser();
 	const { data } = api.main.getLicenseType.useQuery();
 
 	return (
 		<MainLayout title="License Settings | SubTrack">
 			<SettingsLayout>
 				{!data && <LoadingSpinner />}
-				{session && data && (
+				{user && data && (
 					<div className="space-y-6">
 						<div>
 							<h3 className="text-lg font-medium">Your License</h3>
 							<p className="text-sm text-muted-foreground">
-								You have the <strong>{data.licenseType}</strong> license.
-								{data.licenseType !== "SUPER" && data.licenseType !== "PRO"
+								You have the <strong>{data.license_type}</strong> license.
+								{data.license_type !== "SUPER" && data.license_type !== "PRO"
 									? "Upgrade to get even more features."
 									: ""}
 							</p>
 						</div>
 						<Separator />
 
-						{(data.licenseType === "FREE" || data.licenseType === "BASIC") && (
+						{(data.license_type === "FREE" ||
+							data.license_type === "BASIC") && (
 							<div className="flex flex-row gap-3">
-								{data.licenseType === "FREE" && (
+								{data.license_type === "FREE" && (
 									<>
 										<PricingCard
 											title={FREE_PRICING_INFO.title}
@@ -55,14 +55,14 @@ export default function LicenseSettingsPage() {
 											features={BASIC_PRICING_INFO.features}
 											actionLabel="Upgrade to Basic"
 											actionType="submit-checkout-form"
-											userId={session.user.id}
-											userEmail={session.user.email as string}
+											userId={user.id}
+											userEmail={user.email as string}
 											licenseType="BASIC"
 										/>
 									</>
 								)}
 
-								{data.licenseType === "BASIC" && (
+								{data.license_type === "BASIC" && (
 									<PricingCard
 										title={BASIC_PRICING_INFO.title}
 										subtitle={BASIC_PRICING_INFO.subtitle}
@@ -80,14 +80,14 @@ export default function LicenseSettingsPage() {
 									features={PRO_PRICING_INFO.features}
 									actionLabel="Upgrade to Pro"
 									actionType="submit-checkout-form"
-									userId={session.user.id}
-									userEmail={session.user.email as string}
+									userId={user.id}
+									userEmail={user.email as string}
 									licenseType="PRO"
 								/>
 							</div>
 						)}
 
-						{data.licenseType === "PRO" && (
+						{data.license_type === "PRO" && (
 							<div className="max-w-sm">
 								<PricingCard
 									title={PRO_PRICING_INFO.title}
@@ -100,11 +100,11 @@ export default function LicenseSettingsPage() {
 							</div>
 						)}
 
-						{data.licenseType === "SUPER" && (
+						{data.license_type === "SUPER" && (
 							<div className="w-[350px] ml-4 px-8 py-8 flex flex-col border-8 border-double border-[#54617f] rounded-lg shadow-lg">
 								<div className="mx-auto text-center">
 									<h4 className="mx-auto text-xl text-[#363f53] font-bold">
-										😎 {data.licenseType} 😎
+										😎 {data.license_type} 😎
 									</h4>
 								</div>
 

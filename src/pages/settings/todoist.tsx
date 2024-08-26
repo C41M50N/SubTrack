@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSession } from "next-auth/react";
 import React from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
@@ -25,6 +24,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import MainLayout from "@/layouts/main";
 import SettingsLayout from "@/layouts/settings";
+import { useUser } from "@/lib/hooks";
 import { api } from "@/utils/api";
 
 const TodoistAPIKeyFormSchema = z.object({
@@ -36,10 +36,11 @@ const TodoistProjectFormSchema = z.object({
 });
 
 export default function TodoistSettingsPage() {
-	const { data: session } = useSession();
+	const { user } = useUser();
+
 	const todoistAPIKeyForm = useForm<z.infer<typeof TodoistAPIKeyFormSchema>>({
 		resolver: zodResolver(TodoistAPIKeyFormSchema),
-		defaultValues: { key: session?.user.todoistAPIKey || "" },
+		defaultValues: { key: user?.todoistAPIKey || "" },
 	});
 	const { mutate: setTodoistAPIKey, isLoading: isSetTodoistAPIKeyLoading } =
 		api.main.setTodoistAPIKey.useMutation();
@@ -61,16 +62,10 @@ export default function TodoistSettingsPage() {
 	const projectId = todoistProjectForm.watch("projectId");
 
 	React.useEffect(() => {
-		if (session) {
-			todoistAPIKeyForm.setValue("key", session.user.todoistAPIKey);
-		}
-	}, [session]);
-
-	React.useEffect(() => {
 		console.log(todoistProjectForm);
 		console.log(isGetTodoistProjectsLoading);
-		if (session && !isGetTodoistProjectsLoading) {
-			todoistProjectForm.setValue("projectId", session.user.todoistProjectId, {
+		if (user && !isGetTodoistProjectsLoading) {
+			todoistProjectForm.setValue("projectId", user.todoistProjectId, {
 				shouldDirty: true,
 			});
 		}
@@ -90,7 +85,7 @@ export default function TodoistSettingsPage() {
 					<Separator />
 
 					<div className="w-full flex flex-row gap-10">
-						{session && (
+						{user && (
 							<Form {...todoistAPIKeyForm}>
 								<form
 									className="space-y-4 max-w-sm w-full"

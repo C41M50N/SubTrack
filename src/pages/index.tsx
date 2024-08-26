@@ -3,29 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { pricingInfo } from "@/features/pricing";
 import PricingCard from "@/features/pricing/pricing-card";
-import { authOptions } from "@/server/auth";
-import {
-	IconArrowBadgeRight,
-	IconArrowBadgeRightFilled,
-	IconArrowBigRightFilled,
-	IconCircleCheck,
-	IconExternalLink,
-} from "@tabler/icons-react";
-import type {
-	GetServerSidePropsContext,
-	InferGetServerSidePropsType,
-} from "next";
-import { getServerSession } from "next-auth/next";
-import { getProviders, signIn, useSession } from "next-auth/react";
+import { SignInButton, SignUpButton, SignedIn, SignedOut } from "@clerk/nextjs";
+import { IconDashboard, IconExternalLink } from "@tabler/icons-react";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-export default function SignInPage({
-	provider,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) {
-	const { data: session } = useSession();
+export default function SignInPage() {
 	const router = useRouter();
 
 	return (
@@ -69,63 +54,59 @@ export default function SignInPage({
 					<div className="flex-1" />
 
 					<div className="hidden md:flex flex-row gap-0.5">
-						{/* <a href="https://cbuff.dev/projects/subtrack">
-							<Button variant="link" className="flex flex-row gap-1">
-								<span className="text-2xl">About</span>
-								<IconExternalLink strokeWidth={1.5} />
+						<Link href="/demo">
+							<Button size="lg" variant="ghost_link">
+								<span className="text-xl">Demo</span>
 							</Button>
-						</a>
+						</Link>
 
-						<span className="text-lg font-bold self-center">·</span> */}
-
-						<a href="/demo">
-							<Button variant="link" className="flex flex-row gap-1">
-								<span className="text-2xl">Demo</span>
-								<IconExternalLink strokeWidth={1.5} />
+						<Link href="https://github.com/C41M50N/SubTrack">
+							<Button
+								size="lg"
+								variant="ghost_link"
+								className="flex flex-row gap-1"
+							>
+								<span className="text-xl">GitHub</span>
+								<IconExternalLink className="size-5" />
 							</Button>
-						</a>
-
-						<span className="text-lg font-bold self-center">·</span>
-
-						<a href="https://github.com/C41M50N/SubTrack">
-							<Button variant="link" className="flex flex-row gap-1">
-								<span className="text-2xl">GitHub</span>
-								<IconExternalLink strokeWidth={1.5} />
-							</Button>
-						</a>
+						</Link>
 					</div>
 
-					<Separator orientation="vertical" className="hidden md:block h-2/5 bg-gray-500" />
+					<div className="ml-1" />
 
-					<div className="ml-5" />
+					<Separator
+						orientation="vertical"
+						className="hidden md:block h-2/5 bg-gray-400"
+					/>
 
-					{session === null && (
-						<Button
-							className="bg-black hover:bg-black/80 flex flex-row gap-4"
-							variant="default"
-							size="lg"
-							onClick={() => signIn(provider.id, { callbackUrl: "/dashboard" })}
-						>
-							<Image
-								alt="Google Icon"
-								src="/google.svg"
-								width={1}
-								height={1}
-								className="w-6 h-6"
-							/>
-							<span className="font-semibold text-lg">Sign In with Google</span>
-						</Button>
-					)}
-					{session !== null && (
+					<div className="ml-0" />
+
+					<SignedOut>
+						<div className="flex flex-row gap-2">
+							<Link href="/auth/login">
+								<Button size="lg" variant="ghost">
+									<span className="font-semibold text-lg">Login</span>
+								</Button>
+							</Link>
+
+							<Link href="/auth/signup">
+								<Button size="lg" variant="default">
+									<span className="font-semibold text-lg">Get Started</span>
+								</Button>
+							</Link>
+						</div>
+					</SignedOut>
+
+					<SignedIn>
 						<Button
 							variant="default"
 							size="lg"
 							onClick={() => router.push("/dashboard")}
 						>
-							<span className="font-semibold text-lg">Go to Dashboard</span>
-							<IconArrowBigRightFilled className="ml-3" size={20} />
+							<IconDashboard className="mr-2" size={20} />
+							<span className="font-semibold text-lg">Dashboard</span>
 						</Button>
-					)}
+					</SignedIn>
 				</header>
 
 				<section className="max-w-[720px] pt-14 md:pt-24 mx-auto flex flex-col items-center justify-center gap-9">
@@ -300,13 +281,4 @@ export default function SignInPage({
 			</div>
 		</>
 	);
-}
-
-export async function getServerSideProps(context: GetServerSidePropsContext) {
-	const providers = await getProviders();
-
-	return {
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		props: { provider: providers!.google },
-	};
 }

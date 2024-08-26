@@ -1,15 +1,14 @@
-import { signOut, useSession } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import React from "react";
+import type React from "react";
 
 import {
 	IconDashboard,
 	IconEdit,
 	IconPlus,
 	IconSettings,
+	IconSettingsFilled,
 } from "@tabler/icons-react";
 
 import NewSubscriptionModal from "@/components/subscriptions/NewSubscriptionModal";
@@ -24,7 +23,13 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Toaster } from "@/components/ui/toaster";
-import { useCategories, useCollections, useModalState } from "@/lib/hooks";
+import {
+	useCategories,
+	useCollections,
+	useModalState,
+	useUser,
+} from "@/lib/hooks";
+import { UserButton, useClerk } from "@clerk/nextjs";
 
 type MainLayoutProps = {
 	children: React.ReactNode;
@@ -32,19 +37,13 @@ type MainLayoutProps = {
 };
 
 export default function MainLayout({ children, title }: MainLayoutProps) {
-	const { data: session } = useSession();
-	const router = useRouter();
+	const { user } = useUser();
+	const { signOut } = useClerk();
 
 	const newSubscriptionModalState = useModalState();
 
 	const { categories, isCategoriesLoading } = useCategories();
 	const { collections, isGetCollectionsLoading } = useCollections();
-
-	React.useEffect(() => {
-		if (session === null) {
-			router.replace("/");
-		}
-	}, [session]);
 
 	return (
 		<>
@@ -102,7 +101,7 @@ export default function MainLayout({ children, title }: MainLayoutProps) {
 						<div className="mr-14">
 							{!isCategoriesLoading && !isGetCollectionsLoading && (
 								<Button
-									className="gap-2 "
+									className="gap-2"
 									onClick={() => {
 										newSubscriptionModalState.setState("open");
 									}}
@@ -113,7 +112,18 @@ export default function MainLayout({ children, title }: MainLayoutProps) {
 							)}
 						</div>
 
-						{session?.user?.name && (
+						{user && (
+							// <UserButton>
+							// 	<UserButton.MenuItems>
+							// 		<UserButton.Link
+							// 			label="Settings"
+							// 			labelIcon={<IconSettingsFilled className="size-4" />}
+							// 			href="/settings/account"
+							// 		/>
+							// 		<UserButton.Action label="signOut" />
+							// 	</UserButton.MenuItems>
+							// </UserButton>
+
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
 									<Button
@@ -122,9 +132,9 @@ export default function MainLayout({ children, title }: MainLayoutProps) {
 									>
 										<Avatar>
 											<AvatarImage
-												alt={session.user.name}
+												alt={user.name}
 												src={
-													session.user.image ||
+													user.image ||
 													"https://img.icons8.com/cotton/64/gender-neutral-user--v1.png"
 												}
 											/>
@@ -141,10 +151,10 @@ export default function MainLayout({ children, title }: MainLayoutProps) {
 									<DropdownMenuLabel className="font-normal">
 										<div className="flex flex-col space-y-1">
 											<p className="text-sm font-medium leading-none">
-												{session.user.name}
+												{user.name}
 											</p>
 											<p className="text-xs leading-none text-muted-foreground">
-												{session.user.email}
+												{user.email}
 											</p>
 										</div>
 									</DropdownMenuLabel>
@@ -156,7 +166,7 @@ export default function MainLayout({ children, title }: MainLayoutProps) {
 									<DropdownMenuItem
 										className="text-red-700"
 										onClick={() =>
-											signOut({ callbackUrl: "/", redirect: true })
+											signOut({ redirectUrl: "/" })
 										}
 									>
 										Log out

@@ -21,14 +21,15 @@ import {
 } from "@/features/common/calculations-helpers";
 import { Statistics } from "@/features/common/subscription-stats";
 import MainLayout from "@/layouts/main";
-import { useCategories } from "@/lib/hooks";
+import { useCategories, useUser } from "@/lib/hooks";
 import { toMoneyString } from "@/utils";
 import { api } from "@/utils/api";
 import { useAtom } from "jotai";
-import { useSession } from "next-auth/react";
 import React from "react";
 
 export default function DashboardPage() {
+	const { user } = useUser();
+
 	const [selectedCollectionId, setSelectedCollectionId] = useAtom(
 		selectedCollectionIdAtom,
 	);
@@ -50,7 +51,6 @@ export default function DashboardPage() {
 		);
 	const [selectedSubscriptions] = useAtom(selectedSubscriptionsAtom);
 	const { categories, isCategoriesLoading } = useCategories();
-	const { data: session } = useSession();
 
 	return (
 		<MainLayout title="Dashboard | SubTrack">
@@ -74,7 +74,7 @@ export default function DashboardPage() {
 					{!isSubsLoading && !subscriptions && (
 						<span className="text-xl">No Subscriptions</span>
 					)}
-					{session &&
+					{user &&
 						!isSubsLoading &&
 						subscriptions &&
 						!isCategoriesLoading &&
@@ -83,7 +83,7 @@ export default function DashboardPage() {
 								columns={columns}
 								data={subscriptions}
 								categories={categories}
-								licenseType={session.user.licenseType}
+								licenseType={user.license_type}
 							/>
 						)}
 				</div>

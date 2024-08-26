@@ -65,7 +65,7 @@ type EditSubscriptionModalProps = {
 	state: ModalState;
 	subscription: Subscription;
 	categories: Array<string>;
-	collections: Array<Omit<Collection, "userId">>;
+	collections: Array<Omit<Collection, "user_id">>;
 };
 
 export default function EditSubscriptionModal({
@@ -286,7 +286,7 @@ export default function EditSubscriptionModal({
 
 							<FormField
 								control={form.control}
-								name="collectionId"
+								name="collection_id"
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Collection</FormLabel>
