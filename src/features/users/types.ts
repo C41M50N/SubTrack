@@ -9,7 +9,7 @@ const CreateUserSchema = z.object({
 
 export type CreateUserProps = z.infer<typeof CreateUserSchema>;
 
-const UpdateUserSchema = CreateUserSchema.pick({ id: true, name: true });
+const UpdateUserSchema = CreateUserSchema.pick({ id: true, name: true, image: true });
 
 export type UpdateUserProps = z.infer<typeof UpdateUserSchema>;
 

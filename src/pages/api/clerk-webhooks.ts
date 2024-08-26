@@ -74,6 +74,7 @@ export default async function handler(
 		await updateUser({
 			id: evt.data.id,
 			name: `${evt.data.first_name} ${evt.data.last_name}`,
+			image: evt.data.image_url,
 		});
 	} else if (evt.type === "user.deleted") {
 		console.log("deleting user:", evt.data);
