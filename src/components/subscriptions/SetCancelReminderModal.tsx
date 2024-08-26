@@ -9,10 +9,9 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import type { Subscription } from "@/features/subscriptions/types";
-import type { ModalState } from "@/lib/hooks";
+import { type ModalState, useUser } from "@/lib/hooks";
 import { api } from "@/utils/api";
 import dayjs from "dayjs";
-import { useSession } from "next-auth/react";
 
 type SetCancelReminderModalProps = {
 	state: ModalState;
@@ -23,11 +22,11 @@ export default function SetCancelReminderModal({
 	state,
 	subscription,
 }: SetCancelReminderModalProps) {
-	const { data: session } = useSession();
+	const { user } = useUser();
 
 	const { data: projectName, isLoading: isProjectNameLoading } =
 		api.main.getTodoistProjectName.useQuery(undefined, {
-			enabled: session ? session.user.todoistAPIKey !== "" : false,
+			enabled: user ? user.todoistAPIKey !== "" : false,
 		});
 
 	const {
@@ -47,7 +46,7 @@ export default function SetCancelReminderModal({
 					<DialogTitle>Set Cancel Reminder for {subscription.name}</DialogTitle>
 				</DialogHeader>
 
-				{session && !isProjectNameLoading && (
+				{user && !isProjectNameLoading && (
 					<DialogDescription>
 						A Todoist task will be created to remind you to cancel your "
 						{subscription.name}" subscription. The task will be placed in the "
@@ -58,7 +57,7 @@ export default function SetCancelReminderModal({
 						.
 					</DialogDescription>
 				)}
-				{(!session || isProjectNameLoading) && <LoadingSpinner />}
+				{(!user || isProjectNameLoading) && <LoadingSpinner />}
 
 				<DialogFooter>
 					<Button

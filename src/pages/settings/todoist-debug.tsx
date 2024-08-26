@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSession } from "next-auth/react";
 import React from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
@@ -26,6 +25,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import MainLayout from "@/layouts/main";
 import SettingsLayout from "@/layouts/settings";
+import { useUser } from "@/lib/hooks";
 import { api } from "@/utils/api";
 
 const TodoistProjectFormSchema = z.object({
@@ -33,7 +33,7 @@ const TodoistProjectFormSchema = z.object({
 });
 
 export default function TodoistDebugSettingsPage() {
-	const { data: session } = useSession();
+	const { user } = useUser();
 
 	const { data: projects, isLoading: isGetTodoistProjectsLoading } =
 		api.main.getTodoistProjects.useQuery(undefined, {
@@ -47,9 +47,9 @@ export default function TodoistDebugSettingsPage() {
 	const projectId = todoistProjectForm.watch("projectId");
 
 	React.useEffect(() => {
-		if (session && session.user.todoistProjectId !== "") {
-			todoistProjectForm.setValue("projectId", session.user.todoistProjectId);
-			console.log("Setting form value", session.user.todoistProjectId);
+		if (user && user.todoistProjectId !== "") {
+			todoistProjectForm.setValue("projectId", user.todoistProjectId);
+			console.log("Setting form value", user.todoistProjectId);
 		}
 	}, [projects]);
 

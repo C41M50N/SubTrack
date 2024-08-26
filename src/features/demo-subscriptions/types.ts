@@ -11,7 +11,7 @@ export const DEMO_CATEGORIES = [
 
 export type DemoSubscription = Omit<
 	Subscription,
-	"last_invoice" | "userId" | "collectionId"
+	"last_invoice" | "user_id" | "collection_id"
 > & {
 	frequency: SubscriptionFrequency;
 	icon_ref: SubscriptionIcon;
@@ -20,5 +20,5 @@ export type DemoSubscription = Omit<
 
 export const CreateDemoSubscriptionSchema = SubscriptionSchema.omit({
 	id: true,
-	collectionId: true,
+	collection_id: true,
 });

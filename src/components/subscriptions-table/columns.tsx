@@ -1,4 +1,3 @@
-import { useSession } from "next-auth/react";
 import { Lato, Roboto } from "next/font/google";
 import Image from "next/image";
 
@@ -13,7 +12,12 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 
 import type { Subscription } from "@/features/subscriptions/types";
-import { useCategories, useCollections, useModalState } from "@/lib/hooks";
+import {
+	useCategories,
+	useCollections,
+	useModalState,
+	useUser,
+} from "@/lib/hooks";
 import { toMoneyString, toProperCase } from "@/utils";
 
 import DeleteSubscriptionModal from "@/components/subscriptions/DeleteSubscriptionModal";
@@ -195,7 +199,7 @@ export const columns: ColumnDef<Subscription>[] = [
 		cell: ({ row }) => {
 			const subscription = row.original;
 
-			const { data: session } = useSession();
+			const { user } = useUser();
 			const { categories } = useCategories();
 			const { collections } = useCollections();
 
@@ -227,7 +231,7 @@ export const columns: ColumnDef<Subscription>[] = [
 
 							<DropdownMenuSeparator />
 
-							{session?.user.todoistAPIKey !== "" && (
+							{user && user.todoistAPIKey !== "" && (
 								<>
 									<DropdownMenuItem
 										className="cursor-pointer"

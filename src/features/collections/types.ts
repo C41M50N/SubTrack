@@ -4,12 +4,12 @@ import { z } from "zod";
 export const CollectionSchema = z.object({
 	id: z.string(),
 	title: z.string(),
-	userId: z.string(),
+	user_id: z.string(),
 });
 
 export const CreateCollectionSchema = CollectionSchema.omit({
 	id: true,
-	userId: true,
+	user_id: true,
 });
 
-export type CollectionWithoutUserId = Omit<CollectionPrisma, "userId">;
+export type CollectionWithoutUserId = Omit<CollectionPrisma, "user_id">;

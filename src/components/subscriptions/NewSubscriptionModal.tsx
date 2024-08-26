@@ -9,15 +9,9 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { useForm } from "react-hook-form";
 import type z from "zod";
 
-import {
-	type ModalState,
-	useCategories,
-	useCollections,
-	useCreateSubscription,
-} from "@/lib/hooks";
+import { type ModalState, useCreateSubscription } from "@/lib/hooks";
 import { cn, toProperCase } from "@/utils";
 
-import { LoadingSpinner } from "@/components/common/loading-spinner";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -66,7 +60,7 @@ import { useAtom } from "jotai";
 type NewSubscriptionModalProps = {
 	state: ModalState;
 	categories: string[];
-	collections: Omit<Collection, "userId">[];
+	collections: Omit<Collection, "user_id">[];
 };
 
 export default function NewSubscriptionModal({
@@ -97,7 +91,7 @@ export default function NewSubscriptionModal({
 		}
 
 		if (selectedCollectionId) {
-			form.setValue("collectionId", selectedCollectionId);
+			form.setValue("collection_id", selectedCollectionId);
 		}
 	}, [state]);
 
@@ -301,7 +295,7 @@ export default function NewSubscriptionModal({
 
 							<FormField
 								control={form.control}
-								name="collectionId"
+								name="collection_id"
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Collection</FormLabel>

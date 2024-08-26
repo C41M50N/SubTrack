@@ -79,7 +79,9 @@ export default function EditSubscriptionModal({
 		},
 	});
 
-	async function onSubmit(values: z.infer<typeof CreateDemoSubscriptionSchema>) {
+	async function onSubmit(
+		values: z.infer<typeof CreateDemoSubscriptionSchema>,
+	) {
 		setIsLoading(true);
 		await sleep(500);
 		setIsLoading(false);

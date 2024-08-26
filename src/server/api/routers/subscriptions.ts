@@ -11,11 +11,11 @@ export const subscriptionsRouter = createTRPCRouter({
 		.input(SubscriptionWithoutIdSchema)
 		.mutation(async ({ ctx, input }) => {
 			console.log(
-				`Creating new subscription for <${ctx.session.user.name}>: ${JSON.stringify(input)}`,
+				`Creating new subscription for <${ctx.user.name}>: ${JSON.stringify(input)}`,
 			);
 
 			let maxNumSubscriptions: number = Number.POSITIVE_INFINITY;
-			switch (ctx.session.user.licenseType) {
+			switch (ctx.user.license_type) {
 				case "FREE":
 					maxNumSubscriptions = 10;
 					break;
@@ -27,8 +27,8 @@ export const subscriptionsRouter = createTRPCRouter({
 
 			const currentNumSubscriptions = await ctx.prisma.subscription.count({
 				where: {
-					userId: ctx.session.user.id,
-					collectionId: input.collectionId,
+					user_id: ctx.user.id,
+					collection_id: input.collection_id,
 				},
 			});
 
@@ -40,16 +40,16 @@ export const subscriptionsRouter = createTRPCRouter({
 
 			await ctx.prisma.subscription.create({
 				data: {
-					userId: ctx.session.user.id,
+					user_id: ctx.user.id,
 					...input,
-					amount: Math.floor(input.amount * 100)
+					amount: Math.floor(input.amount * 100),
 				},
 			});
 		}),
 
 	getSubscriptions: protectedProcedure.query(async ({ ctx }) => {
 		const raw_subs = await ctx.prisma.subscription.findMany({
-			where: { userId: ctx.session.user.id },
+			where: { user_id: ctx.user.id },
 		});
 		return raw_subs.map((sub) => sub as Subscription);
 	}),
@@ -59,8 +59,8 @@ export const subscriptionsRouter = createTRPCRouter({
 		.query(async ({ ctx, input: collectionId }) => {
 			const subs = await ctx.prisma.subscription.findMany({
 				where: {
-					collectionId: collectionId,
-					userId: ctx.session.user.id,
+					collection_id: collectionId,
+					user_id: ctx.user.id,
 				},
 			});
 			return subs.map((sub) => sub as Subscription);
@@ -70,7 +70,7 @@ export const subscriptionsRouter = createTRPCRouter({
 		.input(SubscriptionSchema)
 		.mutation(async ({ ctx, input }) => {
 			await ctx.prisma.subscription.update({
-				where: { id: input.id, userId: ctx.session.user.id },
+				where: { id: input.id, user_id: ctx.user.id },
 				data: { ...input, amount: input.amount * 100 },
 			});
 		}),
@@ -79,7 +79,7 @@ export const subscriptionsRouter = createTRPCRouter({
 		.input(z.string())
 		.mutation(async ({ ctx, input }) => {
 			await ctx.prisma.subscription.delete({
-				where: { userId: ctx.session.user.id, id: input },
+				where: { user_id: ctx.user.id, id: input },
 			});
 		}),
 });

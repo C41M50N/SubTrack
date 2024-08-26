@@ -6,7 +6,7 @@ export const categoriesRouter = createTRPCRouter({
 		return (
 			(
 				await ctx.prisma.user.findUnique({
-					where: { id: ctx.session.user.id },
+					where: { id: ctx.user.id },
 					select: { categories: true },
 				})
 			)?.categories || []
@@ -18,13 +18,13 @@ export const categoriesRouter = createTRPCRouter({
 		.mutation(async ({ ctx, input: categories }) => {
 			const numAllSubscriptions = await ctx.prisma.subscription.count({
 				where: {
-					userId: ctx.session.user.id,
+					user_id: ctx.user.id,
 				},
 			});
 
 			const numValidSubscriptions = await ctx.prisma.subscription.count({
 				where: {
-					userId: ctx.session.user.id,
+					user_id: ctx.user.id,
 					category: {
 						in: categories,
 					},
@@ -39,7 +39,7 @@ export const categoriesRouter = createTRPCRouter({
 			}
 
 			await ctx.prisma.user.update({
-				where: { id: ctx.session.user.id },
+				where: { id: ctx.user.id },
 				data: { categories: categories },
 			});
 		}),

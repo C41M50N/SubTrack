@@ -26,7 +26,7 @@ export default function MoreOptions() {
 
 		const csv = generateCsv(csvConfig)(
 			subscriptions
-				.map(({ id, userId, icon_ref, ...rest }) => rest)
+				.map(({ id, user_id, icon_ref, ...rest }) => rest)
 				.map(({ next_invoice, last_invoice, ...rest }) => ({
 					...rest,
 					next_invoice: dayjs(next_invoice).format("MM/DD/YYYY"),

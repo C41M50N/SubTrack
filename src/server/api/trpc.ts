@@ -7,14 +7,13 @@
  * need to use are documented accordingly near the end.
  */
 
-import { TRPCError, initTRPC } from "@trpc/server";
+import { TRPCError, type inferAsyncReturnType, initTRPC } from "@trpc/server";
 import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
-import type { Session } from "next-auth";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
-import { getServerAuthSession } from "@/server/auth";
 import { prisma } from "@/server/db";
+import { getAuth } from "@clerk/nextjs/server";
 
 /**
  * 1. CONTEXT
@@ -24,43 +23,14 @@ import { prisma } from "@/server/db";
  * These allow you to access things when processing a request, like the database, the session, etc.
  */
 
-interface CreateContextOptions {
-	session: Session | null;
-}
-
-/**
- * This helper generates the "internals" for a tRPC context. If you need to use it, you can export
- * it from here.
- *
- * Examples of things you may need it for:
- * - testing, so we don't have to mock Next.js' req/res
- * - tRPC's `createSSGHelpers`, where we don't have req/res
- *
- * @see https://create.t3.gg/en/usage/trpc#-serverapitrpcts
- */
-const createInnerTRPCContext = (opts: CreateContextOptions) => {
+export const createTRPCContext = async (opts: CreateNextContextOptions) => {
 	return {
-		session: opts.session,
+		auth: getAuth(opts.req),
 		prisma,
 	};
 };
 
-/**
- * This is the actual context you will use in your router. It will be used to process every request
- * that goes through your tRPC endpoint.
- *
- * @see https://trpc.io/docs/context
- */
-export const createTRPCContext = async (opts: CreateNextContextOptions) => {
-	const { req, res } = opts;
-
-	// Get the session from the server using the getServerSession wrapper function
-	const session = await getServerAuthSession({ req, res });
-
-	return createInnerTRPCContext({
-		session,
-	});
-};
+export type Context = inferAsyncReturnType<typeof createTRPCContext>;
 
 /**
  * 2. INITIALIZATION
@@ -70,7 +40,7 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
  * errors on the backend.
  */
 
-const t = initTRPC.context<typeof createTRPCContext>().create({
+const t = initTRPC.context<Context>().create({
 	transformer: superjson,
 	errorFormatter({ shape, error }) {
 		return {
@@ -91,41 +61,29 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
  * "/src/server/api/routers" directory.
  */
 
-/**
- * This is how you create new routers and sub-routers in your tRPC API.
- *
- * @see https://trpc.io/docs/router
- */
-export const createTRPCRouter = t.router;
-
-/**
- * Public (unauthenticated) procedure
- *
- * This is the base piece you use to build new queries and mutations on your tRPC API. It does not
- * guarantee that a user querying is authorized, but you can still access user session data if they
- * are logged in.
- */
-export const publicProcedure = t.procedure;
-
-/** Reusable middleware that enforces users are logged in before running the procedure. */
-const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
-	if (!ctx.session?.user) {
+const isAuthed = t.middleware(async ({ next, ctx }) => {
+	if (!ctx.auth.userId) {
 		throw new TRPCError({ code: "UNAUTHORIZED" });
 	}
+
+	const user = await ctx.prisma.user.findUnique({
+		where: { id: ctx.auth.userId },
+	});
+
+	if (!user) {
+		throw new TRPCError({ code: "BAD_REQUEST" });
+	}
+
 	return next({
 		ctx: {
-			// infers the `session` as non-nullable
-			session: { ...ctx.session, user: ctx.session.user },
+			auth: ctx.auth,
+			user: user,
 		},
 	});
 });
 
-/**
- * Protected (authenticated) procedure
- *
- * If you want a query or mutation to ONLY be accessible to logged in users, use this. It verifies
- * the session is valid and guarantees `ctx.session.user` is not null.
- *
- * @see https://trpc.io/docs/procedures
- */
-export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
+export const createTRPCRouter = t.router;
+
+export const publicProcedure = t.procedure;
+
+export const protectedProcedure = t.procedure.use(isAuthed);

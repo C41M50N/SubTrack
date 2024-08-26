@@ -28,7 +28,7 @@ export const SubscriptionSchema = z.object({
 	icon_ref: z.enum(ICONS),
 	next_invoice: z.date(),
 	send_alert: z.boolean(),
-	collectionId: z.string(),
+	collection_id: z.string(),
 });
 
 export const SubscriptionWithoutIdSchema = SubscriptionSchema.omit({

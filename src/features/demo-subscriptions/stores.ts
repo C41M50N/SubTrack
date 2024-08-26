@@ -71,7 +71,10 @@ export const useDemoSubscriptions = create<State>()(
 
 			addSubscription(sub) {
 				set({
-					subscriptions: [...get().subscriptions, { ...sub, amount: sub.amount * 100, id: uuidv4() }],
+					subscriptions: [
+						...get().subscriptions,
+						{ ...sub, amount: sub.amount * 100, id: uuidv4() },
+					],
 				});
 			},
 
@@ -82,7 +85,7 @@ export const useDemoSubscriptions = create<State>()(
 						...get().subscriptions.slice(0, idx),
 						{
 							...sub,
-							amount: sub.amount * 100
+							amount: sub.amount * 100,
 						},
 						...get().subscriptions.slice(idx + 1),
 					],

@@ -42,11 +42,11 @@ export default async function handler(
 
 	const groupRenewingSoonSubscriptions = groupBy(
 		renewingSoonSubscriptions,
-		(sub: SubscriptionDTO) => sub.userId,
+		(sub: SubscriptionDTO) => sub.user_id,
 	);
 	const groupRenewedRecentlySubscriptions = groupBy(
 		renewedRecentlySubscriptions,
-		(sub: SubscriptionDTO) => sub.userId,
+		(sub: SubscriptionDTO) => sub.user_id,
 	);
 
 	console.log(groupRenewedRecentlySubscriptions);
