@@ -55,6 +55,8 @@ export default function TodoistSettingsPage() {
 	const { data: projects, isLoading: isGetTodoistProjectsLoading } =
 		api.main.getTodoistProjects.useQuery(undefined, {
 			staleTime: Number.POSITIVE_INFINITY,
+			retry: 0,
+			enabled: user?.todoistAPIKey !== undefined && user.todoistAPIKey.length > 0
 		});
 	const { mutate: setTodoistProject, isLoading: isSetTodoistProjectLoading } =
 		api.main.setTodoistProject.useMutation();
