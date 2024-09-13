@@ -10,6 +10,29 @@ datasource db {
     url = env("DATABASE_URL") // uses connection pooling
 }
 
+model Session {
+  id        String   @id
+  userId    String
+  expiresAt DateTime
+
+  user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
+}
+
+model EmailVerificationCode {
+    id          Int @id @default(autoincrement())
+    code        String
+    userId      String @unique
+    email       String
+    expiresAt   DateTime
+}
+
+model PendingUser {
+    id          Int @id @default(autoincrement())
+    name        String
+    email       String @unique
+    createdAt   DateTime @default(now())
+}
+
 enum LicenseType {
     FREE
     BASIC
@@ -22,6 +45,7 @@ model User {
     created_at    DateTime  @default(now())
     name          String
     email         String    @unique
+    emailVerified Boolean   @default(false)
     image         String
 
     license_type    LicenseType @default(FREE)
@@ -32,6 +56,8 @@ model User {
     currentStripeSession    String?
     todoistAPIKey           String @default("")
     todoistProjectId        String @default("")
+
+    sessions Session[]
 }
 
 model Collection {

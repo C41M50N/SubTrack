@@ -1,21 +1,17 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { verifyRequestOrigin } from "lucia";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-const isUnprotectedRoutes = createRouteMatcher([
-	"/",
-	"/auth(.*)",
-	"/api/clerk-webhooks(.*)",
-	"/api/stripe-webhooks(.*)",
-]);
-
-export default clerkMiddleware((auth, req) => {
-	if (!isUnprotectedRoutes(req)) auth().protect();
-});
-
-export const config = {
-	matcher: [
-		// Skip Next.js internals and all static files, unless found in search params
-		"/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-		// Always run for API routes
-		"/(api|trpc)(.*)",
-	],
-};
+export async function middleware(request: NextRequest): Promise<NextResponse> {
+	if (request.method === "GET") {
+		return NextResponse.next();
+	}
+	const originHeader = request.headers.get("Origin");
+	const hostHeader = request.headers.get("Host");
+	if (!originHeader || !hostHeader || !verifyRequestOrigin(originHeader, [hostHeader])) {
+		return new NextResponse(null, {
+			status: 403
+		});
+	}
+	return NextResponse.next();
+}
