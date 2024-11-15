@@ -50,7 +50,7 @@ export default async function handler(
 			send_alert: { equals: true },
 		},
 		orderBy: {
-			last_invoice: "asc"
+			last_invoice: "desc"
 		}
 	});
 
