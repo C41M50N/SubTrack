@@ -36,6 +36,9 @@ export default async function handler(
 			},
 			send_alert: { equals: true },
 		},
+		orderBy: {
+			next_invoice: "asc"
+		}
 	});
 
 	const renewedRecentlySubscriptions = await prisma.subscription.findMany({
@@ -46,6 +49,9 @@ export default async function handler(
 			},
 			send_alert: { equals: true },
 		},
+		orderBy: {
+			last_invoice: "asc"
+		}
 	});
 
 	const groupRenewingSoonSubscriptions = groupBy(
