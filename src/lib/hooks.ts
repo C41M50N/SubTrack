@@ -63,14 +63,6 @@ export const useSetCategories = () => {
 	return { setCategories, isSetCategoriesLoading };
 };
 
-export const useAllSubscriptions = () => {
-	const { data: subscriptions } = api.subscriptions.getSubscriptions.useQuery(
-		undefined,
-		{ staleTime: Number.POSITIVE_INFINITY },
-	);
-	return { subscriptions } as const;
-};
-
 export const useCreateSubscription = () => {
 	const ctx = api.useContext();
 	const {

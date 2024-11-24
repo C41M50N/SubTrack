@@ -47,13 +47,6 @@ export const subscriptionsRouter = createTRPCRouter({
 			});
 		}),
 
-	getSubscriptions: protectedProcedure.query(async ({ ctx }) => {
-		const raw_subs = await ctx.prisma.subscription.findMany({
-			where: { user_id: ctx.user.id },
-		});
-		return raw_subs.map((sub) => sub as Subscription);
-	}),
-
 	getSubscriptionsFromCollection: protectedProcedure
 		.input(z.string())
 		.query(async ({ ctx, input: collectionId }) => {
