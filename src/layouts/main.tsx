@@ -42,8 +42,8 @@ export default function MainLayout({ children, title }: MainLayoutProps) {
 
 	const newSubscriptionModalState = useModalState();
 
-	const { categories, isCategoriesLoading } = useCategories();
-	const { collections, isGetCollectionsLoading } = useCollections();
+	const { categories } = useCategories();
+	const { collections } = useCollections();
 
 	return (
 		<>
@@ -79,20 +79,6 @@ export default function MainLayout({ children, title }: MainLayoutProps) {
 						</nav>
 
 						<div className="ml-auto" />
-
-						<div className="mr-14">
-							{!isCategoriesLoading && !isGetCollectionsLoading && (
-								<Button
-									className="gap-2"
-									onClick={() => {
-										newSubscriptionModalState.setState("open");
-									}}
-								>
-									<IconPlus />
-									Add Subscription
-								</Button>
-							)}
-						</div>
 
 						{user && (
 							// <UserButton>

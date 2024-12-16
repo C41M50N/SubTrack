@@ -55,7 +55,7 @@ export default function CollectionSelector() {
 
 	return (
 		<div>
-			{!collections && <Skeleton className="w-[160px] lg:w-[200px] h-8" />}
+			{!collections && <Skeleton className="w-[160px] lg:w-[200px] h-10" />}
 			{collections && (
 				<Select
 					disabled={isLoading}
@@ -63,7 +63,7 @@ export default function CollectionSelector() {
 					value={selectedCollectionId || undefined}
 					onValueChange={(collectionId) => setGlobalCollectionId(collectionId)}
 				>
-					<SelectTrigger className="w-[160px] lg:w-[200px] h-8 text-sm">
+					<SelectTrigger className="w-[160px] lg:w-[200px] h-10 text-sm">
 						<div className="ml-1 flex flex-row gap-4">
 							<GalleryVerticalEndIcon className="size-4 mt-0.5" />
 							<SelectValue
@@ -79,7 +79,7 @@ export default function CollectionSelector() {
 								return (
 									<div
 										key={collection.id}
-										className="flex flex-row gap-0.5 h-8"
+										className="flex flex-row gap-0.5 h-10"
 									>
 										<SelectItem value={collection.id}>
 											<span className="text-sm text-left font-medium">
@@ -88,7 +88,7 @@ export default function CollectionSelector() {
 										</SelectItem>
 
 										<Button
-											className="h-8 w-8"
+											className="size-10"
 											size={"icon"}
 											variant={"ghost"}
 											onClick={() => openEditModal(collection)}
@@ -96,7 +96,7 @@ export default function CollectionSelector() {
 											<PencilIcon size={14} />
 										</Button>
 										<Button
-											className={"h-8 w-8"}
+											className={"size-10"}
 											size={"icon"}
 											variant={"ghost"}
 											onClick={() => openDeleteModal(collection)}
@@ -114,8 +114,7 @@ export default function CollectionSelector() {
 							<Button
 								onClick={() => newCollectionModalState.setState("open")}
 								variant={"ghost"}
-								size={"sm"}
-								className="w-full justify-start"
+								className="h-10 w-full justify-start"
 							>
 								<PlusCircleIcon className="mr-2 size-4" />
 								New Collection

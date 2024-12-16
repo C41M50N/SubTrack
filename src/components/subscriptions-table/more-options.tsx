@@ -13,7 +13,7 @@ import { selectedSubscriptionsAtom } from "@/features/common/atoms";
 import dayjs from "@/lib/dayjs";
 import { download, generateCsv, mkConfig } from "export-to-csv";
 import { useAtom } from "jotai";
-import { CircleEllipsisIcon } from "lucide-react";
+import { EllipsisVerticalIcon } from "lucide-react";
 
 export default function MoreOptions() {
 	const [subscriptions] = useAtom(selectedSubscriptionsAtom);
@@ -45,11 +45,9 @@ export default function MoreOptions() {
 			<DropdownMenuTrigger asChild>
 				<Button
 					variant="outline"
-					size="sm"
-					className="ml-auto hidden h-8 lg:flex"
+					className="p-0 h-10 w-8"
 				>
-					<CircleEllipsisIcon className="mr-2 h-4 w-4" />
-					More
+					<EllipsisVerticalIcon className="size-6" />
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end" className="w-[150px]">

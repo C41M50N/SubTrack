@@ -59,8 +59,8 @@ export default function DashboardPage() {
 			<p className="text-muted-foreground">Track your subscriptions here.</p>
 			<Separator className="mt-4 mb-6" />
 
-			<div className="flex flex-row space-x-8">
-				<div className="w-9/12">
+			<div className="flex flex-row space-x-6">
+				<div className="w-full">
 					{isSubsLoading && (
 						<div className="w-full space-y-2 p-2">
 							<Skeleton className="h-12" />
@@ -92,7 +92,7 @@ export default function DashboardPage() {
 						)}
 				</div>
 
-				<div className="flex-1">
+				<div className="min-w-[240px]">
 					<div className="flex flex-col space-y-4">
 						{/* Statistic Cards */}
 						{isSubsLoading &&
