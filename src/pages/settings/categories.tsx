@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { CircleXIcon } from "lucide-react";
 import React from "react";
 
 import { LoadingSpinner } from "@/components/common/loading-spinner";
@@ -64,9 +64,9 @@ export default function CategoriesSettingsPage() {
 										className="flex flex-row gap-1 text-lg font-medium"
 									>
 										{name}
-										<X
+										<CircleXIcon
 											strokeWidth={2.5}
-											className="hover:cursor-pointer"
+											className="ml-1 size-5 hover:cursor-pointer"
 											onClick={() => removeCategory(name)}
 										/>
 									</Badge>
