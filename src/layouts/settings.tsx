@@ -27,6 +27,10 @@ const SettingsNavItems: Array<NavItem> = [
 		title: "Todoist Integration",
 		href: "/settings/todoist",
 	},
+	{
+		title: "Own Your Data",
+		href: "/settings/data",
+	},
 	// {
 	//   title: "Todoist Debug",
 	//   href: "/settings/todoist-debug"

@@ -1,3 +1,4 @@
+import { DataSchema } from "@/features/import-export";
 import { deleteUser, updateUserInfo } from "@/lib/clerk";
 import {
 	createReminder,
@@ -6,7 +7,7 @@ import {
 	getProjects,
 } from "@/lib/todoist";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { sleep } from "@/utils";
+import { parseJSON, sleep } from "@/utils";
 import { z } from "zod";
 
 export const mainRouter = createTRPCRouter({
@@ -88,4 +89,166 @@ export const mainRouter = createTRPCRouter({
 				data: { todoistProjectId: projectId },
 			});
 		}),
+
+	getExportJSON: protectedProcedure
+		.query(async ({ ctx }) => {
+			const categories = (await ctx.prisma.user.findUnique({
+				where: { id: ctx.user.id },
+				select: { categories: true },
+			}))?.categories || [];
+
+			const collections = await ctx.prisma.collection.findMany({
+				where: {
+					user_id: ctx.user.id,
+				},
+				select: {
+					title: true,
+					subscriptions: {
+						select: {
+							name: true,
+							amount: true,
+							frequency: true,
+							category: true,
+							next_invoice: true,
+							last_invoice: true,
+							icon_ref: true,
+							send_alert: true,
+						}
+					}
+				}
+			});
+
+			const data = {
+				categories: categories,
+				collections: collections,
+			}
+
+			return JSON.stringify(data, null, "\t");
+		}),
+
+	importData: protectedProcedure
+		.input(z.object({ json: z.string(), overwrite: z.boolean() }))
+		.mutation(async ({ ctx, input }) => {
+			const data = parseJSON(input.json, DataSchema);
+
+			// handle categories
+			if (input.overwrite) {
+				await ctx.prisma.$transaction([
+					// empty user's categories
+					ctx.prisma.user.update({
+						where: {
+							id: ctx.user.id
+						},
+						data: {
+							categories: []
+						}
+					}),
+
+					// add categories from imported JSON
+					ctx.prisma.user.update({
+						where: {
+							id: ctx.user.id
+						},
+						data: {
+							categories: data.categories
+						}
+					})
+				])
+			} else {
+				// set user's categories as array of merged categories from existing and imported JSON
+				const currentCategories = (await ctx.prisma.user.findUnique({
+					where: { id: ctx.user.id },
+					select: { categories: true },
+				}))?.categories || [];
+	
+				const allCategories = new Set([...currentCategories, ...data.categories])
+	
+				await ctx.prisma.user.update({
+					where: {
+						id: ctx.user.id
+					},
+					data: {
+						categories: Array.from(allCategories)
+					}
+				})
+			}
+			
+
+			// handle collections and subscriptions
+			const currentCollectionTitles = (await ctx.prisma.collection.findMany({
+				where: {
+					user_id: ctx.user.id
+				},
+				select: {
+					title: true
+				}
+			})).map((col) => col.title);
+
+			for (const collectionTitle of data.collections.map(col => col.title)) {
+				// if there is a new collection title in the imported JSON,
+				// then create the collection and add its subscriptions to the collection.
+				if (!currentCollectionTitles.includes(collectionTitle)) {
+					const { id: collectionId } = await ctx.prisma.collection.create({
+						data: {
+							user_id: ctx.user.id,
+							title: collectionTitle,
+						}
+					})
+
+					// biome-ignore lint/style/noNonNullAssertion: guaranteed to be non-null
+					const subscriptions = data.collections.find(col => col.title === collectionTitle)!.subscriptions;
+					await ctx.prisma.subscription.createMany({
+						data: subscriptions.map(sub => ({
+							user_id: ctx.user.id,
+							collection_id: collectionId,
+							...sub,
+						}))
+					})
+				}
+
+				// if there is a duplicate collection title in the imported JSON,
+				// then add (or overwrite) subscriptions to the collection.
+				if (currentCollectionTitles.includes(collectionTitle)) {
+					const collection = await ctx.prisma.collection.findFirst({
+						where: {
+							user_id: ctx.user.id,
+							title: collectionTitle,
+						}
+					})
+					if (!collection) break;
+
+					// biome-ignore lint/style/noNonNullAssertion: guaranteed to be non-null
+					const subscriptions = data.collections.find(col => col.title === collectionTitle)!.subscriptions;
+
+					if (input.overwrite) {
+						await ctx.prisma.$transaction([
+							// delete all existing subscriptions in collection
+							ctx.prisma.subscription.deleteMany({
+								where: {
+									user_id: ctx.user.id,
+									collection_id: collection.id,
+								}
+							}),
+
+							// add subscriptions from imported JSON
+							ctx.prisma.subscription.createMany({
+								data: subscriptions.map(sub => ({
+									user_id: ctx.user.id,
+									collection_id: collection.id,
+									...sub,
+								}))
+							})
+						])
+					} else {
+						await ctx.prisma.subscription.createMany({
+							data: subscriptions.map(sub => ({
+								user_id: ctx.user.id,
+								collection_id: collection.id,
+								...sub,
+							}))
+						})
+					}
+				}
+			}
+		})
 });
