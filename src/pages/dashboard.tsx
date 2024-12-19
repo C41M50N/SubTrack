@@ -92,7 +92,7 @@ export default function DashboardPage() {
 						)}
 				</div>
 
-				<div className="min-w-[240px]">
+				<div className="min-w-[245px]">
 					<div className="flex flex-col space-y-4">
 						{/* Statistic Cards */}
 						{isSubsLoading &&
