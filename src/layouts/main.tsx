@@ -26,7 +26,6 @@ import { Toaster } from "@/components/ui/toaster";
 import {
 	useCategories,
 	useCollections,
-	useModalState,
 	useUser,
 } from "@/lib/hooks";
 import { UserButton, useClerk } from "@clerk/nextjs";
@@ -39,8 +38,6 @@ type MainLayoutProps = {
 export default function MainLayout({ children, title }: MainLayoutProps) {
 	const { user } = useUser();
 	const { signOut } = useClerk();
-
-	const newSubscriptionModalState = useModalState();
 
 	const { categories } = useCategories();
 	const { collections } = useCollections();
@@ -149,7 +146,6 @@ export default function MainLayout({ children, title }: MainLayoutProps) {
 				{children}
 				<Toaster />
 				<NewSubscriptionModal
-					state={newSubscriptionModalState}
 					categories={categories || []}
 					collections={collections || []}
 				/>

@@ -11,6 +11,28 @@ export const useModalState = () => {
 
 export type ModalState = ReturnType<typeof useModalState>;
 
+
+import { create } from 'zustand'
+
+interface CreateModalStateStoreParams {
+  defaultState?: ModalState["state"]
+}
+
+type ModalStateStoreState = {
+  state: ModalState["state"];
+  set: (state: ModalState["state"]) => void;
+}
+
+export function createModalStateStore({ defaultState = "closed" }: CreateModalStateStoreParams) {
+  return create<ModalStateStoreState>((set, get) => ({
+    state: defaultState,
+    set(newState) {
+      set(() => ({ state: newState }))
+    }
+  }))
+}
+
+
 export const useUserName = () => {
 	const { mutateAsync: updateUserName, isLoading: isSetUserNameLoading } =
 		api.main.updateName.useMutation({

@@ -8,12 +8,11 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { useForm } from "react-hook-form";
 import type z from "zod";
 
-import { useDemoSubscriptions } from "@/features/demo-subscriptions/stores";
+import { useDemoSubscriptions, useNewDemoSubscriptionModal } from "@/features/demo-subscriptions/stores";
 import {
 	CreateDemoSubscriptionSchema,
 	DEMO_CATEGORIES,
 } from "@/features/demo-subscriptions/types";
-import type { ModalState } from "@/lib/hooks";
 import { cn, sleep, toProperCase } from "@/utils";
 
 import { Button } from "@/components/ui/button";
@@ -57,15 +56,10 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { FREQUENCIES, ICONS } from "@/features/common/types";
-import { SubscriptionWithoutIdSchema } from "@/features/subscriptions/types";
 
-type NewSubscriptionModalProps = {
-	state: ModalState;
-};
+export default function NewSubscriptionModal() {
+	const newDemoSubscriptionModalState = useNewDemoSubscriptionModal()
 
-export default function NewSubscriptionModal({
-	state,
-}: NewSubscriptionModalProps) {
 	const [isLoading, setIsLoading] = React.useState<boolean>(false);
 	const { addSubscription: addDemoSubscription } = useDemoSubscriptions();
 
@@ -89,13 +83,13 @@ export default function NewSubscriptionModal({
 		setIsLoading(false);
 		addDemoSubscription(values);
 		form.reset();
-		state.setState("closed");
+		newDemoSubscriptionModalState.set("closed");
 	}
 
 	return (
 		<Dialog
-			open={state.state === "open"}
-			onOpenChange={(open) => !open && state.setState("closed")}
+			open={newDemoSubscriptionModalState.state === "open"}
+			onOpenChange={(open) => !open && newDemoSubscriptionModalState.set("closed")}
 		>
 			<DialogContent>
 				<DialogHeader>

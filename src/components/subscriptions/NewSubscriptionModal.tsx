@@ -56,18 +56,19 @@ import { selectedCollectionIdAtom } from "@/features/common/atoms";
 import { FREQUENCIES, ICONS } from "@/features/common/types";
 import { SubscriptionWithoutIdSchema } from "@/features/subscriptions/types";
 import { useAtom } from "jotai";
+import { useNewSubscriptionModal } from "@/features/subscriptions/stores";
 
 type NewSubscriptionModalProps = {
-	state: ModalState;
 	categories: string[];
 	collections: Omit<Collection, "user_id">[];
 };
 
 export default function NewSubscriptionModal({
-	state,
 	categories,
 	collections,
 }: NewSubscriptionModalProps) {
+	const newSubscriptionModalState = useNewSubscriptionModal();
+
 	const { createSubscription, isCreateSubscriptionLoading } =
 		useCreateSubscription();
 
@@ -93,18 +94,18 @@ export default function NewSubscriptionModal({
 		if (selectedCollectionId) {
 			form.setValue("collection_id", selectedCollectionId);
 		}
-	}, [state]);
+	}, [newSubscriptionModalState]);
 
 	async function onSubmit(values: z.infer<typeof SubscriptionWithoutIdSchema>) {
 		await createSubscription(values);
 		form.reset();
-		state.setState("closed");
+		newSubscriptionModalState.set("closed");
 	}
 
 	return (
 		<Dialog
-			open={state.state === "open"}
-			onOpenChange={(open) => !open && state.setState("closed")}
+			open={newSubscriptionModalState.state === "open"}
+			onOpenChange={(open) => !open && newSubscriptionModalState.set("closed")}
 		>
 			<DialogContent>
 				<DialogHeader>

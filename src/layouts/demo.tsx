@@ -8,7 +8,7 @@ import { IconPlus } from "@tabler/icons-react";
 import NewSubscriptionModal from "@/components/demo-subscriptions/NewSubscriptionModal";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/toaster";
-import { useModalState } from "@/lib/hooks";
+import { useNewDemoSubscriptionModal } from "@/features/demo-subscriptions/stores";
 
 type DemoLayoutProps = {
 	children: React.ReactNode;
@@ -16,7 +16,7 @@ type DemoLayoutProps = {
 };
 
 export default function DemoLayout({ children, title }: DemoLayoutProps) {
-	const newModalState = useModalState();
+	const newModalState = useNewDemoSubscriptionModal();
 
 	return (
 		<>
@@ -56,7 +56,7 @@ export default function DemoLayout({ children, title }: DemoLayoutProps) {
 							<Button
 								className="gap-2"
 								onClick={() => {
-									newModalState.setState("open");
+									newModalState.set("open");
 								}}
 							>
 								<IconPlus />
@@ -69,7 +69,7 @@ export default function DemoLayout({ children, title }: DemoLayoutProps) {
 			<main className="ml-auto mr-auto max-w-[1200px] pb-8 px-6">
 				{children}
 				<Toaster />
-				<NewSubscriptionModal state={newModalState} />
+				<NewSubscriptionModal />
 			</main>
 		</>
 	);

@@ -7,6 +7,7 @@ import { DataTableFilter } from "./data-table-filter";
 import { DataTableViewOptions } from "./data-table-view-options";
 import MoreOptions from "./more-options";
 import React from "react";
+import { useNewSubscriptionModal } from "@/features/subscriptions/stores";
 
 type Props<TData> = {
 	table: Table<TData>;
@@ -19,6 +20,7 @@ export default function DataTableToolbar<TData>({
 	categories,
 	advancedTable,
 }: Props<TData>) {
+	const newSubscriptionModalState = useNewSubscriptionModal();
 	const isFiltered = table.getState().columnFilters.length > 0;
 
 	return (
@@ -67,7 +69,7 @@ export default function DataTableToolbar<TData>({
 				<Button
 					size="sm"
 					className="h-10"
-					onClick={() => {}}
+					onClick={() => newSubscriptionModalState.set("open")}
 				>
 					<IconPlus className="mr-2 size-4" />
 					Add Subscription
