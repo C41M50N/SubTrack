@@ -17,13 +17,6 @@ export const mainRouter = createTRPCRouter({
 			await updateUserInfo(ctx.user.id, name);
 		}),
 
-	getLicenseType: protectedProcedure.query(async ({ ctx }) => {
-		return await ctx.prisma.user.findUnique({
-			where: { id: ctx.user.id },
-			select: { license_type: true },
-		});
-	}),
-
 	getCurrentUser: protectedProcedure.query(async ({ ctx }) => {
 		return ctx.user;
 	}),

@@ -4,7 +4,6 @@ const isUnprotectedRoutes = createRouteMatcher([
 	"/",
 	"/auth(.*)",
 	"/api/clerk-webhooks(.*)",
-	"/api/stripe-webhooks(.*)",
 	"/api/functions(.*)",
 ]);
 

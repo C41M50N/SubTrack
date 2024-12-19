@@ -12,13 +12,11 @@ import { useNewSubscriptionModal } from "@/features/subscriptions/stores";
 type Props<TData> = {
 	table: Table<TData>;
 	categories: string[];
-	advancedTable: boolean;
 };
 
 export default function DataTableToolbar<TData>({
 	table,
 	categories,
-	advancedTable,
 }: Props<TData>) {
 	const newSubscriptionModalState = useNewSubscriptionModal();
 	const isFiltered = table.getState().columnFilters.length > 0;
@@ -28,42 +26,40 @@ export default function DataTableToolbar<TData>({
 			<div className="flex flex-1 space-x-2 items-end">
 				<CollectionSelector />
 
-				{advancedTable && (
-					<div className="flex flex-row space-x-2">
-						<Input
-							placeholder="Filter subscriptions..."
-							value={
-								(table.getColumn("name")?.getFilterValue() as string) ?? ""
-							}
-							onChange={(event) =>
-								table.getColumn("name")?.setFilterValue(event.target.value)
-							}
-							className="h-10 w-[200px] lg:w-[280px]"
+				<div className="flex flex-row space-x-2">
+					<Input
+						placeholder="Filter subscriptions..."
+						value={
+							(table.getColumn("name")?.getFilterValue() as string) ?? ""
+						}
+						onChange={(event) =>
+							table.getColumn("name")?.setFilterValue(event.target.value)
+						}
+						className="h-10 w-[200px] lg:w-[280px]"
+					/>
+					{table.getColumn("category") && (
+						<DataTableFilter
+							column={table.getColumn("category")}
+							title={isFiltered ? "" : "Category"}
+							options={categories.map((cat) => ({ label: cat, value: cat }))}
 						/>
-						{table.getColumn("category") && (
-							<DataTableFilter
-								column={table.getColumn("category")}
-								title={isFiltered ? "" : "Category"}
-								options={categories.map((cat) => ({ label: cat, value: cat }))}
-							/>
-						)}
+					)}
 
-						{isFiltered && (
-							<Button
-								variant="ghost"
-								onClick={() => table.resetColumnFilters()}
-								className="h-10 px-2 lg:px-3"
-							>
-								Reset
-								<IconCircleX className="ml-2 h-4 w-4" />
-							</Button>
-						)}
-					</div>
-				)}
+					{isFiltered && (
+						<Button
+							variant="ghost"
+							onClick={() => table.resetColumnFilters()}
+							className="h-10 px-2 lg:px-3"
+						>
+							Reset
+							<IconCircleX className="ml-2 h-4 w-4" />
+						</Button>
+					)}
+				</div>
 			</div>
 
 			<div className="flex flex-row space-x-2">
-				{advancedTable && <DataTableViewOptions table={table} />}
+				<DataTableViewOptions table={table} />
 
 				{/* Add Subscription Button */}
 				<Button

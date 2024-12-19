@@ -87,7 +87,6 @@ export default function DashboardPage() {
 								columns={columns}
 								data={subscriptions}
 								categories={categories}
-								licenseType={user.license_type}
 							/>
 						)}
 				</div>

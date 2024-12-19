@@ -14,16 +14,7 @@ export const subscriptionsRouter = createTRPCRouter({
 				`Creating new subscription for <${ctx.user.name}>: ${JSON.stringify(input)}`,
 			);
 
-			let maxNumSubscriptions: number = Number.POSITIVE_INFINITY;
-			switch (ctx.user.license_type) {
-				case "FREE":
-					maxNumSubscriptions = 10;
-					break;
-
-				case "BASIC":
-					maxNumSubscriptions = 50;
-					break;
-			}
+			const maxNumSubscriptions: number = 300;
 
 			const currentNumSubscriptions = await ctx.prisma.subscription.count({
 				where: {
@@ -34,7 +25,7 @@ export const subscriptionsRouter = createTRPCRouter({
 
 			if (currentNumSubscriptions + 1 > maxNumSubscriptions) {
 				throw new Error(
-					"You have reached your subscription limit for this collection. Upgrade your license in order to add more subscriptions.",
+					"You have reached your subscription limit for this collection. You can have at most 300 subscriptions at a time in a collection.",
 				);
 			}
 

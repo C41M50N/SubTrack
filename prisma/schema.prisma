@@ -10,13 +10,6 @@ datasource db {
     url = env("DATABASE_URL") // uses connection pooling
 }
 
-enum LicenseType {
-    FREE
-    BASIC
-    PRO
-    SUPER
-}
-
 model User {
     id            String    @id
     created_at    DateTime  @default(now())
@@ -24,12 +17,10 @@ model User {
     email         String    @unique
     image         String
 
-    license_type    LicenseType @default(FREE)
     categoryList    CategoryList?
     collections     Collection[]
     subscriptions   Subscription[]
 
-    currentStripeSession    String?
     todoistAPIKey           String @default("")
     todoistProjectId        String @default("")
 }

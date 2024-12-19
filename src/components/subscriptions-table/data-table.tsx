@@ -25,7 +25,6 @@ import {
 } from "@/components/ui/table";
 import { selectedSubscriptionsAtom } from "@/features/common/atoms";
 import type { Subscription } from "@/features/subscriptions/types";
-import type { LicenseType } from "@prisma/client";
 import { useAtom } from "jotai";
 import DataTableToolbar from "./data-table-toolbar";
 
@@ -33,14 +32,12 @@ interface DataTableProps {
 	columns: ColumnDef<Subscription>[];
 	data: Subscription[];
 	categories: string[];
-	licenseType: LicenseType;
 }
 
 export default function DataTable({
 	columns,
 	data,
 	categories,
-	licenseType,
 }: DataTableProps) {
 	const [rowSelection, setRowSelection] = React.useState({});
 	const [columnVisibility, setColumnVisibility] =
@@ -82,11 +79,6 @@ export default function DataTable({
 		setSelectedSubscriptions(subscriptions);
 	}
 
-	const advancedTable: boolean = React.useMemo(
-		() => licenseType !== "FREE",
-		[licenseType],
-	);
-
 	React.useEffect(() => {
 		onTableChange();
 	}, [rowSelection]);
@@ -96,7 +88,6 @@ export default function DataTable({
 			<DataTableToolbar
 				table={table}
 				categories={categories}
-				advancedTable={advancedTable}
 			/>
 
 			<div className="rounded-md border">
