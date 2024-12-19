@@ -92,10 +92,14 @@ export const mainRouter = createTRPCRouter({
 
 	getExportJSON: protectedProcedure
 		.query(async ({ ctx }) => {
-			const categories = (await ctx.prisma.user.findUnique({
-				where: { id: ctx.user.id },
-				select: { categories: true },
-			}))?.categories || [];
+			const categoryList = await ctx.prisma.categoryList.findUnique({
+				where: { user_id: ctx.user.id },
+				select: { categories: true }
+			})
+
+			if (!categoryList) throw new Error("missing categoryList");
+			
+			const categories = categoryList.categories;
 
 			const collections = await ctx.prisma.collection.findMany({
 				where: {
@@ -135,44 +139,35 @@ export const mainRouter = createTRPCRouter({
 			if (input.overwrite) {
 				await ctx.prisma.$transaction([
 					// empty user's categories
-					ctx.prisma.user.update({
-						where: {
-							id: ctx.user.id
-						},
-						data: {
-							categories: []
-						}
+					ctx.prisma.categoryList.update({
+						where: { user_id: ctx.user.id },
+						data: { categories: [] }
 					}),
 
 					// add categories from imported JSON
-					ctx.prisma.user.update({
-						where: {
-							id: ctx.user.id
-						},
-						data: {
-							categories: data.categories
-						}
+					ctx.prisma.categoryList.update({
+						where: { user_id: ctx.user.id },
+						data: { categories: data.categories }
 					})
 				])
 			} else {
 				// set user's categories as array of merged categories from existing and imported JSON
-				const currentCategories = (await ctx.prisma.user.findUnique({
-					where: { id: ctx.user.id },
-					select: { categories: true },
-				}))?.categories || [];
+				const categoryList = await ctx.prisma.categoryList.findUnique({
+					where: { user_id: ctx.user.id },
+					select: { categories: true }
+				})
+	
+				if (!categoryList) throw new Error("missing categoryList");
+				
+				const currentCategories = categoryList.categories;
 	
 				const allCategories = new Set([...currentCategories, ...data.categories])
 	
-				await ctx.prisma.user.update({
-					where: {
-						id: ctx.user.id
-					},
-					data: {
-						categories: Array.from(allCategories)
-					}
+				await ctx.prisma.categoryList.update({
+					where: { user_id: ctx.user.id },
+					data: { categories: Array.from(allCategories) }
 				})
 			}
-			
 
 			// handle collections and subscriptions
 			const currentCollectionTitles = (await ctx.prisma.collection.findMany({

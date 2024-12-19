@@ -73,11 +73,15 @@ const isAuthed = t.middleware(async ({ next, ctx }) => {
 		throw new TRPCError({ code: "UNAUTHORIZED" });
 	}
 
+	// const userId = "user_2lBAMmBldOCeALpCTbjNG7etQMY";
+	const userId = ctx.auth.userId;
+
 	const user = await ctx.prisma.user.findUnique({
-		where: { id: ctx.auth.userId },
+		where: { id: userId },
 	});
 
 	if (!user) {
+		console.log(userId);
 		throw new TRPCError({ code: "BAD_REQUEST" });
 	}
 

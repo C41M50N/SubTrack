@@ -25,13 +25,19 @@ model User {
     image         String
 
     license_type    LicenseType @default(FREE)
-    categories      String[] @default(["entertainment", "productivity", "finance"])
+    categoryList    CategoryList?
     collections     Collection[]
     subscriptions   Subscription[]
 
     currentStripeSession    String?
     todoistAPIKey           String @default("")
     todoistProjectId        String @default("")
+}
+
+model CategoryList {
+    user_id     String @id
+    categories  String[] @default(["entertainment", "productivity", "finance"])
+    user        User @relation(fields: [user_id], references: [id])
 }
 
 model Collection {

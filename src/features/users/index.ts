@@ -8,6 +8,13 @@ import type {
 export async function createUser(data: CreateUserProps) {
 	const user = await prisma.user.create({ data });
 
+	// create default categories
+	await prisma.categoryList.create({
+		data: {
+			user_id: user.id,
+		}
+	})
+
 	// create default collection
 	await prisma.collection.create({
 		data: {

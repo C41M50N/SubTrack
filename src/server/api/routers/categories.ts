@@ -3,14 +3,14 @@ import { z } from "zod";
 
 export const categoriesRouter = createTRPCRouter({
 	getCategories: protectedProcedure.query(async ({ ctx }) => {
-		return (
-			(
-				await ctx.prisma.user.findUnique({
-					where: { id: ctx.user.id },
-					select: { categories: true },
-				})
-			)?.categories || []
-		);
+		const categoryList = await ctx.prisma.categoryList.findUnique({
+			where: { user_id: ctx.user.id },
+			select: { categories: true }
+		})
+
+		if (!categoryList) throw new Error("missing categoryList");
+
+		return categoryList.categories;
 	}),
 
 	setCategories: protectedProcedure
@@ -38,9 +38,9 @@ export const categoriesRouter = createTRPCRouter({
 				);
 			}
 
-			await ctx.prisma.user.update({
-				where: { id: ctx.user.id },
-				data: { categories: categories },
+			await ctx.prisma.categoryList.update({
+				where: { user_id: ctx.user.id },
+				data: { categories: categories }
 			});
 		}),
 });
