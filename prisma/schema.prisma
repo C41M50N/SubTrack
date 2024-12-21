@@ -2,58 +2,117 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    url = env("DATABASE_URL") // uses connection pooling
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // uses connection pooling
 }
 
 model User {
-    id            String    @id
-    created_at    DateTime  @default(now())
-    name          String
-    email         String    @unique
-    image         String
+  id            String @id
+  name          String
+  email         String @unique
+  emailVerified Boolean
+  image         String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime
 
-    categoryList    CategoryList?
-    collections     Collection[]
-    subscriptions   Subscription[]
+  categoryList  CategoryList?
+  collections   Collection[]
+  subscriptions Subscription[]
 
-    todoistAPIKey           String @default("")
-    todoistProjectId        String @default("")
+  todoistAPIKey    String    @default("")
+  todoistProjectId String    @default("")
+
+  sessions         Session[]
+  accounts         Account[]
+
+  @@map("User")
 }
 
 model CategoryList {
-    user_id     String @id
-    categories  String[] @default(["entertainment", "productivity", "finance"])
-    user        User @relation(fields: [user_id], references: [id])
+  user_id    String   @id
+  categories String[] @default(["entertainment", "productivity", "finance"])
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("CategoryList")
 }
 
 model Collection {
-    id              String @id @default(cuid())
-    title           String
-    subscriptions   Subscription[]
+  id            String         @id @default(cuid())
+  title         String
+  subscriptions Subscription[]
 
-    user            User @relation(fields: [user_id], references: [id], onDelete: Cascade)
-    user_id         String
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id String
+
+  @@map("Collection")
 }
 
 model Subscription {
-    id              String @id @default(cuid())
-    name            String
-    amount          Int
-    frequency       String
-    category        String
-    next_invoice    DateTime
-    last_invoice    DateTime?
-    icon_ref        String @default("default")
-    send_alert      Boolean @default(true)
+  id           String    @id @default(cuid())
+  name         String
+  amount       Int
+  frequency    String
+  category     String
+  next_invoice DateTime
+  last_invoice DateTime?
+  icon_ref     String    @default("default")
+  send_alert   Boolean   @default(true)
 
-    collection    Collection @relation(fields: [collection_id], references: [id], onDelete: Cascade)
-    collection_id String
+  collection    Collection @relation(fields: [collection_id], references: [id], onDelete: Cascade)
+  collection_id String
 
-    user    User @relation(fields: [user_id], references: [id], onDelete: Cascade)
-    user_id String
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id String
+
+  @@map("Subscription")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("Session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+
+  @@map("Account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("Verification")
 }

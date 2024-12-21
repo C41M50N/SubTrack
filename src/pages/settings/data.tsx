@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import type { ChangeEvent } from "react";
 import type { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import { createCaller } from "@/server/api/root";
-import { getAuth } from "@clerk/nextjs/server";
 import { prisma } from "@/server/db";
 import dayjs from "dayjs";
 import { downloadFile } from "@/utils";
@@ -15,6 +14,7 @@ import { api } from "@/utils/api";
 import React from "react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { toast } from "@/components/ui/use-toast";
+import { getServerAuthSession } from "@/server/api/trpc";
 
 export default function DataSettingsPage({
   exportJSON
@@ -120,7 +120,8 @@ export default function DataSettingsPage({
 }
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const trpc = createCaller({ auth: getAuth(context.req), prisma: prisma });
+  const session = await getServerAuthSession(context.req);
+  const trpc = createCaller({ session: session, db: prisma });
   const exportJSON = await trpc.main.getExportJSON();
 
   return {

@@ -11,14 +11,14 @@ export const subscriptionsRouter = createTRPCRouter({
 		.input(SubscriptionWithoutIdSchema)
 		.mutation(async ({ ctx, input }) => {
 			console.log(
-				`Creating new subscription for <${ctx.user.name}>: ${JSON.stringify(input)}`,
+				`Creating new subscription for <${ctx.session.user.name}>: ${JSON.stringify(input)}`,
 			);
 
 			const maxNumSubscriptions: number = 300;
 
-			const currentNumSubscriptions = await ctx.prisma.subscription.count({
+			const currentNumSubscriptions = await ctx.db.subscription.count({
 				where: {
-					user_id: ctx.user.id,
+					user_id: ctx.session.user.id,
 					collection_id: input.collection_id,
 				},
 			});
@@ -29,9 +29,9 @@ export const subscriptionsRouter = createTRPCRouter({
 				);
 			}
 
-			await ctx.prisma.subscription.create({
+			await ctx.db.subscription.create({
 				data: {
-					user_id: ctx.user.id,
+					user_id: ctx.session.user.id,
 					...input,
 					amount: Math.floor(input.amount * 100),
 				},
@@ -41,10 +41,10 @@ export const subscriptionsRouter = createTRPCRouter({
 	getSubscriptionsFromCollection: protectedProcedure
 		.input(z.string())
 		.query(async ({ ctx, input: collectionId }) => {
-			const subs = await ctx.prisma.subscription.findMany({
+			const subs = await ctx.db.subscription.findMany({
 				where: {
 					collection_id: collectionId,
-					user_id: ctx.user.id,
+					user_id: ctx.session.user.id,
 				},
 			});
 			return subs.map((sub) => sub as Subscription);
@@ -53,8 +53,8 @@ export const subscriptionsRouter = createTRPCRouter({
 	updateSubscription: protectedProcedure
 		.input(SubscriptionSchema)
 		.mutation(async ({ ctx, input }) => {
-			await ctx.prisma.subscription.update({
-				where: { id: input.id, user_id: ctx.user.id },
+			await ctx.db.subscription.update({
+				where: { id: input.id, user_id: ctx.session.user.id },
 				data: { ...input, amount: input.amount * 100 },
 			});
 		}),
@@ -62,8 +62,8 @@ export const subscriptionsRouter = createTRPCRouter({
 	deleteSubscription: protectedProcedure
 		.input(z.string())
 		.mutation(async ({ ctx, input }) => {
-			await ctx.prisma.subscription.delete({
-				where: { user_id: ctx.user.id, id: input },
+			await ctx.db.subscription.delete({
+				where: { user_id: ctx.session.user.id, id: input },
 			});
 		}),
 });

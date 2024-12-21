@@ -1,4 +1,3 @@
-import { ClerkProvider } from "@clerk/nextjs";
 import { Analytics } from "@vercel/analytics/react";
 import type { AppType } from "next/app";
 
@@ -24,7 +23,7 @@ const MyApp: AppType = ({ Component, pageProps: { ...pageProps } }) => {
 	];
 
 	return (
-		<ClerkProvider {...pageProps}>
+		<>
 			<Head>
 				<title>SubTrack | A Subscriptions Tracking Dashboard</title>
 				<meta name="description" content="A Subscriptions Tracking Dashboard" />
@@ -50,7 +49,7 @@ const MyApp: AppType = ({ Component, pageProps: { ...pageProps } }) => {
 			</Head>
 			<Component {...pageProps} />
 			<Analytics />
-		</ClerkProvider>
+		</>
 	);
 };
 

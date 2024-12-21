@@ -1,5 +1,6 @@
 import { DataSchema } from "@/features/import-export";
-import { deleteUser, updateUserInfo } from "@/lib/clerk";
+import deleteUser from "@/features/users/actions/delete-user";
+import updateUserInfo from "@/features/users/actions/update-user-info";
 import {
 	createReminder,
 	createTodoistAPI,
@@ -14,45 +15,45 @@ export const mainRouter = createTRPCRouter({
 	updateName: protectedProcedure
 		.input(z.string())
 		.mutation(async ({ ctx, input: name }) => {
-			await updateUserInfo(ctx.user.id, name);
+			return await updateUserInfo(ctx, { name })
 		}),
 
 	getCurrentUser: protectedProcedure.query(async ({ ctx }) => {
-		return ctx.user;
+		return ctx.session.user;
 	}),
 
 	deleteUser: protectedProcedure.mutation(async ({ ctx }) => {
-		await deleteUser(ctx.user.id);
+		return await deleteUser(ctx)
 	}),
 
 	setTodoistAPIKey: protectedProcedure
 		.input(z.string())
 		.mutation(async ({ ctx, input: apikey }) => {
-			await ctx.prisma.user.update({
-				where: { id: ctx.user.id },
+			await ctx.db.user.update({
+				where: { id: ctx.session.user.id },
 				data: { todoistAPIKey: apikey },
 			});
 		}),
 
 	removeTodoistAPIKey: protectedProcedure.mutation(async ({ ctx }) => {
-		await ctx.prisma.user.update({
-			where: { id: ctx.user.id },
+		await ctx.db.user.update({
+			where: { id: ctx.session.user.id },
 			data: { todoistAPIKey: "", todoistProjectId: "" },
 		});
 	}),
 
 	getTodoistProjects: protectedProcedure.query(async ({ ctx }) => {
-		const todoist = createTodoistAPI(ctx.user.todoistAPIKey);
+		const todoist = createTodoistAPI(ctx.session.user.todoistAPIKey);
 		const projects = await getProjects(todoist);
 		await sleep(1000);
 		return projects;
 	}),
 
 	getTodoistProjectName: protectedProcedure.query(async ({ ctx }) => {
-		const todoist = createTodoistAPI(ctx.user.todoistAPIKey);
+		const todoist = createTodoistAPI(ctx.session.user.todoistAPIKey);
 		const project_name = await getProjectName(
 			todoist,
-			ctx.user.todoistProjectId,
+			ctx.session.user.todoistProjectId,
 		);
 		return project_name;
 	}),
@@ -65,10 +66,10 @@ export const mainRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const todoist = createTodoistAPI(ctx.user.todoistAPIKey);
+			const todoist = createTodoistAPI(ctx.session.user.todoistAPIKey);
 			await createReminder(
 				todoist,
-				ctx.user.todoistProjectId,
+				ctx.session.user.todoistProjectId,
 				input.title,
 				input.reminder_date,
 			);
@@ -77,16 +78,16 @@ export const mainRouter = createTRPCRouter({
 	setTodoistProject: protectedProcedure
 		.input(z.string())
 		.mutation(async ({ ctx, input: projectId }) => {
-			await ctx.prisma.user.update({
-				where: { id: ctx.user.id },
+			await ctx.db.user.update({
+				where: { id: ctx.session.user.id },
 				data: { todoistProjectId: projectId },
 			});
 		}),
 
 	getExportJSON: protectedProcedure
 		.query(async ({ ctx }) => {
-			const categoryList = await ctx.prisma.categoryList.findUnique({
-				where: { user_id: ctx.user.id },
+			const categoryList = await ctx.db.categoryList.findUnique({
+				where: { user_id: ctx.session.user.id },
 				select: { categories: true }
 			})
 
@@ -94,9 +95,9 @@ export const mainRouter = createTRPCRouter({
 			
 			const categories = categoryList.categories;
 
-			const collections = await ctx.prisma.collection.findMany({
+			const collections = await ctx.db.collection.findMany({
 				where: {
-					user_id: ctx.user.id,
+					user_id: ctx.session.user.id,
 				},
 				select: {
 					title: true,
@@ -130,23 +131,23 @@ export const mainRouter = createTRPCRouter({
 
 			// handle categories
 			if (input.overwrite) {
-				await ctx.prisma.$transaction([
+				await ctx.db.$transaction([
 					// empty user's categories
-					ctx.prisma.categoryList.update({
-						where: { user_id: ctx.user.id },
+					ctx.db.categoryList.update({
+						where: { user_id: ctx.session.user.id },
 						data: { categories: [] }
 					}),
 
 					// add categories from imported JSON
-					ctx.prisma.categoryList.update({
-						where: { user_id: ctx.user.id },
+					ctx.db.categoryList.update({
+						where: { user_id: ctx.session.user.id },
 						data: { categories: data.categories }
 					})
 				])
 			} else {
 				// set user's categories as array of merged categories from existing and imported JSON
-				const categoryList = await ctx.prisma.categoryList.findUnique({
-					where: { user_id: ctx.user.id },
+				const categoryList = await ctx.db.categoryList.findUnique({
+					where: { user_id: ctx.session.user.id },
 					select: { categories: true }
 				})
 	
@@ -156,16 +157,16 @@ export const mainRouter = createTRPCRouter({
 	
 				const allCategories = new Set([...currentCategories, ...data.categories])
 	
-				await ctx.prisma.categoryList.update({
-					where: { user_id: ctx.user.id },
+				await ctx.db.categoryList.update({
+					where: { user_id: ctx.session.user.id },
 					data: { categories: Array.from(allCategories) }
 				})
 			}
 
 			// handle collections and subscriptions
-			const currentCollectionTitles = (await ctx.prisma.collection.findMany({
+			const currentCollectionTitles = (await ctx.db.collection.findMany({
 				where: {
-					user_id: ctx.user.id
+					user_id: ctx.session.user.id
 				},
 				select: {
 					title: true
@@ -176,18 +177,18 @@ export const mainRouter = createTRPCRouter({
 				// if there is a new collection title in the imported JSON,
 				// then create the collection and add its subscriptions to the collection.
 				if (!currentCollectionTitles.includes(collectionTitle)) {
-					const { id: collectionId } = await ctx.prisma.collection.create({
+					const { id: collectionId } = await ctx.db.collection.create({
 						data: {
-							user_id: ctx.user.id,
+							user_id: ctx.session.user.id,
 							title: collectionTitle,
 						}
 					})
 
 					// biome-ignore lint/style/noNonNullAssertion: guaranteed to be non-null
 					const subscriptions = data.collections.find(col => col.title === collectionTitle)!.subscriptions;
-					await ctx.prisma.subscription.createMany({
+					await ctx.db.subscription.createMany({
 						data: subscriptions.map(sub => ({
-							user_id: ctx.user.id,
+							user_id: ctx.session.user.id,
 							collection_id: collectionId,
 							...sub,
 						}))
@@ -197,9 +198,9 @@ export const mainRouter = createTRPCRouter({
 				// if there is a duplicate collection title in the imported JSON,
 				// then add (or overwrite) subscriptions to the collection.
 				if (currentCollectionTitles.includes(collectionTitle)) {
-					const collection = await ctx.prisma.collection.findFirst({
+					const collection = await ctx.db.collection.findFirst({
 						where: {
-							user_id: ctx.user.id,
+							user_id: ctx.session.user.id,
 							title: collectionTitle,
 						}
 					})
@@ -209,28 +210,28 @@ export const mainRouter = createTRPCRouter({
 					const subscriptions = data.collections.find(col => col.title === collectionTitle)!.subscriptions;
 
 					if (input.overwrite) {
-						await ctx.prisma.$transaction([
+						await ctx.db.$transaction([
 							// delete all existing subscriptions in collection
-							ctx.prisma.subscription.deleteMany({
+							ctx.db.subscription.deleteMany({
 								where: {
-									user_id: ctx.user.id,
+									user_id: ctx.session.user.id,
 									collection_id: collection.id,
 								}
 							}),
 
 							// add subscriptions from imported JSON
-							ctx.prisma.subscription.createMany({
+							ctx.db.subscription.createMany({
 								data: subscriptions.map(sub => ({
-									user_id: ctx.user.id,
+									user_id: ctx.session.user.id,
 									collection_id: collection.id,
 									...sub,
 								}))
 							})
 						])
 					} else {
-						await ctx.prisma.subscription.createMany({
+						await ctx.db.subscription.createMany({
 							data: subscriptions.map(sub => ({
-								user_id: ctx.user.id,
+								user_id: ctx.session.user.id,
 								collection_id: collection.id,
 								...sub,
 							}))

@@ -1,3 +1,4 @@
+import { sendReviewEmail } from "@/emails";
 import { MonthlyReviewEmail } from "@/emails/monthly-review";
 import { resend } from "@/lib/resend";
 import { prisma } from "@/server/db";
@@ -78,18 +79,13 @@ export default async function handler(
 			select: { name: true, email: true },
 		});
 
-		await resend.sendEmail({
-			from: "SubTrack Alerts <alert@subtrack.cbuff.dev>",
+		await sendReviewEmail({
 			to: user.email,
-			subject: `Your Subscriptions Review for ${dayjs().format("MMMM")}`,
-			react: MonthlyReviewEmail({
-				user_name: user.name,
-				renewing_soon: renewingSoonSubs?.sort(
-					(sub1, sub2) =>
-						sub1.next_invoice.getTime() - sub2.next_invoice.getTime(),
-				),
-				renewed_recently: renewedRecentlySubs,
-			}),
+			emailProps: {
+				userName: user.name,
+				renewingSoon: renewingSoonSubs ?? [],
+				renewedRecently: renewedRecentlySubs ?? [],
+			}
 		});
 
 		console.log(`Sent alert email to ${JSON.stringify(user)}`);

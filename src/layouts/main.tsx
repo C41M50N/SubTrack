@@ -26,9 +26,9 @@ import { Toaster } from "@/components/ui/toaster";
 import {
 	useCategories,
 	useCollections,
-	useUser,
 } from "@/lib/hooks";
-import { UserButton, useClerk } from "@clerk/nextjs";
+import { signOut, useSession } from "@/features/auth/auth-client";
+import { useRouter } from "next/router";
 
 type MainLayoutProps = {
 	children: React.ReactNode;
@@ -36,8 +36,8 @@ type MainLayoutProps = {
 };
 
 export default function MainLayout({ children, title }: MainLayoutProps) {
-	const { user } = useUser();
-	const { signOut } = useClerk();
+	const router = useRouter();
+	const { data: session } = useSession();
 
 	const { categories } = useCategories();
 	const { collections } = useCollections();
@@ -77,18 +77,7 @@ export default function MainLayout({ children, title }: MainLayoutProps) {
 
 						<div className="ml-auto" />
 
-						{user && (
-							// <UserButton>
-							// 	<UserButton.MenuItems>
-							// 		<UserButton.Link
-							// 			label="Settings"
-							// 			labelIcon={<IconSettingsFilled className="size-4" />}
-							// 			href="/settings/account"
-							// 		/>
-							// 		<UserButton.Action label="signOut" />
-							// 	</UserButton.MenuItems>
-							// </UserButton>
-
+						{session && (
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
 									<Button
@@ -97,9 +86,9 @@ export default function MainLayout({ children, title }: MainLayoutProps) {
 									>
 										<Avatar>
 											<AvatarImage
-												alt={user.name}
+												alt={session.user.name}
 												src={
-													user.image ||
+													session.user.image ||
 													"https://img.icons8.com/cotton/64/gender-neutral-user--v1.png"
 												}
 											/>
@@ -116,10 +105,10 @@ export default function MainLayout({ children, title }: MainLayoutProps) {
 									<DropdownMenuLabel className="font-normal">
 										<div className="flex flex-col space-y-1">
 											<p className="text-sm font-medium leading-none">
-												{user.name}
+												{session.user.name}
 											</p>
 											<p className="text-xs leading-none text-muted-foreground">
-												{user.email}
+												{session.user.email}
 											</p>
 										</div>
 									</DropdownMenuLabel>
@@ -130,9 +119,15 @@ export default function MainLayout({ children, title }: MainLayoutProps) {
 									<DropdownMenuSeparator />
 									<DropdownMenuItem
 										className="text-red-700"
-										onClick={() =>
-											signOut({ redirectUrl: "/" })
-										}
+										onClick={async () => {
+											await signOut({
+												fetchOptions: {
+													onSuccess: () => {
+														router.push("/");
+													},
+												},
+											});
+										}}
 									>
 										Log out
 									</DropdownMenuItem>

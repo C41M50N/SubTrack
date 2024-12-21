@@ -177,20 +177,3 @@ export function useUser() {
 		});
 	return { user, refreshUserData };
 }
-
-// export function useClerkUser() {
-// 	const { isSignedIn, user } = useUser();
-// 	const { data: dbUser } = api.main.getCurrentUser.useQuery(undefined, { staleTime: Number.POSITIVE_INFINITY });
-// 	if (!isSignedIn || !dbUser) {
-// 		return undefined;
-// 	}
-
-// 	return {
-// 		id: user.id,
-// 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-// 		name: user.fullName!,
-// 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-// 		email: user.primaryEmailAddress!.emailAddress,
-// 		profile_picture: user.imageUrl,
-// 	}
-// }

@@ -13,19 +13,30 @@ import {
 	Tailwind,
 	Text,
 } from "@react-email/components";
-import React from "react";
 
-type MonthlyReviewEmailProps = {
-	user_name: string;
-	renewing_soon: Subscription[] | undefined;
-	renewed_recently: Subscription[] | undefined;
+export type MonthlyReviewEmailProps = {
+	userName: string;
+	renewingSoon: Subscription[];
+	renewedRecently: Subscription[];
 };
 
 export function MonthlyReviewEmail({
-	user_name = "Chuck Norris",
-	renewing_soon,
-	renewed_recently,
+	userName: user_name = "Chuck Norris",
+	renewingSoon,
+	renewedRecently,
 }: Readonly<MonthlyReviewEmailProps>) {
+
+	// sort asc
+	const renewingSoonSubs = renewingSoon.sort(
+		(a, b) => a.next_invoice.getTime() - b.next_invoice.getTime()
+	);
+
+	// sort desc
+	const renewedRecentlySubs = renewedRecently.sort(
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		(a, b) => b.last_invoice!.getTime() - a.last_invoice!.getTime()
+	)
+
 	return (
 		<Html>
 			<Head />
@@ -44,13 +55,13 @@ export function MonthlyReviewEmail({
 							Hey {user_name}! Here is your subscriptions review for{" "}
 							{dayjs().format("MMMM")}.
 						</Text>
-						{renewing_soon && (
+						{renewingSoonSubs.length > 0 && (
 							<>
 								<Text className="text-2xl font-semibold">
 									Subscriptions that are renewing soon
 								</Text>
 								<ul className="mt-1 gap-2">
-									{renewing_soon.map((sub) => (
+									{renewingSoonSubs.map((sub) => (
 										<li key={sub.id}>
 											<Text className="text-base">
 												{sub.name} renewing on{" "}
@@ -64,13 +75,13 @@ export function MonthlyReviewEmail({
 							</>
 						)}
 
-						{renewed_recently && (
+						{renewedRecentlySubs.length > 0 && (
 							<>
 								<Text className="text-2xl font-semibold">
 									Subscriptions that have renewed recently
 								</Text>
 								<ul className="mt-1">
-									{renewed_recently.map((sub) => {
+									{renewedRecentlySubs.map((sub) => {
 										if (!sub.last_invoice) {
 											throw new Error("invalid recently renewed subscription");
 										}

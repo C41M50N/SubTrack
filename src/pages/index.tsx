@@ -1,9 +1,7 @@
 import FeatureCard from "@/components/common/feature-card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { pricingInfo } from "@/features/pricing";
-import PricingCard from "@/features/pricing/pricing-card";
-import { SignedIn, SignedOut } from "@clerk/nextjs";
+import { useSession } from "@/features/auth/auth-client";
 import { IconDashboard, IconExternalLink } from "@tabler/icons-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -11,6 +9,7 @@ import { useRouter } from "next/navigation";
 
 export default function LandingPage() {
 	const router = useRouter();
+	const { data: session } = useSession();
 
 	return (
 		<>
@@ -58,7 +57,7 @@ export default function LandingPage() {
 
 					<div className="ml-0" />
 
-					<SignedOut>
+					{!session && (
 						<div className="flex flex-row gap-2">
 							<Link href="/auth/login">
 								<Button size="lg" variant="ghost">
@@ -72,9 +71,9 @@ export default function LandingPage() {
 								</Button>
 							</Link>
 						</div>
-					</SignedOut>
+					)}
 
-					<SignedIn>
+					{session && (
 						<Button
 							variant="default"
 							size="lg"
@@ -83,7 +82,7 @@ export default function LandingPage() {
 							<IconDashboard className="mr-2" size={20} />
 							<span className="font-semibold text-lg">Dashboard</span>
 						</Button>
-					</SignedIn>
+					)}
 				</header>
 
 				<section className="max-w-[720px] pt-14 md:pt-24 mx-auto flex flex-col items-center justify-center gap-9">
@@ -210,31 +209,6 @@ export default function LandingPage() {
 									/>
 								}
 							/>
-						</div>
-					</div>
-				</section>
-
-				<section className="pt-12 md:pt-24 pb-24 mx-auto max-w-[1200px] mb-auto px-8 2xl:px-0">
-					<div className="mx-auto flex flex-col items-center">
-						<h3 className="text-3xl md:text-4xl font-bold">Pricing</h3>
-						<span className="mt-4 text-xs font-semibold text-muted-foreground">
-							All prices are one-time payments. It would be quite ironic if
-							SubTrack ran on a subscription pricing model.
-						</span>
-
-						<div className="mt-14 grid grid-cols-1 lg:grid-cols-3 gap-8">
-							{pricingInfo.map((info) => (
-								<PricingCard
-									key={info.title}
-									title={info.title}
-									subtitle={info.subtitle}
-									cost={info.cost}
-									features={info.features}
-									actionLabel="Get Started"
-									actionType="navigate"
-									href={info.href}
-								/>
-							))}
 						</div>
 					</div>
 				</section>

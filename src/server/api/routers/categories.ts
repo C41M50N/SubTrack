@@ -3,8 +3,8 @@ import { z } from "zod";
 
 export const categoriesRouter = createTRPCRouter({
 	getCategories: protectedProcedure.query(async ({ ctx }) => {
-		const categoryList = await ctx.prisma.categoryList.findUnique({
-			where: { user_id: ctx.user.id },
+		const categoryList = await ctx.db.categoryList.findUnique({
+			where: { user_id: ctx.session.user.id },
 			select: { categories: true }
 		})
 
@@ -16,15 +16,15 @@ export const categoriesRouter = createTRPCRouter({
 	setCategories: protectedProcedure
 		.input(z.array(z.string()))
 		.mutation(async ({ ctx, input: categories }) => {
-			const numAllSubscriptions = await ctx.prisma.subscription.count({
+			const numAllSubscriptions = await ctx.db.subscription.count({
 				where: {
-					user_id: ctx.user.id,
+					user_id: ctx.session.user.id,
 				},
 			});
 
-			const numValidSubscriptions = await ctx.prisma.subscription.count({
+			const numValidSubscriptions = await ctx.db.subscription.count({
 				where: {
-					user_id: ctx.user.id,
+					user_id: ctx.session.user.id,
 					category: {
 						in: categories,
 					},
@@ -38,8 +38,8 @@ export const categoriesRouter = createTRPCRouter({
 				);
 			}
 
-			await ctx.prisma.categoryList.update({
-				where: { user_id: ctx.user.id },
+			await ctx.db.categoryList.update({
+				where: { user_id: ctx.session.user.id },
 				data: { categories: categories }
 			});
 		}),
