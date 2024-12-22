@@ -50,7 +50,7 @@ export default function SignInPage() {
 								<div className="flex items-baseline">
 									<Label htmlFor="password">Password</Label>
 									<Link
-										href="#"
+										href="/auth/forgot-password"
 										className="ml-auto inline-block text-xs underline"
 									>
 										Forgot your password?

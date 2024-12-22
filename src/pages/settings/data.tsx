@@ -71,7 +71,7 @@ export default function DataSettingsPage({
 					<Separator className="my-6" />
 
           <div className="flex flex-col space-y-3">
-            <Label className="text-base">
+            <Label className="text-base font-semibold">
               Import Data
             </Label>
             <div className="pt-2 flex flex-col space-y-4">
@@ -106,7 +106,7 @@ export default function DataSettingsPage({
 
             <div className="pt-3" />
 
-            <Label className="text-base">
+            <Label className="text-base font-semibold">
               Export Data
             </Label>
             <Button className="w-[120px]" onClick={onExportData}>

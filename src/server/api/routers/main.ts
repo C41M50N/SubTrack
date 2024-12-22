@@ -1,6 +1,7 @@
 import { DataSchema } from "@/features/import-export";
 import deleteUser from "@/features/users/actions/delete-user";
-import updateUserInfo from "@/features/users/actions/update-user-info";
+import updateUserDetails from "@/features/users/actions/update-user-details";
+import { AccountDetailsSchema } from "@/features/users/types";
 import {
 	createReminder,
 	createTodoistAPI,
@@ -12,10 +13,10 @@ import { parseJSON, sleep } from "@/utils";
 import { z } from "zod";
 
 export const mainRouter = createTRPCRouter({
-	updateName: protectedProcedure
-		.input(z.string())
-		.mutation(async ({ ctx, input: name }) => {
-			return await updateUserInfo(ctx, { name })
+	updateAccountDetails: protectedProcedure
+		.input(AccountDetailsSchema)
+		.mutation(async ({ ctx, input }) => {
+			return await updateUserDetails(ctx, input)
 		}),
 
 	getCurrentUser: protectedProcedure.query(async ({ ctx }) => {
