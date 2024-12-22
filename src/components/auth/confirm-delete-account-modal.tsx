@@ -25,7 +25,7 @@ export default function ConfirmDeleteAccountModal({
   const {
 		mutate: deleteUser,
 		isLoading: isDeleteUserLoading
-	} = api.main.deleteUser.useMutation({
+	} = api.users.deleteUser.useMutation({
 		onError(error) {
 			toast({
         variant: "error",

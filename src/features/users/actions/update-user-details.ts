@@ -1,5 +1,5 @@
 import type { AuthenticatedContext } from "@/server/api/trpc";
-import type { AccountDetailsSchema } from "../types";
+import type { AccountDetailsSchema } from "..";
 import type { z } from "zod";
 
 export default async function updateUserDetails(

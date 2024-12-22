@@ -24,13 +24,13 @@ export default function DataSettingsPage({
   const [file, setFile] = React.useState<File | null>(null);
 
   const { mutateAsync: importData, isLoading: isImportDataLoading } = api.main.importData.useMutation({
-    onSuccess: () => {
+    onSuccess() {
       toast({
         variant: 'success',
         title: 'Successfully imported data'
       })
     },
-    onError: () => {
+    onError() {
       toast({
         variant: 'error',
         title: 'Failed to import data'

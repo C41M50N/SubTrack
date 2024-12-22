@@ -23,7 +23,7 @@ import { useRouter } from "next/navigation";
 import React from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
-import { AccountDetailsSchema } from "@/features/users/types";
+import { AccountDetailsSchema } from "@/features/users";
 
 export default function AccountSettingsPage() {
 	const router = useRouter();
@@ -39,7 +39,7 @@ export default function AccountSettingsPage() {
 	const {
 		mutate: updateAccountDetails,
 		isLoading: isUpdateAccountDetailsLoading
-	} = api.main.updateAccountDetails.useMutation({
+	} = api.users.updateAccountDetails.useMutation({
 		onError(error) {
 			toast({
         variant: "error",

@@ -3,6 +3,7 @@ import { collectionsRouter } from "@/server/api/routers/collections";
 import { mainRouter } from "@/server/api/routers/main";
 import { subscriptionsRouter } from "@/server/api/routers/subscriptions";
 import { createTRPCRouter, createCallerFactory } from "@/server/api/trpc";
+import { usersRouter } from "./routers/users";
 
 /**
  * This is the primary router for your server.
@@ -11,6 +12,7 @@ import { createTRPCRouter, createCallerFactory } from "@/server/api/trpc";
  */
 export const appRouter = createTRPCRouter({
 	main: mainRouter,
+	users: usersRouter,
 	categories: categoriesRouter,
 	collections: collectionsRouter,
 	subscriptions: subscriptionsRouter,

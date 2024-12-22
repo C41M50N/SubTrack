@@ -1,1 +1,0 @@
-ngrok http --domain=ultimate-balanced-badger.ngrok-free.app 3000

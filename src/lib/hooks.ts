@@ -32,28 +32,6 @@ export function createModalStateStore({ defaultState = "closed" }: CreateModalSt
   }))
 }
 
-
-export const useUserName = () => {
-	const { mutateAsync: updateUserName, isLoading: isSetUserNameLoading } =
-		api.main.updateName.useMutation({
-			onSuccess: () => {
-				toast({
-					variant: "success",
-					title: "Successfully updated name!",
-				});
-			},
-			onError: (err) => {
-				toast({
-					variant: "error",
-					title: "Something went wrong...",
-					description: err.message,
-				});
-			},
-		});
-
-	return { setUserName: updateUserName, isSetUserNameLoading };
-};
-
 export const useCategories = (enabled = true) => {
 	const { data: categories, isInitialLoading: isCategoriesLoading } =
 		api.categories.getCategories.useQuery(undefined, {
@@ -172,7 +150,7 @@ export const useCollections = () => {
 
 export function useUser() {
 	const { data: user, refetch: refreshUserData } =
-		api.main.getCurrentUser.useQuery(undefined, {
+		api.users.getCurrentUser.useQuery(undefined, {
 			staleTime: Number.POSITIVE_INFINITY,
 		});
 	return { user, refreshUserData };
