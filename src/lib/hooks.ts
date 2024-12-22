@@ -11,25 +11,26 @@ export const useModalState = () => {
 
 export type ModalState = ReturnType<typeof useModalState>;
 
-
-import { create } from 'zustand'
+import { create } from "zustand";
 
 interface CreateModalStateStoreParams {
-  defaultState?: ModalState["state"]
+	defaultState?: ModalState["state"];
 }
 
 type ModalStateStoreState = {
-  state: ModalState["state"];
-  set: (state: ModalState["state"]) => void;
-}
+	state: ModalState["state"];
+	set: (state: ModalState["state"]) => void;
+};
 
-export function createModalStateStore({ defaultState = "closed" }: CreateModalStateStoreParams) {
-  return create<ModalStateStoreState>((set, get) => ({
-    state: defaultState,
-    set(newState) {
-      set(() => ({ state: newState }))
-    }
-  }))
+export function createModalStateStore({
+	defaultState = "closed",
+}: CreateModalStateStoreParams) {
+	return create<ModalStateStoreState>((set, get) => ({
+		state: defaultState,
+		set(newState) {
+			set(() => ({ state: newState }));
+		},
+	}));
 }
 
 export const useCategories = (enabled = true) => {

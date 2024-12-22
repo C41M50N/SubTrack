@@ -1,9 +1,9 @@
+import { createModalStateStore } from "@/lib/hooks";
 import dayjs from "dayjs";
 import { v4 as uuidv4 } from "uuid";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import type { DemoSubscription } from ".";
-import { createModalStateStore } from "@/lib/hooks";
 
 type State = {
 	subscriptions: Array<DemoSubscription>;
@@ -145,4 +145,6 @@ export const useSelectedDemoSubscriptions =
 		},
 	}));
 
-	export const useNewDemoSubscriptionModal = createModalStateStore({ defaultState: "closed" });
+export const useNewDemoSubscriptionModal = createModalStateStore({
+	defaultState: "closed",
+});

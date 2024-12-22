@@ -22,11 +22,11 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { SubscriptionFrequency } from "@/features/common";
+import type { DemoSubscription } from "@/features/demo-subscriptions";
 import {
 	useDemoSubscriptions,
 	useSelectedDemoSubscriptions,
 } from "@/features/demo-subscriptions/stores";
-import type { DemoSubscription } from "@/features/demo-subscriptions";
 
 const roboto = Roboto({
 	weight: ["400", "500", "700"],

@@ -2,7 +2,7 @@ import { categoriesRouter } from "@/server/api/routers/categories";
 import { collectionsRouter } from "@/server/api/routers/collections";
 import { mainRouter } from "@/server/api/routers/main";
 import { subscriptionsRouter } from "@/server/api/routers/subscriptions";
-import { createTRPCRouter, createCallerFactory } from "@/server/api/trpc";
+import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 import { usersRouter } from "./routers/users";
 
 /**

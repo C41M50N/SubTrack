@@ -43,10 +43,7 @@ export default function MoreOptions() {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<Button
-					variant="outline"
-					className="p-0 h-10 w-8"
-				>
+				<Button variant="outline" className="p-0 h-10 w-8">
 					<EllipsisVerticalIcon className="size-6" />
 				</Button>
 			</DropdownMenuTrigger>

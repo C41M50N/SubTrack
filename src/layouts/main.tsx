@@ -23,11 +23,8 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Toaster } from "@/components/ui/toaster";
-import {
-	useCategories,
-	useCollections,
-} from "@/lib/hooks";
 import { signOut, useSession } from "@/features/auth/auth-client";
+import { useCategories, useCollections } from "@/lib/hooks";
 import { useRouter } from "next/router";
 
 type MainLayoutProps = {

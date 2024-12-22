@@ -43,33 +43,34 @@ export function toMoneyString(amount: number): string {
 
 export function downloadFile(file: File) {
 	// Create a URL for the file
-  const fileUrl = URL.createObjectURL(file);
-  
-  // Create a temporary anchor element
-  const link = document.createElement('a');
-  link.href = fileUrl;
-  link.download = file.name; // Uses the filename you specified
-  
-  // Append to document, click, and cleanup
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  
-  // Clean up the URL object
-  URL.revokeObjectURL(fileUrl);
+	const fileUrl = URL.createObjectURL(file);
+
+	// Create a temporary anchor element
+	const link = document.createElement("a");
+	link.href = fileUrl;
+	link.download = file.name; // Uses the filename you specified
+
+	// Append to document, click, and cleanup
+	document.body.appendChild(link);
+	link.click();
+	document.body.removeChild(link);
+
+	// Clean up the URL object
+	URL.revokeObjectURL(fileUrl);
 }
 
 export function parseJSON<T>(json: string, schema: z.Schema<T>) {
-	const stringToJSONSchema = z.string()
-    .transform(( str, ctx ): z.infer<typeof schema> => {
+	const stringToJSONSchema = z
+		.string()
+		.transform((str, ctx): z.infer<typeof schema> => {
 			try {
-				const obj = JSON.parse( str );
+				const obj = JSON.parse(str);
 				return schema.parse(obj);
-			} catch ( e ) {
-				ctx.addIssue( { code: 'custom', message: 'Invalid JSON format' } )
-				return z.NEVER
+			} catch (e) {
+				ctx.addIssue({ code: "custom", message: "Invalid JSON format" });
+				return z.NEVER;
 			}
-    })
+		});
 
 	return stringToJSONSchema.parse(json);
 }

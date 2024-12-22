@@ -68,45 +68,44 @@ export const mainRouter = createTRPCRouter({
 			});
 		}),
 
-	getExportJSON: protectedProcedure
-		.query(async ({ ctx }) => {
-			const categoryList = await ctx.db.categoryList.findUnique({
-				where: { user_id: ctx.session.user.id },
-				select: { categories: true }
-			})
+	getExportJSON: protectedProcedure.query(async ({ ctx }) => {
+		const categoryList = await ctx.db.categoryList.findUnique({
+			where: { user_id: ctx.session.user.id },
+			select: { categories: true },
+		});
 
-			if (!categoryList) throw new Error("missing categoryList");
-			
-			const categories = categoryList.categories;
+		if (!categoryList) throw new Error("missing categoryList");
 
-			const collections = await ctx.db.collection.findMany({
-				where: {
-					user_id: ctx.session.user.id,
+		const categories = categoryList.categories;
+
+		const collections = await ctx.db.collection.findMany({
+			where: {
+				user_id: ctx.session.user.id,
+			},
+			select: {
+				title: true,
+				subscriptions: {
+					select: {
+						name: true,
+						amount: true,
+						frequency: true,
+						category: true,
+						next_invoice: true,
+						last_invoice: true,
+						icon_ref: true,
+						send_alert: true,
+					},
 				},
-				select: {
-					title: true,
-					subscriptions: {
-						select: {
-							name: true,
-							amount: true,
-							frequency: true,
-							category: true,
-							next_invoice: true,
-							last_invoice: true,
-							icon_ref: true,
-							send_alert: true,
-						}
-					}
-				}
-			});
+			},
+		});
 
-			const data = {
-				categories: categories,
-				collections: collections,
-			}
+		const data = {
+			categories: categories,
+			collections: collections,
+		};
 
-			return JSON.stringify(data, null, "\t");
-		}),
+		return JSON.stringify(data, null, "\t");
+	}),
 
 	importData: protectedProcedure
 		.input(z.object({ json: z.string(), overwrite: z.boolean() }))
@@ -119,45 +118,50 @@ export const mainRouter = createTRPCRouter({
 					// empty user's categories
 					ctx.db.categoryList.update({
 						where: { user_id: ctx.session.user.id },
-						data: { categories: [] }
+						data: { categories: [] },
 					}),
 
 					// add categories from imported JSON
 					ctx.db.categoryList.update({
 						where: { user_id: ctx.session.user.id },
-						data: { categories: data.categories }
-					})
-				])
+						data: { categories: data.categories },
+					}),
+				]);
 			} else {
 				// set user's categories as array of merged categories from existing and imported JSON
 				const categoryList = await ctx.db.categoryList.findUnique({
 					where: { user_id: ctx.session.user.id },
-					select: { categories: true }
-				})
-	
+					select: { categories: true },
+				});
+
 				if (!categoryList) throw new Error("missing categoryList");
-				
+
 				const currentCategories = categoryList.categories;
-	
-				const allCategories = new Set([...currentCategories, ...data.categories])
-	
+
+				const allCategories = new Set([
+					...currentCategories,
+					...data.categories,
+				]);
+
 				await ctx.db.categoryList.update({
 					where: { user_id: ctx.session.user.id },
-					data: { categories: Array.from(allCategories) }
-				})
+					data: { categories: Array.from(allCategories) },
+				});
 			}
 
 			// handle collections and subscriptions
-			const currentCollectionTitles = (await ctx.db.collection.findMany({
-				where: {
-					user_id: ctx.session.user.id
-				},
-				select: {
-					title: true
-				}
-			})).map((col) => col.title);
+			const currentCollectionTitles = (
+				await ctx.db.collection.findMany({
+					where: {
+						user_id: ctx.session.user.id,
+					},
+					select: {
+						title: true,
+					},
+				})
+			).map((col) => col.title);
 
-			for (const collectionTitle of data.collections.map(col => col.title)) {
+			for (const collectionTitle of data.collections.map((col) => col.title)) {
 				// if there is a new collection title in the imported JSON,
 				// then create the collection and add its subscriptions to the collection.
 				if (!currentCollectionTitles.includes(collectionTitle)) {
@@ -165,18 +169,20 @@ export const mainRouter = createTRPCRouter({
 						data: {
 							user_id: ctx.session.user.id,
 							title: collectionTitle,
-						}
-					})
+						},
+					});
 
 					// biome-ignore lint/style/noNonNullAssertion: guaranteed to be non-null
-					const subscriptions = data.collections.find(col => col.title === collectionTitle)!.subscriptions;
+					const subscriptions = data.collections.find(
+						(col) => col.title === collectionTitle,
+					)!.subscriptions;
 					await ctx.db.subscription.createMany({
-						data: subscriptions.map(sub => ({
+						data: subscriptions.map((sub) => ({
 							user_id: ctx.session.user.id,
 							collection_id: collectionId,
 							...sub,
-						}))
-					})
+						})),
+					});
 				}
 
 				// if there is a duplicate collection title in the imported JSON,
@@ -186,12 +192,14 @@ export const mainRouter = createTRPCRouter({
 						where: {
 							user_id: ctx.session.user.id,
 							title: collectionTitle,
-						}
-					})
+						},
+					});
 					if (!collection) break;
 
 					// biome-ignore lint/style/noNonNullAssertion: guaranteed to be non-null
-					const subscriptions = data.collections.find(col => col.title === collectionTitle)!.subscriptions;
+					const subscriptions = data.collections.find(
+						(col) => col.title === collectionTitle,
+					)!.subscriptions;
 
 					if (input.overwrite) {
 						await ctx.db.$transaction([
@@ -200,28 +208,28 @@ export const mainRouter = createTRPCRouter({
 								where: {
 									user_id: ctx.session.user.id,
 									collection_id: collection.id,
-								}
+								},
 							}),
 
 							// add subscriptions from imported JSON
 							ctx.db.subscription.createMany({
-								data: subscriptions.map(sub => ({
+								data: subscriptions.map((sub) => ({
 									user_id: ctx.session.user.id,
 									collection_id: collection.id,
 									...sub,
-								}))
-							})
-						])
+								})),
+							}),
+						]);
 					} else {
 						await ctx.db.subscription.createMany({
-							data: subscriptions.map(sub => ({
+							data: subscriptions.map((sub) => ({
 								user_id: ctx.session.user.id,
 								collection_id: collection.id,
 								...sub,
-							}))
-						})
+							})),
+						});
 					}
 				}
 			}
-		})
+		}),
 });

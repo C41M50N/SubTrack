@@ -7,7 +7,6 @@ import "@/styles/globals.css";
 import Head from "next/head";
 
 const MyApp: AppType = ({ Component, pageProps: { ...pageProps } }) => {
-
 	const keywords = [
 		"manage subscriptions",
 		"subscription manager",

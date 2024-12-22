@@ -25,11 +25,11 @@ export default async function handler(
 ) {
 	const authHeader = req.headers.authorization;
 	if (
-    !process.env.CRON_SECRET ||
-    authHeader !== `Bearer ${process.env.CRON_SECRET}`
-  ) {
-    return res.status(401).json({ success: false });
-  }
+		!process.env.CRON_SECRET ||
+		authHeader !== `Bearer ${process.env.CRON_SECRET}`
+	) {
+		return res.status(401).json({ success: false });
+	}
 
 	const subscriptions = await prisma.subscription.findMany({
 		where: {

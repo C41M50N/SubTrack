@@ -9,13 +9,13 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
-import Image from "next/image";
-import { Loader2, X } from "lucide-react";
-import { signIn, signUp } from "@/features/auth/auth-client";
-import { useRouter } from "next/navigation";
-import { toast } from "@/components/ui/use-toast";
 import { Separator } from "@/components/ui/separator";
+import { toast } from "@/components/ui/use-toast";
+import { signIn, signUp } from "@/features/auth/auth-client";
+import { Loader2, X } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function SignUpPage() {
 	const router = useRouter();
@@ -118,8 +118,11 @@ export default function SignUpPage() {
 								/>
 							</div>
 							<div className="grid gap-2">
-								<Label htmlFor="image">Profile Image{" "}
-									<span className="leading-none text-xs text-muted-foreground">(optional)</span>
+								<Label htmlFor="image">
+									Profile Image{" "}
+									<span className="leading-none text-xs text-muted-foreground">
+										(optional)
+									</span>
 								</Label>
 								<div className="flex items-end gap-4">
 									{imagePreview && (
@@ -171,7 +174,7 @@ export default function SignUpPage() {
 													variant: "error",
 													title: "Something went wrong",
 													description: ctx.error.message,
-												})
+												});
 											},
 											onSuccess() {
 												router.push("/dashboard");
@@ -232,7 +235,9 @@ export default function SignUpPage() {
 									target="_blank"
 									rel="noreferrer"
 								>
-									<span className="text-[#40516f] font-medium">better-auth</span>
+									<span className="text-[#40516f] font-medium">
+										better-auth
+									</span>
 								</a>
 								.
 							</p>

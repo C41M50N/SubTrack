@@ -52,11 +52,11 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { selectedCollectionIdAtom } from "@/features/common/atoms";
 import { FREQUENCIES, ICONS } from "@/features/common";
+import { selectedCollectionIdAtom } from "@/features/common/atoms";
 import { SubscriptionWithoutIdSchema } from "@/features/subscriptions";
-import { useAtom } from "jotai";
 import { useNewSubscriptionModal } from "@/features/subscriptions/stores";
+import { useAtom } from "jotai";
 
 type NewSubscriptionModalProps = {
 	categories: string[];

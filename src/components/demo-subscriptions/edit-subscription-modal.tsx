@@ -47,12 +47,12 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { FREQUENCIES, ICONS } from "@/features/common";
-import { useDemoSubscriptions } from "@/features/demo-subscriptions/stores";
 import {
 	CreateDemoSubscriptionSchema,
 	DEMO_CATEGORIES,
 	type DemoSubscription,
 } from "@/features/demo-subscriptions";
+import { useDemoSubscriptions } from "@/features/demo-subscriptions/stores";
 import { SubscriptionWithoutIdSchema } from "@/features/subscriptions";
 import dayjs from "@/lib/dayjs";
 import type { ModalState } from "@/lib/hooks";

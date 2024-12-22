@@ -6,7 +6,7 @@ import {
 	SelectItem,
 	SelectSeparator,
 	SelectTrigger,
-	SelectValue
+	SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { CollectionWithoutUserId } from "@/features/collections";

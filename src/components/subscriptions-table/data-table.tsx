@@ -85,10 +85,7 @@ export default function DataTable({
 
 	return (
 		<div className="space-y-4">
-			<DataTableToolbar
-				table={table}
-				categories={categories}
-			/>
+			<DataTableToolbar table={table} categories={categories} />
 
 			<div className="rounded-md border">
 				<Table>

@@ -9,7 +9,7 @@ import {
 	Img,
 	Preview,
 	Tailwind,
-	Text
+	Text,
 } from "@react-email/components";
 
 export type MonthlyReviewEmailProps = {
@@ -23,17 +23,16 @@ export function MonthlyReviewEmail({
 	renewingSoon,
 	renewedRecently,
 }: Readonly<MonthlyReviewEmailProps>) {
-
 	// sort asc
 	const renewingSoonSubs = renewingSoon.sort(
-		(a, b) => a.next_invoice.getTime() - b.next_invoice.getTime()
+		(a, b) => a.next_invoice.getTime() - b.next_invoice.getTime(),
 	);
 
 	// sort desc
 	const renewedRecentlySubs = renewedRecently.sort(
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		(a, b) => b.last_invoice!.getTime() - a.last_invoice!.getTime()
-	)
+		(a, b) => b.last_invoice!.getTime() - a.last_invoice!.getTime(),
+	);
 
 	return (
 		<Html>

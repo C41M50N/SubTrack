@@ -1,15 +1,22 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
-import { Loader2 } from "lucide-react";
-import { signIn } from "@/features/auth/auth-client";
-import Link from "next/link";
-import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/use-toast";
+import { signIn } from "@/features/auth/auth-client";
+import { Loader2 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/router";
+import { useState } from "react";
 
 export default function SignInPage() {
 	const router = useRouter();
@@ -86,12 +93,12 @@ export default function SignInPage() {
 													variant: "error",
 													title: "Something went wrong",
 													description: ctx.error.message,
-												})
+												});
 											},
 											onSuccess: async () => {
 												router.push("/dashboard");
 											},
-										}
+										},
 									});
 								}}
 							>
@@ -121,7 +128,7 @@ export default function SignInPage() {
 									onClick={async () => {
 										await signIn.social({
 											provider: "google",
-											callbackURL: "/dashboard"
+											callbackURL: "/dashboard",
 										});
 									}}
 								>
@@ -147,7 +154,9 @@ export default function SignInPage() {
 									target="_blank"
 									rel="noreferrer"
 								>
-									<span className="text-[#40516f] font-medium">better-auth</span>
+									<span className="text-[#40516f] font-medium">
+										better-auth
+									</span>
 								</a>
 								.
 							</p>

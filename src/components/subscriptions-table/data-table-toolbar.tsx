@@ -1,13 +1,13 @@
+import { useNewSubscriptionModal } from "@/features/subscriptions/stores";
 import { IconCircleX, IconPlus } from "@tabler/icons-react";
 import type { Table } from "@tanstack/react-table";
+import React from "react";
 import CollectionSelector from "../collections/collection-selector";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { DataTableFilter } from "./data-table-filter";
 import { DataTableViewOptions } from "./data-table-view-options";
 import MoreOptions from "./more-options";
-import React from "react";
-import { useNewSubscriptionModal } from "@/features/subscriptions/stores";
 
 type Props<TData> = {
 	table: Table<TData>;
@@ -29,9 +29,7 @@ export default function DataTableToolbar<TData>({
 				<div className="flex flex-row space-x-2">
 					<Input
 						placeholder="Filter subscriptions..."
-						value={
-							(table.getColumn("name")?.getFilterValue() as string) ?? ""
-						}
+						value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
 						onChange={(event) =>
 							table.getColumn("name")?.setFilterValue(event.target.value)
 						}

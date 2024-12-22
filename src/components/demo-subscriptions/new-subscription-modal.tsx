@@ -8,11 +8,14 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { useForm } from "react-hook-form";
 import type z from "zod";
 
-import { useDemoSubscriptions, useNewDemoSubscriptionModal } from "@/features/demo-subscriptions/stores";
 import {
 	CreateDemoSubscriptionSchema,
 	DEMO_CATEGORIES,
 } from "@/features/demo-subscriptions";
+import {
+	useDemoSubscriptions,
+	useNewDemoSubscriptionModal,
+} from "@/features/demo-subscriptions/stores";
 import { cn, sleep, toProperCase } from "@/utils";
 
 import { Button } from "@/components/ui/button";
@@ -58,7 +61,7 @@ import {
 import { FREQUENCIES, ICONS } from "@/features/common";
 
 export default function NewSubscriptionModal() {
-	const newDemoSubscriptionModalState = useNewDemoSubscriptionModal()
+	const newDemoSubscriptionModalState = useNewDemoSubscriptionModal();
 
 	const [isLoading, setIsLoading] = React.useState<boolean>(false);
 	const { addSubscription: addDemoSubscription } = useDemoSubscriptions();
@@ -89,7 +92,9 @@ export default function NewSubscriptionModal() {
 	return (
 		<Dialog
 			open={newDemoSubscriptionModalState.state === "open"}
-			onOpenChange={(open) => !open && newDemoSubscriptionModalState.set("closed")}
+			onOpenChange={(open) =>
+				!open && newDemoSubscriptionModalState.set("closed")
+			}
 		>
 			<DialogContent>
 				<DialogHeader>

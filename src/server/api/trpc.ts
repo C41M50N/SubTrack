@@ -7,17 +7,17 @@
  * need to use are documented accordingly near the end.
  */
 
-import type { GetServerSidePropsContext } from "next";
-import { fromNodeHeaders } from "better-auth/node";
 import { TRPCError, type inferAsyncReturnType, initTRPC } from "@trpc/server";
 import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
+import { fromNodeHeaders } from "better-auth/node";
+import type { GetServerSidePropsContext } from "next";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
 import { prisma } from "@/server/db";
-import { auth } from "../auth";
 import type { PrismaClient, User } from "@prisma/client";
 import type { Session } from "better-auth/types";
+import { auth } from "../auth";
 
 /**
  * 1. CONTEXT
@@ -30,7 +30,7 @@ import type { Session } from "better-auth/types";
 export type AuthenticatedSession = {
 	user: User;
 	session: Session;
-}
+};
 
 interface CreateContextOptions {
 	req: CreateNextContextOptions["req"] | GetServerSidePropsContext["req"];
@@ -41,14 +41,14 @@ function createInnerTRPCContext(opts: CreateContextOptions) {
 	return {
 		...opts,
 		db: prisma,
-	}
+	};
 }
 
 export async function getServerAuthSession(
-	req: CreateNextContextOptions["req"] | GetServerSidePropsContext["req"]
+	req: CreateNextContextOptions["req"] | GetServerSidePropsContext["req"],
 ): Promise<AuthenticatedSession | null> {
 	const session = await auth.api.getSession({
-		headers: fromNodeHeaders(req.headers)
+		headers: fromNodeHeaders(req.headers),
 	});
 
 	if (!session || !session.user) {
@@ -65,29 +65,29 @@ export async function getServerAuthSession(
 
 	return {
 		session: session.session,
-		user: user
-	}
+		user: user,
+	};
 }
 
 export type AuthenticatedContext = {
 	session: AuthenticatedSession;
 	db: PrismaClient;
-}
+};
 
 export type UnauthenticatedContext = {
 	session: null;
 	db: PrismaClient;
-}
+};
 
 export async function createTRPCContext(
-	opts: CreateNextContextOptions
+	opts: CreateNextContextOptions,
 ): Promise<AuthenticatedContext | UnauthenticatedContext> {
 	const session = await getServerAuthSession(opts.req);
 	return createInnerTRPCContext({
 		req: opts.req,
-		session: session
+		session: session,
 	});
-};
+}
 
 export type Context = inferAsyncReturnType<typeof createTRPCContext>;
 
@@ -132,10 +132,10 @@ const isAuthed = t.middleware(async ({ next, ctx }) => {
 		throw new TRPCError({ code: "UNAUTHORIZED" });
 	}
 
-	if (!ctx.session.user) throw new TRPCError({ code: "BAD_REQUEST" })
+	if (!ctx.session.user) throw new TRPCError({ code: "BAD_REQUEST" });
 
 	return next({
-		ctx: ctx
+		ctx: ctx,
 	});
 });
 

@@ -1,5 +1,5 @@
-import type { StatisticItem } from "../common";
 import type { DemoSubscription } from ".";
+import type { StatisticItem } from "../common";
 
 export const Statistics: Array<StatisticItem> = [
 	{

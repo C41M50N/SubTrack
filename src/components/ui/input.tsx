@@ -4,8 +4,8 @@ import { cn } from "@/utils";
 
 export interface InputProps
 	extends React.InputHTMLAttributes<HTMLInputElement> {
-		variant?: "sm" | "normal";
-	}
+	variant?: "sm" | "normal";
+}
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
 	({ className, type, variant = "normal", ...props }, ref) => {

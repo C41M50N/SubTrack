@@ -5,8 +5,8 @@ export const categoriesRouter = createTRPCRouter({
 	getCategories: protectedProcedure.query(async ({ ctx }) => {
 		const categoryList = await ctx.db.categoryList.findUnique({
 			where: { user_id: ctx.session.user.id },
-			select: { categories: true }
-		})
+			select: { categories: true },
+		});
 
 		if (!categoryList) throw new Error("missing categoryList");
 
@@ -40,7 +40,7 @@ export const categoriesRouter = createTRPCRouter({
 
 			await ctx.db.categoryList.update({
 				where: { user_id: ctx.session.user.id },
-				data: { categories: categories }
+				data: { categories: categories },
 			});
 		}),
 });

@@ -1,9 +1,5 @@
 import ConfirmDeleteAccountModal from "@/components/auth/confirm-delete-account-modal";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { toast } from "@/components/ui/use-toast";
 import {
 	Form,
 	FormControl,
@@ -12,7 +8,12 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { toast } from "@/components/ui/use-toast";
 import { authClient, useSession } from "@/features/auth/auth-client";
+import { AccountDetailsSchema } from "@/features/users";
 import MainLayout from "@/layouts/main";
 import SettingsLayout from "@/layouts/settings";
 import { useModalState } from "@/lib/hooks";
@@ -23,7 +24,6 @@ import { useRouter } from "next/navigation";
 import React from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
-import { AccountDetailsSchema } from "@/features/users";
 
 export default function AccountSettingsPage() {
 	const router = useRouter();
@@ -32,27 +32,27 @@ export default function AccountSettingsPage() {
 	const form = useForm<z.infer<typeof AccountDetailsSchema>>({
 		resolver: zodResolver(AccountDetailsSchema),
 		defaultValues: {
-			name: session?.user.name
-		}
+			name: session?.user.name,
+		},
 	});
 
 	const {
 		mutate: updateAccountDetails,
-		isLoading: isUpdateAccountDetailsLoading
+		isLoading: isUpdateAccountDetailsLoading,
 	} = api.users.updateAccountDetails.useMutation({
 		onError(error) {
 			toast({
-        variant: "error",
-        title: "Failed to update account details at this time",
-        description: error.message,
-      })
+				variant: "error",
+				title: "Failed to update account details at this time",
+				description: error.message,
+			});
 		},
 		onSuccess() {
 			toast({
 				variant: "success",
 				title: "Successfully updated account details",
-			})
-		}
+			});
+		},
 	});
 
 	const deleteAccountModalState = useModalState();
@@ -68,13 +68,13 @@ export default function AccountSettingsPage() {
 						variant: "error",
 						title: "Something went wrong",
 						description: ctx.error.message,
-					})
+					});
 				},
 				onSuccess() {
 					router.push("/");
 				},
-			}
-		})
+			},
+		});
 	}
 
 	return (
@@ -91,10 +91,13 @@ export default function AccountSettingsPage() {
 
 					{/* Update name and image */}
 					<Form {...form}>
-						<form onSubmit={form.handleSubmit((values) => updateAccountDetails(values))} className="space-y-1">
-							<Label className="text-base font-semibold">
-								Account Details
-							</Label>
+						<form
+							onSubmit={form.handleSubmit((values) =>
+								updateAccountDetails(values),
+							)}
+							className="space-y-1"
+						>
+							<Label className="text-base font-semibold">Account Details</Label>
 							<div className="pt-2 flex flex-col space-y-4">
 								<div className="flex flex-row gap-x-4">
 									{/* Avatar image picker */}
@@ -125,7 +128,10 @@ export default function AccountSettingsPage() {
 									</div>
 								</div>
 								<div>
-									<Button type="submit" isLoading={isUpdateAccountDetailsLoading}>
+									<Button
+										type="submit"
+										isLoading={isUpdateAccountDetailsLoading}
+									>
 										Save
 									</Button>
 								</div>
@@ -137,9 +143,7 @@ export default function AccountSettingsPage() {
 
 					{/* Log out */}
 					<div className="flex flex-col gap-y-1">
-						<Label className="text-base font-semibold">
-							Log out
-						</Label>
+						<Label className="text-base font-semibold">Log out</Label>
 						<div className="pt-1">
 							<Button
 								variant="destructive"
@@ -157,9 +161,7 @@ export default function AccountSettingsPage() {
 
 					{/* Delete Account */}
 					<div className="flex flex-col gap-y-1">
-						<Label className="text-base font-semibold">
-							Delete Account
-						</Label>
+						<Label className="text-base font-semibold">Delete Account</Label>
 						<div className="pt-1">
 							<Button
 								variant="destructive"
@@ -173,9 +175,7 @@ export default function AccountSettingsPage() {
 					</div>
 				</div>
 
-				<ConfirmDeleteAccountModal
-					state={deleteAccountModalState}
-				/>
+				<ConfirmDeleteAccountModal state={deleteAccountModalState} />
 			</SettingsLayout>
 		</MainLayout>
 	);

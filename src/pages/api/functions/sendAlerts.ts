@@ -23,11 +23,11 @@ export default async function handler(
 ) {
 	const authHeader = req.headers.authorization;
 	if (
-    !process.env.CRON_SECRET ||
-    authHeader !== `Bearer ${process.env.CRON_SECRET}`
-  ) {
-    return res.status(401).json({ success: false });
-  }
+		!process.env.CRON_SECRET ||
+		authHeader !== `Bearer ${process.env.CRON_SECRET}`
+	) {
+		return res.status(401).json({ success: false });
+	}
 
 	const renewingSoonSubscriptions = await prisma.subscription.findMany({
 		where: {
@@ -38,8 +38,8 @@ export default async function handler(
 			send_alert: { equals: true },
 		},
 		orderBy: {
-			next_invoice: "asc"
-		}
+			next_invoice: "asc",
+		},
 	});
 
 	const renewedRecentlySubscriptions = await prisma.subscription.findMany({
@@ -51,8 +51,8 @@ export default async function handler(
 			send_alert: { equals: true },
 		},
 		orderBy: {
-			last_invoice: "desc"
-		}
+			last_invoice: "desc",
+		},
 	});
 
 	const groupRenewingSoonSubscriptions = groupBy(
@@ -85,7 +85,7 @@ export default async function handler(
 				userName: user.name,
 				renewingSoon: renewingSoonSubs ?? [],
 				renewedRecently: renewedRecentlySubs ?? [],
-			}
+			},
 		});
 
 		console.log(`Sent alert email to ${JSON.stringify(user)}`);

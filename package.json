@@ -12,7 +12,7 @@
     "db:generate": "prisma generate",
     "db:studio": "prisma studio",
     "db:push": "prisma db push",
-    "format": "biome check --write ./src/"
+    "format": "biome check --formatter-enabled=true --linter-enabled=true --organize-imports-enabled=true --write ./src"
   },
   "dependencies": {
     "@better-fetch/fetch": "^1.1.12",

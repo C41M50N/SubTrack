@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import {
 	Dialog,
 	DialogContent,
-  DialogDescription,
+	DialogDescription,
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
@@ -14,32 +14,30 @@ import { useRouter } from "next/router";
 import { toast } from "../ui/use-toast";
 
 type ConfirmDeleteAccountModalProps = {
-  state: ModalState;
-}
+	state: ModalState;
+};
 
 export default function ConfirmDeleteAccountModal({
-  state
+	state,
 }: ConfirmDeleteAccountModalProps) {
-  const router = useRouter();
+	const router = useRouter();
 
-  const {
-		mutate: deleteUser,
-		isLoading: isDeleteUserLoading
-	} = api.users.deleteUser.useMutation({
-		onError(error) {
-			toast({
-        variant: "error",
-        title: "Failed to delete account at this time",
-        description: error.message,
-      })
-		},
-		onSuccess() {
-			router.push("/");
-		},
-	})
+	const { mutate: deleteUser, isLoading: isDeleteUserLoading } =
+		api.users.deleteUser.useMutation({
+			onError(error) {
+				toast({
+					variant: "error",
+					title: "Failed to delete account at this time",
+					description: error.message,
+				});
+			},
+			onSuccess() {
+				router.push("/");
+			},
+		});
 
-  return (
-    <Dialog
+	return (
+		<Dialog
 			open={state.state === "open"}
 			onOpenChange={(open) => !open && state.setState("closed")}
 		>
@@ -47,13 +45,17 @@ export default function ConfirmDeleteAccountModal({
 				<DialogHeader>
 					<DialogTitle>Delete Note</DialogTitle>
 					<DialogDescription>
-						Are you sure you want to permanently delete your account and all of your subscription data?
+						Are you sure you want to permanently delete your account and all of
+						your subscription data?
 					</DialogDescription>
 				</DialogHeader>
 				<DialogFooter>
-          <Button variant={"secondary"} onClick={() => state.setState("closed")}>
+					<Button
+						variant={"secondary"}
+						onClick={() => state.setState("closed")}
+					>
 						Cancel
-          </Button>
+					</Button>
 					<Button
 						variant={"destructive"}
 						isLoading={isDeleteUserLoading}
@@ -66,5 +68,5 @@ export default function ConfirmDeleteAccountModal({
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>
-  )
+	);
 }
