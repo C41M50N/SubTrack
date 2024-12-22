@@ -11,7 +11,7 @@ import {
 import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 
-import type { Subscription } from "@/features/subscriptions/types";
+import type { Subscription } from "@/features/subscriptions";
 import {
 	useCategories,
 	useCollections,
@@ -20,9 +20,9 @@ import {
 } from "@/lib/hooks";
 import { toMoneyString, toProperCase } from "@/utils";
 
-import DeleteSubscriptionModal from "@/components/subscriptions/DeleteSubscriptionModal";
-import EditSubscriptionModal from "@/components/subscriptions/EditSubscriptionModal";
-import SetCancelReminderModal from "@/components/subscriptions/SetCancelReminderModal";
+import DeleteSubscriptionModal from "@/components/subscriptions/delete-subscription-modal";
+import EditSubscriptionModal from "@/components/subscriptions/edit-subscription-modal";
+import SetCancelReminderModal from "@/components/subscriptions/set-cancel-reminder-modal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";

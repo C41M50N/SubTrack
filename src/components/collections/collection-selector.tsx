@@ -10,7 +10,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { CollectionWithoutUserId } from "@/features/collections/types";
+import type { CollectionWithoutUserId } from "@/features/collections";
 import { selectedCollectionIdAtom } from "@/features/common/atoms";
 import { useModalState } from "@/lib/hooks";
 import { api } from "@/utils/api";
@@ -22,9 +22,9 @@ import {
 	Trash2Icon,
 } from "lucide-react";
 import React from "react";
-import DeleteCollectionModal from "./DeleteCollectionModal";
-import EditCollectionModal from "./EditCollectionModal";
-import NewCollectionModal from "./NewCollectionModal";
+import DeleteCollectionModal from "./delete-collection-modal";
+import EditCollectionModal from "./edit-collection-modal";
+import NewCollectionModal from "./new-collection-modal";
 
 export default function CollectionSelector() {
 	const { data: collections, isLoading } =

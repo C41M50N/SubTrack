@@ -7,7 +7,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import type { SubscriptionId } from "@/features/subscriptions/types";
+import type { SubscriptionId } from "@/features/subscriptions";
 import { type ModalState, useDeleteSubscription } from "@/lib/hooks";
 import { IconTrash } from "@tabler/icons-react";
 import React from "react";

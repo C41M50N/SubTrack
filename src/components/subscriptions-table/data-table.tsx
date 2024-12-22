@@ -24,7 +24,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { selectedSubscriptionsAtom } from "@/features/common/atoms";
-import type { Subscription } from "@/features/subscriptions/types";
+import type { Subscription } from "@/features/subscriptions";
 import { useAtom } from "jotai";
 import DataTableToolbar from "./data-table-toolbar";
 

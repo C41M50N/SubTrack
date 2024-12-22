@@ -9,8 +9,8 @@ import { ArrowUpDown } from "lucide-react";
 import { useModalState } from "@/lib/hooks";
 import { toMoneyString, toProperCase } from "@/utils";
 
-import DemoDeleteSubscriptionModal from "@/components/demo-subscriptions/DeleteSubscriptionModal";
-import DemoEditSubscriptionModal from "@/components/demo-subscriptions/EditSubscriptionModal";
+import DemoDeleteSubscriptionModal from "@/components/demo-subscriptions/delete-subscription-modal";
+import DemoEditSubscriptionModal from "@/components/demo-subscriptions/edit-subscription-modal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -21,12 +21,12 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { SubscriptionFrequency } from "@/features/common/types";
+import type { SubscriptionFrequency } from "@/features/common";
 import {
 	useDemoSubscriptions,
 	useSelectedDemoSubscriptions,
 } from "@/features/demo-subscriptions/stores";
-import type { DemoSubscription } from "@/features/demo-subscriptions/types";
+import type { DemoSubscription } from "@/features/demo-subscriptions";
 
 const roboto = Roboto({
 	weight: ["400", "500", "700"],

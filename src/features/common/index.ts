@@ -1,5 +1,5 @@
-import type { DemoSubscription } from "../demo-subscriptions/types";
-import type { Subscription } from "../subscriptions/types";
+import type { DemoSubscription } from "../demo-subscriptions";
+import type { Subscription } from "../subscriptions";
 
 export const FREQUENCIES = [
 	"weekly",

@@ -1,6 +1,6 @@
 import type { Subscription } from "@prisma/client";
-import type { SubscriptionFrequency, SubscriptionIcon } from "../common/types";
-import { SubscriptionSchema } from "../subscriptions/types";
+import type { SubscriptionFrequency, SubscriptionIcon } from "../common";
+import { SubscriptionSchema } from "../subscriptions";
 
 export const DEMO_CATEGORIES = [
 	"entertainment",

@@ -1,4 +1,4 @@
-import type { Subscription } from "@/features/subscriptions/types";
+import type { Subscription } from "@/features/subscriptions";
 import { prisma } from "@/server/db";
 import dayjs from "dayjs";
 import type { NextApiRequest, NextApiResponse } from "next";

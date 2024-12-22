@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
-import type { Subscription } from "../subscriptions/types";
-import type { SubscriptionFrequency } from "./types";
+import type { Subscription } from "../subscriptions";
+import type { SubscriptionFrequency } from ".";
 
 type Month =
 	| "January"

@@ -5,7 +5,7 @@ import {
 	ICONS,
 	type SubscriptionFrequency,
 	type SubscriptionIcon,
-} from "../common/types";
+} from "../common";
 
 export type Subscription = SubscriptionPrisma & {
 	frequency: SubscriptionFrequency;

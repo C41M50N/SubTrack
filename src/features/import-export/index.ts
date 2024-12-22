@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { FREQUENCIES, ICONS } from "../common/types";
+import { FREQUENCIES, ICONS } from "../common";
 
 export const DataSchema = z.object({
   categories: z.array(z.string()),

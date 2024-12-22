@@ -11,7 +11,7 @@ import {
 	IconSettingsFilled,
 } from "@tabler/icons-react";
 
-import NewSubscriptionModal from "@/components/subscriptions/NewSubscriptionModal";
+import NewSubscriptionModal from "@/components/subscriptions/new-subscription-modal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {

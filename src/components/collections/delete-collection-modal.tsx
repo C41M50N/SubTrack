@@ -33,7 +33,7 @@ export default function DeleteCollectionModal({ state, collectionId }: Props) {
 		api.collections.deleteCollection.useMutation({
 			onSuccess() {
 				ctx.collections.getCollections.refetch();
-				ctx.subscriptions.getSubscriptions.refetch();
+				ctx.subscriptions.getSubscriptionsFromCollection.refetch();
 			},
 			onError(error) {
 				toast({

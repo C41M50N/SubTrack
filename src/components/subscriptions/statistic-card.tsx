@@ -14,7 +14,6 @@ export default function StatisticCard({
 		<Card className="bg-slate-50 shadow">
 			<CardContent className="py-2">
 				<div className="text-2xl font-bold">≈ {toMoneyString(value)}</div>
-
 				<p className="text-sm text-muted-foreground">{description}</p>
 			</CardContent>
 		</Card>

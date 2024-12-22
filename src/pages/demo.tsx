@@ -1,6 +1,6 @@
 import { columns as demoColumns } from "@/components/demo-subscriptions-table/columns";
 import DemoDataTable from "@/components/demo-subscriptions-table/data-table";
-import StatisticCard from "@/components/subscriptions/StatisticCard";
+import StatisticCard from "@/components/subscriptions/statistic-card";
 import {
 	useDemoSubscriptions,
 	useSelectedDemoSubscriptions,

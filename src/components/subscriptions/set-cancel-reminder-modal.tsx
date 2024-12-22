@@ -8,7 +8,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import type { Subscription } from "@/features/subscriptions/types";
+import type { Subscription } from "@/features/subscriptions";
 import { type ModalState, useUser } from "@/lib/hooks";
 import { api } from "@/utils/api";
 import dayjs from "dayjs";

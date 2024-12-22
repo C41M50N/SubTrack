@@ -5,7 +5,7 @@ import type React from "react";
 
 import { IconPlus } from "@tabler/icons-react";
 
-import NewSubscriptionModal from "@/components/demo-subscriptions/NewSubscriptionModal";
+import NewSubscriptionModal from "@/components/demo-subscriptions/new-subscription-modal";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/toaster";
 import { useNewDemoSubscriptionModal } from "@/features/demo-subscriptions/stores";

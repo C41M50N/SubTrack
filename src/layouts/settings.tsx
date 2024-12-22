@@ -29,15 +29,15 @@ const SettingsNavItems: Array<NavItem> = [
 	},
 	// {
 	//   title: "Todoist Debug",
-	//   href: "/settings/todoist-debug"
+	//   href: "/settings/debug/todoist"
 	// },
 	// {
 	//   title: "Toast Debug",
-	//   href: "/settings/toast-debug"
+	//   href: "/settings/debug/toast"
 	// },
 	// {
 	//   title: "UI Debug",
-	//   href: "/settings/ui-debug"
+	//   href: "/settings/debug/ui"
 	// }
 	// {
 	//   title: "Notifications",

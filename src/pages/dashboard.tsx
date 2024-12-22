@@ -1,8 +1,8 @@
 import { LoadingSpinner } from "@/components/common/loading-spinner";
 import { columns } from "@/components/subscriptions-table/columns";
 import DataTable from "@/components/subscriptions-table/data-table";
-import SkeletonStatisticCard from "@/components/subscriptions/SkeletonStatisticCard";
-import StatisticCard from "@/components/subscriptions/StatisticCard";
+import SkeletonStatisticCard from "@/components/subscriptions/skeleton-statistic-card";
+import StatisticCard from "@/components/subscriptions/statistic-card";
 import {
 	Accordion,
 	AccordionContent,

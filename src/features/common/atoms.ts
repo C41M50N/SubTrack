@@ -1,6 +1,6 @@
 import type { Collection } from "@prisma/client";
 import { atom } from "jotai";
-import type { Subscription } from "../subscriptions/types";
+import type { Subscription } from "../subscriptions";
 
 export const selectedSubscriptionsAtom = atom<Array<Subscription>>([]);
 

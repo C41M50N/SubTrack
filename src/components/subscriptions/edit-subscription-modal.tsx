@@ -1,12 +1,21 @@
 import Image from "next/image";
-import React from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import type { Collection } from "@prisma/client";
 import { IconCalendarEvent, IconDeviceFloppy } from "@tabler/icons-react";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useForm } from "react-hook-form";
 import type z from "zod";
 
+import dayjs from "@/lib/dayjs";
+import {
+	type ModalState,
+	useCategories,
+	useUpdateSubscription,
+} from "@/lib/hooks";
+import { cn, sleep, toProperCase } from "@/utils";
+
+import { LoadingSpinner } from "@/components/common/loading-spinner";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -46,32 +55,30 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { FREQUENCIES, ICONS } from "@/features/common/types";
-import { useDemoSubscriptions } from "@/features/demo-subscriptions/stores";
+import { FREQUENCIES, ICONS } from "@/features/common";
 import {
-	CreateDemoSubscriptionSchema,
-	DEMO_CATEGORIES,
-	type DemoSubscription,
-} from "@/features/demo-subscriptions/types";
-import { SubscriptionWithoutIdSchema } from "@/features/subscriptions/types";
-import dayjs from "@/lib/dayjs";
-import type { ModalState } from "@/lib/hooks";
-import { cn, sleep, toProperCase } from "@/utils";
+	type Subscription,
+	SubscriptionWithoutIdSchema,
+} from "@/features/subscriptions";
 
 type EditSubscriptionModalProps = {
 	state: ModalState;
-	subscription: DemoSubscription;
+	subscription: Subscription;
+	categories: Array<string>;
+	collections: Array<Omit<Collection, "user_id">>;
 };
 
 export default function EditSubscriptionModal({
 	state,
 	subscription,
+	categories,
+	collections,
 }: EditSubscriptionModalProps) {
-	const [isLoading, setIsLoading] = React.useState<boolean>(false);
-	const { updateDemoSubscription } = useDemoSubscriptions();
+	const { updateSubscription, isUpdateSubscriptionLoading } =
+		useUpdateSubscription();
 
-	const form = useForm<z.infer<typeof CreateDemoSubscriptionSchema>>({
-		resolver: zodResolver(CreateDemoSubscriptionSchema),
+	const form = useForm<z.infer<typeof SubscriptionWithoutIdSchema>>({
+		resolver: zodResolver(SubscriptionWithoutIdSchema),
 		defaultValues: {
 			...subscription,
 			amount: subscription.amount / 100,
@@ -79,13 +86,8 @@ export default function EditSubscriptionModal({
 		},
 	});
 
-	async function onSubmit(
-		values: z.infer<typeof CreateDemoSubscriptionSchema>,
-	) {
-		setIsLoading(true);
-		await sleep(500);
-		setIsLoading(false);
-		updateDemoSubscription({ id: subscription.id, ...values });
+	async function onSubmit(values: z.infer<typeof SubscriptionWithoutIdSchema>) {
+		await updateSubscription({ id: subscription.id, ...values });
 		state.setState("closed");
 	}
 
@@ -98,7 +100,6 @@ export default function EditSubscriptionModal({
 				<DialogHeader>
 					<DialogTitle>Edit Subscription</DialogTitle>
 				</DialogHeader>
-
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 						<div className="grid grid-cols-2 gap-4">
@@ -129,7 +130,7 @@ export default function EditSubscriptionModal({
 														variant="outline"
 														role="combobox"
 														className={cn(
-															"w-[200px] justify-between",
+															"w-full justify-between",
 															!field.value && "text-muted-foreground",
 														)}
 													>
@@ -211,9 +212,7 @@ export default function EditSubscriptionModal({
 									</FormItem>
 								)}
 							/>
-						</div>
 
-						<div className="grid grid-cols-3 gap-4">
 							<FormField
 								control={form.control}
 								name="amount"
@@ -272,9 +271,38 @@ export default function EditSubscriptionModal({
 												</SelectTrigger>
 											</FormControl>
 											<SelectContent>
-												{DEMO_CATEGORIES.map((v) => (
-													<SelectItem value={v} key={v}>
-														{v}
+												{categories &&
+													categories.map((v) => (
+														<SelectItem value={v} key={v}>
+															{v}
+														</SelectItem>
+													))}
+											</SelectContent>
+										</Select>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<FormField
+								control={form.control}
+								name="collection_id"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Collection</FormLabel>
+										<Select
+											onValueChange={field.onChange}
+											defaultValue={field.value}
+										>
+											<FormControl>
+												<SelectTrigger>
+													<SelectValue />
+												</SelectTrigger>
+											</FormControl>
+											<SelectContent>
+												{collections.map((col) => (
+													<SelectItem value={col.id} key={col.id}>
+														{col.title}
 													</SelectItem>
 												))}
 											</SelectContent>
@@ -283,14 +311,12 @@ export default function EditSubscriptionModal({
 									</FormItem>
 								)}
 							/>
-						</div>
 
-						<div className="grid grid-cols-10 gap-4">
 							<FormField
 								control={form.control}
 								name="next_invoice"
 								render={({ field }) => (
-									<FormItem className="col-span-6">
+									<FormItem>
 										<FormLabel>Next Invoice</FormLabel>
 										<Popover>
 											<PopoverTrigger asChild>
@@ -330,20 +356,26 @@ export default function EditSubscriptionModal({
 								control={form.control}
 								name="send_alert"
 								render={({ field }) => (
-									<FormItem className="col-span-4 flex flex-row items-center justify-center space-x-2 pt-6">
+									<FormItem className="flex flex-row items-center justify-center space-y-0 space-x-2 pt-6">
 										<Checkbox
-											className="h-6 w-6"
+											className="h-5 w-5"
 											checked={field.value}
 											onCheckedChange={field.onChange}
 										/>
-										<FormLabel>Send Alert?</FormLabel>
+										<FormLabel className="leading-none text-center mt-0">
+											Send Alert?
+										</FormLabel>
 									</FormItem>
 								)}
 							/>
 						</div>
 
 						<DialogFooter>
-							<Button type="submit" isLoading={isLoading} className="gap-1 ">
+							<Button
+								type="submit"
+								isLoading={isUpdateSubscriptionLoading}
+								className="gap-1 "
+							>
 								<IconDeviceFloppy size={20} strokeWidth={1.75} />
 								<span>Save</span>
 							</Button>

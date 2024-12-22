@@ -2,7 +2,7 @@ import {
 	type Subscription,
 	SubscriptionSchema,
 	SubscriptionWithoutIdSchema,
-} from "@/features/subscriptions/types";
+} from "@/features/subscriptions";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { z } from "zod";
 

@@ -2,15 +2,18 @@ import Image from "next/image";
 import React from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { Collection } from "@prisma/client";
 import { IconCalendarEvent } from "@tabler/icons-react";
 import { format } from "date-fns";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useForm } from "react-hook-form";
 import type z from "zod";
 
-import { type ModalState, useCreateSubscription } from "@/lib/hooks";
-import { cn, toProperCase } from "@/utils";
+import { useDemoSubscriptions, useNewDemoSubscriptionModal } from "@/features/demo-subscriptions/stores";
+import {
+	CreateDemoSubscriptionSchema,
+	DEMO_CATEGORIES,
+} from "@/features/demo-subscriptions";
+import { cn, sleep, toProperCase } from "@/utils";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -52,30 +55,16 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { selectedCollectionIdAtom } from "@/features/common/atoms";
-import { FREQUENCIES, ICONS } from "@/features/common/types";
-import { SubscriptionWithoutIdSchema } from "@/features/subscriptions/types";
-import { useAtom } from "jotai";
-import { useNewSubscriptionModal } from "@/features/subscriptions/stores";
+import { FREQUENCIES, ICONS } from "@/features/common";
 
-type NewSubscriptionModalProps = {
-	categories: string[];
-	collections: Omit<Collection, "user_id">[];
-};
+export default function NewSubscriptionModal() {
+	const newDemoSubscriptionModalState = useNewDemoSubscriptionModal()
 
-export default function NewSubscriptionModal({
-	categories,
-	collections,
-}: NewSubscriptionModalProps) {
-	const newSubscriptionModalState = useNewSubscriptionModal();
+	const [isLoading, setIsLoading] = React.useState<boolean>(false);
+	const { addSubscription: addDemoSubscription } = useDemoSubscriptions();
 
-	const { createSubscription, isCreateSubscriptionLoading } =
-		useCreateSubscription();
-
-	const [selectedCollectionId, _] = useAtom(selectedCollectionIdAtom);
-
-	const form = useForm<z.infer<typeof SubscriptionWithoutIdSchema>>({
-		resolver: zodResolver(SubscriptionWithoutIdSchema),
+	const form = useForm<z.infer<typeof CreateDemoSubscriptionSchema>>({
+		resolver: zodResolver(CreateDemoSubscriptionSchema),
 		defaultValues: {
 			name: "",
 			amount: 10.0,
@@ -86,31 +75,27 @@ export default function NewSubscriptionModal({
 		},
 	});
 
-	React.useEffect(() => {
-		if (categories[0]) {
-			form.setValue("category", categories[0]);
-		}
-
-		if (selectedCollectionId) {
-			form.setValue("collection_id", selectedCollectionId);
-		}
-	}, [newSubscriptionModalState]);
-
-	async function onSubmit(values: z.infer<typeof SubscriptionWithoutIdSchema>) {
-		await createSubscription(values);
+	async function onSubmit(
+		values: z.infer<typeof CreateDemoSubscriptionSchema>,
+	) {
+		setIsLoading(true);
+		await sleep(500);
+		setIsLoading(false);
+		addDemoSubscription(values);
 		form.reset();
-		newSubscriptionModalState.set("closed");
+		newDemoSubscriptionModalState.set("closed");
 	}
 
 	return (
 		<Dialog
-			open={newSubscriptionModalState.state === "open"}
-			onOpenChange={(open) => !open && newSubscriptionModalState.set("closed")}
+			open={newDemoSubscriptionModalState.state === "open"}
+			onOpenChange={(open) => !open && newDemoSubscriptionModalState.set("closed")}
 		>
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>New Subscription</DialogTitle>
 				</DialogHeader>
+
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 						<div className="grid grid-cols-2 gap-4">
@@ -141,7 +126,7 @@ export default function NewSubscriptionModal({
 														variant="outline"
 														role="combobox"
 														className={cn(
-															"w-full justify-between",
+															"w-[200px] justify-between",
 															!field.value && "text-muted-foreground",
 														)}
 													>
@@ -223,7 +208,9 @@ export default function NewSubscriptionModal({
 									</FormItem>
 								)}
 							/>
+						</div>
 
+						<div className="grid grid-cols-3 gap-4">
 							<FormField
 								control={form.control}
 								name="amount"
@@ -273,34 +260,6 @@ export default function NewSubscriptionModal({
 									<FormItem>
 										<FormLabel>Category</FormLabel>
 										<Select
-											onValueChange={(v) => v !== "" && field.onChange(v)}
-											defaultValue={field.value}
-										>
-											<FormControl>
-												<SelectTrigger>
-													<SelectValue />
-												</SelectTrigger>
-											</FormControl>
-											<SelectContent>
-												{categories.map((v) => (
-													<SelectItem value={v.toString()} key={v}>
-														{v}
-													</SelectItem>
-												))}
-											</SelectContent>
-										</Select>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-
-							<FormField
-								control={form.control}
-								name="collection_id"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Collection</FormLabel>
-										<Select
 											onValueChange={field.onChange}
 											defaultValue={field.value}
 										>
@@ -310,9 +269,9 @@ export default function NewSubscriptionModal({
 												</SelectTrigger>
 											</FormControl>
 											<SelectContent>
-												{collections.map((col) => (
-													<SelectItem value={col.id} key={col.id}>
-														{col.title}
+												{DEMO_CATEGORIES.map((v) => (
+													<SelectItem value={v} key={v}>
+														{v}
 													</SelectItem>
 												))}
 											</SelectContent>
@@ -321,18 +280,20 @@ export default function NewSubscriptionModal({
 									</FormItem>
 								)}
 							/>
+						</div>
 
+						<div className="grid grid-cols-10 gap-4">
 							<FormField
 								control={form.control}
 								name="next_invoice"
 								render={({ field }) => (
-									<FormItem>
+									<FormItem className="col-span-6">
 										<FormLabel>Next Invoice</FormLabel>
 										<Popover>
 											<PopoverTrigger asChild>
 												<FormControl>
 													<Button
-														variant="outline"
+														variant={"outline"}
 														className={cn(
 															"w-full pl-3 text-left font-normal gap-2",
 															!field.value && "text-muted-foreground",
@@ -366,22 +327,20 @@ export default function NewSubscriptionModal({
 								control={form.control}
 								name="send_alert"
 								render={({ field }) => (
-									<FormItem className="flex flex-row items-center justify-center space-y-0 space-x-2 pt-6">
+									<FormItem className="col-span-4 flex flex-row items-center justify-center space-x-2 pt-6">
 										<Checkbox
-											className="h-5 w-5"
+											className="h-6 w-6"
 											checked={field.value}
 											onCheckedChange={field.onChange}
 										/>
-										<FormLabel className="leading-none text-center mt-0">
-											Send Alert?
-										</FormLabel>
+										<FormLabel>Send Alert?</FormLabel>
 									</FormItem>
 								)}
 							/>
 						</div>
 
 						<DialogFooter>
-							<Button type="submit" isLoading={isCreateSubscriptionLoading}>
+							<Button type="submit" isLoading={isLoading}>
 								Submit
 							</Button>
 						</DialogFooter>

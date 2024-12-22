@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
-import type { CollectionWithoutUserId } from "@/features/collections/types";
+import type { CollectionWithoutUserId } from "@/features/collections";
 import type { ModalState } from "@/lib/hooks";
 import { api } from "@/utils/api";
 import { zodResolver } from "@hookform/resolvers/zod";
