@@ -4,10 +4,9 @@ import {
 	SelectContent,
 	SelectGroup,
 	SelectItem,
-	SelectLabel,
 	SelectSeparator,
 	SelectTrigger,
-	SelectValue,
+	SelectValue
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { CollectionWithoutUserId } from "@/features/collections";

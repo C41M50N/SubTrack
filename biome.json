@@ -1,7 +1,17 @@
 {
-	"$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+	"$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
 	"organizeImports": {
 		"enabled": true
+	},
+	"formatter": {
+		"enabled": true
+	},
+	"files": {
+		"ignore": [
+			".next",
+			".react-email",
+			"node_modules"
+		]
 	},
 	"linter": {
 		"enabled": true,

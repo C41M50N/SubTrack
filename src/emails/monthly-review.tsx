@@ -3,15 +3,13 @@ import { toMoneyString } from "@/utils";
 import type { Subscription } from "@prisma/client";
 import {
 	Body,
-	Button,
 	Container,
 	Head,
-	Heading,
 	Html,
 	Img,
 	Preview,
 	Tailwind,
-	Text,
+	Text
 } from "@react-email/components";
 
 export type MonthlyReviewEmailProps = {
