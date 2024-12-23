@@ -3,6 +3,7 @@ import { collectionsRouter } from "@/server/api/routers/collections";
 import { mainRouter } from "@/server/api/routers/main";
 import { subscriptionsRouter } from "@/server/api/routers/subscriptions";
 import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
+import { dataRouter } from "./routers/data";
 import { usersRouter } from "./routers/users";
 
 /**
@@ -16,6 +17,7 @@ export const appRouter = createTRPCRouter({
 	categories: categoriesRouter,
 	collections: collectionsRouter,
 	subscriptions: subscriptionsRouter,
+	data: dataRouter,
 });
 
 // export type definition of API

@@ -31,7 +31,7 @@ export const SubscriptionSchema = z.object({
 	collection_id: z.string(),
 });
 
-export const SubscriptionWithoutIdSchema = SubscriptionSchema.omit({
+export const CreateSubscriptionSchema = SubscriptionSchema.omit({
 	id: true,
 });
 

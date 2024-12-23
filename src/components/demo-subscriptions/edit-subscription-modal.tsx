@@ -53,7 +53,7 @@ import {
 	type DemoSubscription,
 } from "@/features/demo-subscriptions";
 import { useDemoSubscriptions } from "@/features/demo-subscriptions/stores";
-import { SubscriptionWithoutIdSchema } from "@/features/subscriptions";
+import { CreateSubscriptionSchema } from "@/features/subscriptions";
 import dayjs from "@/lib/dayjs";
 import type { ModalState } from "@/lib/hooks";
 import { cn, sleep, toProperCase } from "@/utils";

@@ -26,7 +26,7 @@ export default function DataSettingsPage({
 	const [file, setFile] = React.useState<File | null>(null);
 
 	const { mutateAsync: importData, isLoading: isImportDataLoading } =
-		api.main.importData.useMutation({
+		api.data.importData.useMutation({
 			onSuccess() {
 				toast({
 					variant: "success",
@@ -137,7 +137,7 @@ export default function DataSettingsPage({
 export async function getServerSideProps(context: GetServerSidePropsContext) {
 	const session = await getServerAuthSession(context.req);
 	const trpc = createCaller({ session: session, db: prisma });
-	const exportJSON = await trpc.main.getExportJSON();
+	const exportJSON = await trpc.data.createJSONExport();
 
 	return {
 		props: {

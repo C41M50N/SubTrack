@@ -57,8 +57,8 @@ import {
 } from "@/components/ui/select";
 import { FREQUENCIES, ICONS } from "@/features/common";
 import {
+	CreateSubscriptionSchema,
 	type Subscription,
-	SubscriptionWithoutIdSchema,
 } from "@/features/subscriptions";
 
 type EditSubscriptionModalProps = {
@@ -77,8 +77,8 @@ export default function EditSubscriptionModal({
 	const { updateSubscription, isUpdateSubscriptionLoading } =
 		useUpdateSubscription();
 
-	const form = useForm<z.infer<typeof SubscriptionWithoutIdSchema>>({
-		resolver: zodResolver(SubscriptionWithoutIdSchema),
+	const form = useForm<z.infer<typeof CreateSubscriptionSchema>>({
+		resolver: zodResolver(CreateSubscriptionSchema),
 		defaultValues: {
 			...subscription,
 			amount: subscription.amount / 100,
@@ -86,7 +86,7 @@ export default function EditSubscriptionModal({
 		},
 	});
 
-	async function onSubmit(values: z.infer<typeof SubscriptionWithoutIdSchema>) {
+	async function onSubmit(values: z.infer<typeof CreateSubscriptionSchema>) {
 		await updateSubscription({ id: subscription.id, ...values });
 		state.setState("closed");
 	}

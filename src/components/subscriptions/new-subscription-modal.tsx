@@ -54,7 +54,7 @@ import {
 } from "@/components/ui/select";
 import { FREQUENCIES, ICONS } from "@/features/common";
 import { selectedCollectionIdAtom } from "@/features/common/atoms";
-import { SubscriptionWithoutIdSchema } from "@/features/subscriptions";
+import { CreateSubscriptionSchema } from "@/features/subscriptions";
 import { useNewSubscriptionModal } from "@/features/subscriptions/stores";
 import { useAtom } from "jotai";
 
@@ -74,8 +74,8 @@ export default function NewSubscriptionModal({
 
 	const [selectedCollectionId, _] = useAtom(selectedCollectionIdAtom);
 
-	const form = useForm<z.infer<typeof SubscriptionWithoutIdSchema>>({
-		resolver: zodResolver(SubscriptionWithoutIdSchema),
+	const form = useForm<z.infer<typeof CreateSubscriptionSchema>>({
+		resolver: zodResolver(CreateSubscriptionSchema),
 		defaultValues: {
 			name: "",
 			amount: 10.0,
@@ -96,7 +96,7 @@ export default function NewSubscriptionModal({
 		}
 	}, [newSubscriptionModalState]);
 
-	async function onSubmit(values: z.infer<typeof SubscriptionWithoutIdSchema>) {
+	async function onSubmit(values: z.infer<typeof CreateSubscriptionSchema>) {
 		await createSubscription(values);
 		form.reset();
 		newSubscriptionModalState.set("closed");

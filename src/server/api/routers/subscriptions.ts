@@ -1,69 +1,39 @@
 import {
-	type Subscription,
+	CreateSubscriptionSchema,
 	SubscriptionSchema,
-	SubscriptionWithoutIdSchema,
 } from "@/features/subscriptions";
+import createSubscription from "@/features/subscriptions/actions/create-subscription";
+import deleteSubscription, {
+	DeleteSubscriptionProps,
+} from "@/features/subscriptions/actions/delete-subscription";
+import getSubscriptionsFromCollection, {
+	GetSubscriptionsFromCollectionProps,
+} from "@/features/subscriptions/actions/get-subscriptions-from-collection";
+import updateSubscription from "@/features/subscriptions/actions/update-subscription";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { z } from "zod";
 
 export const subscriptionsRouter = createTRPCRouter({
 	createSubscription: protectedProcedure
-		.input(SubscriptionWithoutIdSchema)
+		.input(CreateSubscriptionSchema)
 		.mutation(async ({ ctx, input }) => {
-			console.log(
-				`Creating new subscription for <${ctx.session.user.name}>: ${JSON.stringify(input)}`,
-			);
-
-			const maxNumSubscriptions: number = 300;
-
-			const currentNumSubscriptions = await ctx.db.subscription.count({
-				where: {
-					user_id: ctx.session.user.id,
-					collection_id: input.collection_id,
-				},
-			});
-
-			if (currentNumSubscriptions + 1 > maxNumSubscriptions) {
-				throw new Error(
-					"You have reached your subscription limit for this collection. You can have at most 300 subscriptions at a time in a collection.",
-				);
-			}
-
-			await ctx.db.subscription.create({
-				data: {
-					user_id: ctx.session.user.id,
-					...input,
-					amount: Math.floor(input.amount * 100),
-				},
-			});
+			return await createSubscription(ctx, input);
 		}),
 
 	getSubscriptionsFromCollection: protectedProcedure
-		.input(z.string())
-		.query(async ({ ctx, input: collectionId }) => {
-			const subs = await ctx.db.subscription.findMany({
-				where: {
-					collection_id: collectionId,
-					user_id: ctx.session.user.id,
-				},
-			});
-			return subs.map((sub) => sub as Subscription);
+		.input(GetSubscriptionsFromCollectionProps)
+		.query(async ({ ctx, input }) => {
+			return await getSubscriptionsFromCollection(ctx, input);
 		}),
 
 	updateSubscription: protectedProcedure
 		.input(SubscriptionSchema)
 		.mutation(async ({ ctx, input }) => {
-			await ctx.db.subscription.update({
-				where: { id: input.id, user_id: ctx.session.user.id },
-				data: { ...input, amount: input.amount * 100 },
-			});
+			return await updateSubscription(ctx, input);
 		}),
 
 	deleteSubscription: protectedProcedure
-		.input(z.string())
+		.input(DeleteSubscriptionProps)
 		.mutation(async ({ ctx, input }) => {
-			await ctx.db.subscription.delete({
-				where: { user_id: ctx.session.user.id, id: input },
-			});
+			return await deleteSubscription(ctx, input);
 		}),
 });

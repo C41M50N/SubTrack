@@ -25,7 +25,7 @@ export default function DeleteSubscriptionModal({
 		useDeleteSubscription();
 
 	async function onSubmit() {
-		await deleteSubscription(subscription_id);
+		await deleteSubscription({ subscriptionId: subscription_id });
 		state.setState("closed");
 	}
 
