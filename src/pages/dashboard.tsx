@@ -47,7 +47,7 @@ export default function DashboardPage() {
 
 	const { data: subscriptions, isInitialLoading: isSubsLoading } =
 		api.subscriptions.getSubscriptionsFromCollection.useQuery(
-			selectedCollectionId || "",
+			{ collectionId: selectedCollectionId || "" },
 			{ enabled: selectedCollectionId !== null },
 		);
 	const [selectedSubscriptions] = useAtom(selectedSubscriptionsAtom);

@@ -27,7 +27,7 @@ export default function DeleteCollectionModal({ state, collectionId }: Props) {
 	const ctx = api.useContext();
 
 	const { data: subscriptions, isLoading: isGetSubscriptionsLoading } =
-		api.subscriptions.getSubscriptionsFromCollection.useQuery(collectionId);
+		api.subscriptions.getSubscriptionsFromCollection.useQuery({ collectionId });
 
 	const { mutateAsync: deleteCollection } =
 		api.collections.deleteCollection.useMutation({
