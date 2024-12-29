@@ -8,14 +8,14 @@ import { prisma } from "./db";
 export const auth = betterAuth({
 	emailAndPassword: {
 		enabled: true,
+		autoSignIn: true,
 		requireEmailVerification: true,
 		async sendResetPassword(data, request) {
 			// Send an email to the user with a link to reset their password
 			await sendPasswordResetEmail({
 				to: data.user.email,
 				emailProps: {
-					// biome-ignore lint/style/noNonNullAssertion: <explanation>
-					userName: data.user.name.split(" ")[0]!,
+					userName: data.user.name.split(" ")[0] as string,
 					resetURL: data.url,
 				},
 			});
@@ -30,8 +30,7 @@ export const auth = betterAuth({
 			await sendVerificationEmail({
 				to: data.user.email,
 				emailProps: {
-					// biome-ignore lint/style/noNonNullAssertion: <explanation>
-					userName: data.user.name.split(" ")[0]!,
+					userName: data.user.name.split(" ")[0] as string,
 					verifyURL: data.url,
 				},
 			});
