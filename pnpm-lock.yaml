@@ -96,8 +96,8 @@ importers:
         specifier: ^1.4.1
         version: 1.4.1(next@14.2.21(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)
       better-auth:
-        specifier: ^1.1.1
-        version: 1.1.1
+        specifier: ^1.1.6
+        version: 1.1.6
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -235,8 +235,8 @@ packages:
     resolution: {integrity: sha512-FDSOghenHTiToteC/QRlv2q3DhPZ/oOXTBoirfWNx1Cx3TMVcGWQtMMmQcSvb/JjpNeGzx8Pq/b4fKEJuWm1sw==}
     engines: {node: '>=6.9.0'}
 
-  '@better-auth/utils@0.2.1':
-    resolution: {integrity: sha512-1PgLrNJY3FZfwz8g6puKrAS/WJW3LWuNlLSFFKrzDLrn69SPBCuCXUF3tY6c1gURLX6nHARH6yx3dVy9f298cg==}
+  '@better-auth/utils@0.2.3':
+    resolution: {integrity: sha512-Ap1GaSmo6JYhJhxJOpUB0HobkKPTNzfta+bLV89HfpyCAHN7p8ntCrmNFHNAVD0F6v0mywFVEUg1FUhNCc81Rw==}
 
   '@better-fetch/fetch@1.1.12':
     resolution: {integrity: sha512-B3bfloI/2UBQWIATRN6qmlORrvx3Mp0kkNjmXLv0b+DtbtR+pP4/I5kQA/rDUv+OReLywCCldf6co4LdDmh8JA==}
@@ -1547,15 +1547,12 @@ packages:
   '@selderee/plugin-htmlparser2@0.10.0':
     resolution: {integrity: sha512-gW69MEamZ4wk1OsOq1nG1jcyhXIQcnrsX5JwixVw/9xaiav8TCyjESAruu1Rz9yyInhgBXxkNwMeygKnN2uxNA==}
 
-  '@simplewebauthn/browser@10.0.0':
-    resolution: {integrity: sha512-hG0JMZD+LiLUbpQcAjS4d+t4gbprE/dLYop/CkE01ugU/9sKXflxV5s0DRjdz3uNMFecatRfb4ZLG3XvF8m5zg==}
+  '@simplewebauthn/browser@13.0.0':
+    resolution: {integrity: sha512-7d/+gxoFoDQxq2EkLl/PuTIQ/rnSrA3bmr8L2Ij7bRyicJoCJX/NDGUNExyctB9nSDrEkkcrJMDkwpCYOGU3Lg==}
 
-  '@simplewebauthn/server@10.0.1':
-    resolution: {integrity: sha512-djNWcRn+H+6zvihBFJSpG3fzb0NQS9c/Mw5dYOtZ9H+oDw8qn9Htqxt4cpqRvSOAfwqP7rOvE9rwqVaoGGc3hg==}
+  '@simplewebauthn/server@13.0.0':
+    resolution: {integrity: sha512-Tb3hJRpeT4cgT2uPORc465qu9LGXcDoIegFmkIgqw7XNZtsaoHzn3xI1DiFH7ukzs6JbhfQBRyY4rlfCdTwkNw==}
     engines: {node: '>=20.0.0'}
-
-  '@simplewebauthn/types@10.0.0':
-    resolution: {integrity: sha512-SFXke7xkgPRowY2E+8djKbdEznTVnD5R6GO7GPTthpHrokLvNKw8C3lFZypTxLI7KkCfGPfhtqB3d7OVGGa9jQ==}
 
   '@stablelib/base64@1.0.1':
     resolution: {integrity: sha512-1bnPQqSxSuc3Ii6MhBysoWCg58j97aUjuCSZrGSmDxNqtytIi0k8utUenAwTZN4V5mXXYGsVUI9zeBqy+jBOSQ==}
@@ -1876,8 +1873,8 @@ packages:
   before-after-hook@2.2.3:
     resolution: {integrity: sha512-NzUnlZexiaH/46WDhANlyR2bXRopNg4F/zuSA3OpZnllCUgRaOF2znDioDWrmbNVsuZk6l9pMquQB38cfBZwkQ==}
 
-  better-auth@1.1.1:
-    resolution: {integrity: sha512-XVG7213jOY1WNx5x1xlhGZXQ3M5UqvPhZigskc4e4SLaNptwIa8X0FtJ1+QYWY93j9Zpw5cXjpgs//T6h7W4EQ==}
+  better-auth@1.1.6:
+    resolution: {integrity: sha512-avoj9TxEm4K1IE8E4PBcGNQdoHaY8LR3O4vEiLK78l1CyM7lK1frd9NVqUbxz8RR95mR9SF87FKlyorQ+SW0Og==}
 
   better-call@0.3.3-beta.4:
     resolution: {integrity: sha512-txigUTFsjOlE4dfkfhDhu6Gk0I1Xo3S4Nye+nfMKJXknb+WsymcWtqoRUSUGdhOMumM3LT9R3QttTUxwny9lWQ==}
@@ -2705,10 +2702,6 @@ packages:
     resolution: {integrity: sha512-WNLf5Sd8oZxOm+TzppcYk8gVOgP+l58xNy58D0nbUnOxOWRWvlcCV4kUF7ltmI6PsrLl/BgKEyS4mqsGChFN0w==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
-
-  nanostores@0.11.3:
-    resolution: {integrity: sha512-TUes3xKIX33re4QzdxwZ6tdbodjmn3tWXCEc1uokiEmo14sI1EaGYNs2k3bU2pyyGNmBqFGAVl6jAGWd06AVIg==}
-    engines: {node: ^18.0.0 || >=20.0.0}
 
   natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
@@ -3562,7 +3555,7 @@ snapshots:
     dependencies:
       regenerator-runtime: 0.14.1
 
-  '@better-auth/utils@0.2.1':
+  '@better-auth/utils@0.2.3':
     dependencies:
       uncrypto: 0.1.3
 
@@ -4884,11 +4877,9 @@ snapshots:
       domhandler: 5.0.3
       selderee: 0.10.0
 
-  '@simplewebauthn/browser@10.0.0':
-    dependencies:
-      '@simplewebauthn/types': 10.0.0
+  '@simplewebauthn/browser@13.0.0': {}
 
-  '@simplewebauthn/server@10.0.1':
+  '@simplewebauthn/server@13.0.0':
     dependencies:
       '@hexagon/base64': 1.1.28
       '@levischuck/tiny-cbor': 0.2.2
@@ -4897,12 +4888,9 @@ snapshots:
       '@peculiar/asn1-rsa': 2.3.13
       '@peculiar/asn1-schema': 2.3.13
       '@peculiar/asn1-x509': 2.3.13
-      '@simplewebauthn/types': 10.0.0
       cross-fetch: 4.1.0
     transitivePeerDependencies:
       - encoding
-
-  '@simplewebauthn/types@10.0.0': {}
 
   '@stablelib/base64@1.0.1': {}
 
@@ -5213,19 +5201,18 @@ snapshots:
 
   before-after-hook@2.2.3: {}
 
-  better-auth@1.1.1:
+  better-auth@1.1.6:
     dependencies:
-      '@better-auth/utils': 0.2.1
+      '@better-auth/utils': 0.2.3
       '@better-fetch/fetch': 1.1.12
       '@noble/ciphers': 0.6.0
       '@noble/hashes': 1.6.1
-      '@simplewebauthn/browser': 10.0.0
-      '@simplewebauthn/server': 10.0.1
+      '@simplewebauthn/browser': 13.0.0
+      '@simplewebauthn/server': 13.0.0
       better-call: 0.3.3-beta.4
       defu: 6.1.4
       jose: 5.9.6
       kysely: 0.27.5
-      nanostores: 0.11.3
       uncrypto: 0.1.3
       zod: 3.24.1
     transitivePeerDependencies:
@@ -6078,8 +6065,6 @@ snapshots:
       thenify-all: 1.6.0
 
   nanoid@3.3.8: {}
-
-  nanostores@0.11.3: {}
 
   natural-compare@1.4.0: {}
 
