@@ -15,31 +15,10 @@ This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3
 - [React Email](https://react.email)
 - [Resend](https://resend.com)
 
-## Development using Dev Container 🐳
-### Prerequisites
-- [Docker](https://www.docker.com)
-- [VSCode](https://code.visualstudio.com)
-- [Dev Containers extension for VSCode](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
-
-### Steps
-1. **Clone repository and open in VSCode**
-    ```bash
-    git clone https://github.com/C41M50N/SubTrack.git "subtrack"
-    cd subtrack
-    code .
-    ```
-
-2. **Open in VSCode Dev Container**
-    - Open the Command Palette and run `Dev Containers: Reopen in Container`
-    - Wait a few minutes for the container to build
-
-3. **Move on to Post-setup Steps**
-    - [Post-setup Steps](#post-setup-steps)
-
-## Post-setup Steps
-### Add Environment Variables
-...
+## Development Environment Requirements
+- [Node.js (v20+)](https://nodejs.org/)
+- [pnpm (v8+)](https://pnpm.io/)
 
 ## FAQ
 ### How do I request more subscription icons?
-- Create an issue with the "icon request" label.
+- Create an issue with the "icon request" label. Attach a screenshot of the icon that you want added.
