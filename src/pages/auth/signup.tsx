@@ -12,10 +12,13 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/use-toast";
 import { signIn, signUp } from "@/features/auth/auth-client";
+import { getServerAuthSession } from "@/server/api/trpc";
 import { Loader2, X } from "lucide-react";
+import type { GetServerSidePropsContext } from "next/types";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import AuthLayout from "@/layouts/auth";
 
 export default function SignUpPage() {
 	const router = useRouter();
@@ -41,7 +44,7 @@ export default function SignUpPage() {
 	};
 
 	return (
-		<div className="h-screen sm:-mt-10 flex justify-center items-center">
+		<AuthLayout>
 			<div className="w-[450px]">
 				<Card className="w-full px-4 sm:px-6 pt-1 pb-4 shadow-none sm:shadow-xl border-none sm:border">
 					<CardHeader>
@@ -245,7 +248,7 @@ export default function SignUpPage() {
 					</CardFooter>
 				</Card>
 			</div>
-		</div>
+		</AuthLayout>
 	);
 }
 
@@ -256,4 +259,17 @@ async function convertImageToBase64(file: File): Promise<string> {
 		reader.onerror = reject;
 		reader.readAsDataURL(file);
 	});
+}
+
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+	const session = await getServerAuthSession(context.req);
+	if (session) {
+		return {
+			redirect: {
+				destination: "/dashboard"
+			}
+		}
+	}
+
+	return { props: {} }
 }

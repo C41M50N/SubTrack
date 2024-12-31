@@ -19,6 +19,8 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { PasswordSchema } from "@/features/auth";
 import { authClient } from "@/features/auth/auth-client";
+import AuthLayout from "@/layouts/auth";
+import { getServerAuthSession } from "@/server/api/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeftIcon } from "lucide-react";
 import type {
@@ -74,7 +76,7 @@ export default function ResetPasswordPage({
 	}
 
 	return (
-		<div className="h-screen sm:-mt-10 flex justify-center items-center">
+		<AuthLayout>
 			<div className="w-[450px]">
 				<Card className="w-full px-4 sm:px-6 pt-1 pb-4 shadow-none sm:shadow-xl border-none sm:border">
 					<CardHeader>
@@ -142,13 +144,22 @@ export default function ResetPasswordPage({
 					</CardContent>
 				</Card>
 			</div>
-		</div>
+		</AuthLayout>
 	);
 }
 
-export async function getServerSideProps(ctx: GetServerSidePropsContext) {
-	const token = ctx.query.token as string | undefined;
-	const error = ctx.query.error as string | undefined;
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+	const session = await getServerAuthSession(context.req);
+	if (session) {
+		return {
+			redirect: {
+				destination: "/dashboard"
+			}
+		}
+	}
+
+	const token = context.query.token as string | undefined;
+	const error = context.query.error as string | undefined;
 
 	if (error) {
 		return {

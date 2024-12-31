@@ -12,10 +12,15 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/use-toast";
 import { signIn } from "@/features/auth/auth-client";
+import AuthLayout from "@/layouts/auth";
+import { createCaller } from "@/server/api/root";
+import { getServerAuthSession } from "@/server/api/trpc";
+import { prisma } from "@/server/db";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import type { GetServerSidePropsContext } from "next/types";
 import { useState } from "react";
 
 export default function SignInPage() {
@@ -25,7 +30,7 @@ export default function SignInPage() {
 	const [loading, setLoading] = useState(false);
 
 	return (
-		<div className="h-screen sm:-mt-10 flex justify-center items-center">
+		<AuthLayout>
 			<div className="w-[450px]">
 				<Card className="w-full px-4 sm:px-6 pt-1 pb-4 shadow-none sm:shadow-xl border-none sm:border">
 					<CardHeader>
@@ -164,6 +169,19 @@ export default function SignInPage() {
 					</CardFooter>
 				</Card>
 			</div>
-		</div>
+		</AuthLayout>
 	);
+}
+
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+	const session = await getServerAuthSession(context.req);
+	if (session) {
+		return {
+			redirect: {
+				destination: "/dashboard"
+			}
+		}
+	}
+
+	return { props: {} }
 }
