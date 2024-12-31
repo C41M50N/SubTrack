@@ -221,9 +221,9 @@ export const columns: ColumnDef<Subscription>[] = [
 								className="cursor-pointer"
 								onClick={() => editModalState.setState("open")}
 							>
-								<IconPencil stroke={1.75} />
+								<IconPencil className="mr-2.5 size-5" />
 								<span
-									className={`text-base font-medium pl-2 ${lato.className}`}
+									className={`text-base font-medium ${lato.className}`}
 								>
 									Edit
 								</span>
@@ -237,9 +237,9 @@ export const columns: ColumnDef<Subscription>[] = [
 										className="cursor-pointer"
 										onClick={() => setReminderModalState.setState("open")}
 									>
-										<IconAlarm stroke={1.75} />
+										<IconAlarm className="mr-2.5 size-5" />
 										<span
-											className={`text-base font-medium pl-2 ${lato.className}`}
+											className={`text-base font-medium ${lato.className}`}
 										>
 											Set Cancel Reminder
 										</span>
@@ -253,9 +253,9 @@ export const columns: ColumnDef<Subscription>[] = [
 								className="cursor-pointer text-red-700"
 								onClick={() => deleteModalState.setState("open")}
 							>
-								<IconTrash stroke={1.75} />
+								<IconTrash className="mr-2.5 size-5" />
 								<span
-									className={`text-base font-medium pl-2 ${lato.className}`}
+									className={`text-base font-medium ${lato.className}`}
 								>
 									Delete
 								</span>
