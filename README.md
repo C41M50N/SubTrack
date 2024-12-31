@@ -7,17 +7,17 @@ This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3
 
 ## Tech Stack 🛠️
 - [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
+- [Better-Auth](https://better-auth.com/)
 - [Prisma](https://prisma.io)
 - [Tailwind CSS](https://tailwindcss.com)
 - [tRPC](https://trpc.io)
 - [shadcn](https://ui.shadcn.com)
-- [React Email](https://react.email)
 - [Resend](https://resend.com)
 
 ## Development Environment Requirements
 - [Node.js (v20+)](https://nodejs.org/)
 - [pnpm (v8+)](https://pnpm.io/)
+- [Docker](https://docker.com)
 
 ## FAQ
 ### How do I request more subscription icons?
