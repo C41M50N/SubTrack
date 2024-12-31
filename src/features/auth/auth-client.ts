@@ -10,7 +10,7 @@ export function getBaseUrl() {
 }
 
 export const authClient = createAuthClient({
-	baseURL: window.location.origin,
+	baseURL: getBaseUrl(),
 });
 
 export const { signIn, signOut, signUp, useSession } = authClient;
