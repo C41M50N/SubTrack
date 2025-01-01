@@ -99,7 +99,7 @@ export default function LandingPage() {
 					<div className="border-[5px] pb-1 px-[1px] border-black/70 rounded-xl">
 						<Image
 							className="mt-1"
-							src={"/dashboard.png"}
+							src={"/dashboard.jpeg"}
 							width={3000}
 							height={2000}
 							quality={100}

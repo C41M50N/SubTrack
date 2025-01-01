@@ -1,9 +1,16 @@
 # SubTrack
-SubTrack is an intuitive subscriptions tracking utility. The goal of SubTrack is to facilitate a streamlined, non-invasive process of tracking your digital subscriptions. There is an optional integration with the Todoist platform that is used for creating cancel reminders for subscriptions. For more details -> [SubTrack Writeup](https://cbuff.dev/projects/subtrack)
+SubTrack is a subscription management tool designed to help users take control of their recurring expenses through an intuitive dashboard, custom organization features, and proactive notifications. For more details check out my [writeup](https://cbuff.dev/projects/subtrack).
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+![Dashboard Image](/public/dashboard.jpeg)
 
-![Dashboard Image](/public/dashboard.png)
+## Core Features
+- **Manage Subscriptions**: Manage subscriptions via feature-rich dashboard table
+- **Gain Insights**: Gain insights on your subscriptions via cost metrics
+- **Categorize**: Organize subscriptions using custom categories
+- **Collections**: Separate subscriptions into various collections
+- **Stay Informed**: Stay informed on the state of your subscriptions with a monthly review email
+- **Cancel Reminders**: Create reminders to cancel subscriptions with Todoist
+- **Export Your Data**: Export your subscriptions to a CSV file
 
 ## Tech Stack 🛠️
 - [Next.js](https://nextjs.org)
