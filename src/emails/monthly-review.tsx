@@ -1,16 +1,128 @@
 import dayjs from "@/lib/dayjs";
 import { toMoneyString } from "@/utils";
 import type { Subscription } from "@prisma/client";
+import { Text } from "./primitives/text";
 import {
 	Body,
+	Column,
 	Container,
 	Head,
 	Html,
 	Img,
 	Preview,
+	Row,
 	Tailwind,
-	Text,
 } from "@react-email/components";
+
+const ExampleRenewingSoon = [
+	{
+		id: 'cm5cxngtd00074qpots1rfna6',
+		name: 'Claude Pro',
+		amount: 2000,
+		frequency: 'monthly',
+		category: 'productivity',
+		next_invoice: dayjs("2025-02-13T05:00:00.000Z").toDate(),
+		last_invoice: dayjs("2025-01-13T05:00:00.000Z").toDate(),
+		icon_ref: 'default',
+		send_alert: true,
+		collection_id: 'cm5cxn3he0001127rbsz8xkhq',
+		user_id: '1Ax7J3cTdWr3a8GtcZPNtQHvDgkXqlLl'
+	},
+	{
+		id: 'cm5cxngtd00054qpohwiik7ni',
+		name: 'Vercel',
+		amount: 2000,
+		frequency: 'monthly',
+		category: 'productivity',
+		next_invoice: dayjs("2025-02-09T04:00:00.000Z").toDate(),
+		last_invoice: dayjs("2025-01-09T04:00:00.000Z").toDate(),
+		icon_ref: 'default',
+		send_alert: true,
+		collection_id: 'cm5cxn3he0001127rbsz8xkhq',
+		user_id: '1Ax7J3cTdWr3a8GtcZPNtQHvDgkXqlLl'
+	},
+	{
+		id: 'cm5cxngtd000g4qpos1o0dw3s',
+		name: 'Uploadthing 100GB',
+		amount: 1000,
+		frequency: 'monthly',
+		category: 'dev:jumpdrive',
+		next_invoice: dayjs("2025-01-18T05:40:38.043Z").toDate(),
+		last_invoice: dayjs("2024-12-18T05:40:38.043Z").toDate(),
+		icon_ref: 'default',
+		send_alert: true,
+		collection_id: 'cm5cxn3he0001127rbsz8xkhq',
+		user_id: '1Ax7J3cTdWr3a8GtcZPNtQHvDgkXqlLl'
+	}
+]
+
+const ExampleRenewedRecently = [
+	{
+		id: 'cm5cxngtd00084qpoiu4c1658',
+		name: 'Spotify + Hulu',
+		amount: 1199,
+		frequency: 'monthly',
+		category: 'entertainment',
+		next_invoice: dayjs("2025-01-16T04:00:00.000Z").toDate(),
+		last_invoice: dayjs("2024-12-16T04:00:00.000Z").toDate(),
+		icon_ref: 'spotify',
+		send_alert: true,
+		collection_id: 'cm5cxn3he0001127rbsz8xkhq',
+		user_id: '1Ax7J3cTdWr3a8GtcZPNtQHvDgkXqlLl'
+	},
+	{
+		id: 'cm5cxngtd000g4qpos1o0dw3s',
+		name: 'Uploadthing 100GB',
+		amount: 1000,
+		frequency: 'monthly',
+		category: 'dev:jumpdrive',
+		next_invoice: dayjs("2025-01-18T05:40:38.043Z").toDate(),
+		last_invoice: dayjs("2024-12-18T05:40:38.043Z").toDate(),
+		icon_ref: 'default',
+		send_alert: true,
+		collection_id: 'cm5cxn3he0001127rbsz8xkhq',
+		user_id: '1Ax7J3cTdWr3a8GtcZPNtQHvDgkXqlLl'
+	},
+	{
+		id: 'cm5cxngtd000h4qpoapl6v6v5',
+		name: 'Netflix',
+		amount: 1549,
+		frequency: 'monthly',
+		category: 'entertainment',
+		next_invoice: dayjs("2025-01-21T05:00:00.000Z").toDate(),
+		last_invoice: dayjs("null").toDate(),
+		icon_ref: 'netflix',
+		send_alert: true,
+		collection_id: 'cm5cxn3he0001127rbsz8xkhq',
+		user_id: '1Ax7J3cTdWr3a8GtcZPNtQHvDgkXqlLl'
+	},
+	{
+		id: 'cm5cxngtd00054qpohwiik7ni',
+		name: 'Vercel',
+		amount: 2000,
+		frequency: 'monthly',
+		category: 'productivity',
+		next_invoice: dayjs("2025-02-09T04:00:00.000Z").toDate(),
+		last_invoice: dayjs("2025-01-09T04:00:00.000Z").toDate(),
+		icon_ref: 'default',
+		send_alert: true,
+		collection_id: 'cm5cxn3he0001127rbsz8xkhq',
+		user_id: '1Ax7J3cTdWr3a8GtcZPNtQHvDgkXqlLl'
+	},
+	{
+		id: 'cm5cxngtd00074qpots1rfna6',
+		name: 'Claude Pro',
+		amount: 2000,
+		frequency: 'monthly',
+		category: 'productivity',
+		next_invoice: dayjs("2025-02-13T05:00:00.000Z").toDate(),
+		last_invoice: dayjs("2025-01-13T05:00:00.000Z").toDate(),
+		icon_ref: 'default',
+		send_alert: true,
+		collection_id: 'cm5cxn3he0001127rbsz8xkhq',
+		user_id: '1Ax7J3cTdWr3a8GtcZPNtQHvDgkXqlLl'
+	}
+]
 
 export type MonthlyReviewEmailProps = {
 	userName: string;
@@ -19,9 +131,9 @@ export type MonthlyReviewEmailProps = {
 };
 
 export function MonthlyReviewEmail({
-	userName: user_name = "Chuck Norris",
-	renewingSoon,
-	renewedRecently,
+	userName = "Chuck Norris",
+	renewingSoon = ExampleRenewingSoon,
+	renewedRecently = ExampleRenewedRecently,
 }: Readonly<MonthlyReviewEmailProps>) {
 	// sort asc
 	const renewingSoonSubs = renewingSoon.sort(
@@ -47,53 +159,59 @@ export function MonthlyReviewEmail({
 							height={30}
 							width={135}
 						/>
-						<Text className="text-3xl font-bold">Subscriptions Review</Text>
-						<Text className="text-sm text-muted-foreground">
-							Hey {user_name}! Here is your subscriptions review for{" "}
-							{dayjs().format("MMMM")}.
-						</Text>
-						{renewingSoonSubs.length > 0 && (
-							<>
-								<Text className="text-2xl font-semibold">
-									Subscriptions that are renewing soon
-								</Text>
-								<ul className="mt-1 gap-2">
-									{renewingSoonSubs.map((sub) => (
-										<li key={sub.id}>
-											<Text className="text-base">
-												{sub.name} renewing on{" "}
-												{dayjs(sub.next_invoice).format("MMM D")} (
-												{toMoneyString(sub.amount)} {sub.frequency})
-											</Text>
-										</li>
-									))}
-								</ul>
-								<div className="h-6" />
-							</>
-						)}
+						<Text className="mt-1 text-xl font-bold">{dayjs().format("MMMM")} Subscriptions Review</Text>
 
-						{renewedRecentlySubs.length > 0 && (
-							<>
-								<Text className="text-2xl font-semibold">
-									Subscriptions that have renewed recently
-								</Text>
-								<ul className="mt-1">
-									{renewedRecentlySubs.map((sub) => {
-										if (!sub.last_invoice) {
-											throw new Error("invalid recently renewed subscription");
-										}
-										return (
+						{renewingSoonSubs.length > 0 && (
+							<Row className="mt-2.5">
+								<Column>
+									<Text className="text-lg font-bold">
+										Renewing soon
+									</Text>
+									<Text className="text-xs font-medium">
+										The following subscriptions are renewing within the next 32 days.
+									</Text>
+									<ul className="pl-6 mt-2 mb-2">
+										{renewingSoonSubs.map((sub) => (
 											<li key={sub.id}>
 												<Text className="text-base">
-													{sub.name} renewed on{" "}
-													{dayjs(sub.last_invoice).format("MMM D")} (
+													{sub.name} renewing on{" "}
+													{dayjs(sub.next_invoice).format("MMM D")} (
 													{toMoneyString(sub.amount)} {sub.frequency})
 												</Text>
 											</li>
-										);
-									})}
-								</ul>
-							</>
+										))}
+									</ul>
+								</Column>
+							</Row>
+						)}
+
+						{renewedRecentlySubs.length > 0 && (
+							<Row className="mt-1">
+								<Column>
+									<Text className="text-lg font-bold">
+										Renewed recently
+									</Text>
+									<Text className="text-xs font-medium">
+										The following subscriptions are renewed recently.
+									</Text>
+									<ul className="pl-6 mt-2 mb-2">
+										{renewedRecentlySubs.map((sub) => {
+											if (!sub.last_invoice) {
+												throw new Error("invalid recently renewed subscription");
+											}
+											return (
+												<li key={sub.id}>
+													<Text className="text-base">
+														{sub.name} renewed on{" "}
+														{dayjs(sub.last_invoice).format("MMM D")} (
+														{toMoneyString(sub.amount)} {sub.frequency})
+													</Text>
+												</li>
+											);
+										})}
+									</ul>
+								</Column>
+							</Row>
 						)}
 					</Container>
 				</Body>
@@ -101,3 +219,5 @@ export function MonthlyReviewEmail({
 		</Html>
 	);
 }
+
+export default MonthlyReviewEmail;

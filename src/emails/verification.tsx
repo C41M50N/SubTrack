@@ -54,3 +54,5 @@ export function VerificationEmail({
 		</Html>
 	);
 }
+
+export default VerificationEmail;
