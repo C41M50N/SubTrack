@@ -158,11 +158,12 @@ export function MonthlyReviewEmail({
 							alt="SubTrack"
 							height={30}
 							width={135}
+							className="mb-3"
 						/>
-						<Text className="mt-1 text-xl font-bold">{dayjs().format("MMMM")} Subscriptions Review</Text>
+						<Text className="text-xl font-bold">{dayjs().format("MMMM")} Subscriptions Review</Text>
 
 						{renewingSoonSubs.length > 0 && (
-							<Row className="mt-2.5">
+							<Row className="mt-3">
 								<Column>
 									<Text className="text-lg font-bold">
 										Renewing soon
@@ -172,7 +173,7 @@ export function MonthlyReviewEmail({
 									</Text>
 									<ul className="pl-6 mt-2 mb-2">
 										{renewingSoonSubs.map((sub) => (
-											<li key={sub.id}>
+											<li key={sub.id} className="py-0.5">
 												<Text className="text-base">
 													{sub.name} renewing on{" "}
 													{dayjs(sub.next_invoice).format("MMM D")} (
@@ -200,7 +201,7 @@ export function MonthlyReviewEmail({
 												throw new Error("invalid recently renewed subscription");
 											}
 											return (
-												<li key={sub.id}>
+												<li key={sub.id} className="py-0.5">
 													<Text className="text-base">
 														{sub.name} renewed on{" "}
 														{dayjs(sub.last_invoice).format("MMM D")} (
