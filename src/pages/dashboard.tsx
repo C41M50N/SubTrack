@@ -73,9 +73,9 @@ export default function DashboardPage() {
 						</div>
 					)}
 					{!isSubsLoading && !subscriptions && (
-						<div className="w-full flex flex-col gap-4 items-center justify-center">
+						<div className="w-full flex flex-row gap-4 items-center justify-center">
 							<LoadingSpinner />
-							<span>Creating Your Dashboard</span>
+							<span>Loading Your Dashboard</span>
 						</div>
 					)}
 					{user &&
