@@ -208,7 +208,7 @@ export const columns: ColumnDef<Subscription>[] = [
 			const setReminderModalState = useModalState();
 
 			return (
-				<>
+				<div key={subscription.id}>
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
 							<Button variant="ghost" className="h-8 w-8 p-0">
@@ -277,7 +277,7 @@ export const columns: ColumnDef<Subscription>[] = [
 						state={setReminderModalState}
 						subscription={subscription}
 					/>
-				</>
+				</div>
 			);
 		},
 	},

@@ -210,7 +210,7 @@ export const columns: ColumnDef<DemoSubscription>[] = [
 			const editModalState = useModalState();
 
 			return (
-				<>
+				<div key={subscription.id}>
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
 							<Button variant="ghost" className="h-8 w-8 p-0">
@@ -255,7 +255,7 @@ export const columns: ColumnDef<DemoSubscription>[] = [
 						state={deleteModalState}
 						subscription_id={subscription.id}
 					/>
-				</>
+				</div>
 			);
 		},
 	},
