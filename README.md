@@ -1,5 +1,5 @@
 # SubTrack
-SubTrack is a subscription management tool designed to help users take control of their recurring expenses through an intuitive dashboard, custom organization features, and proactive notifications. For more details check out my [writeup](https://cbuff.dev/projects/subtrack).
+SubTrack is a subscription management tool designed to help users take control of their recurring expenses through an intuitive dashboard, custom organization features, and proactive notifications. For more details check out my [writeup](https://cbuff.dev/project/subtrack).
 
 ![Dashboard Image](/public/dashboard.jpeg)
 
