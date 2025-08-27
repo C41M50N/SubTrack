@@ -9,13 +9,13 @@ import {
 	IconTrash,
 } from "@tabler/icons-react";
 import type { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown } from "lucide-react";
 
 import type { Subscription } from "@/features/subscriptions";
 import {
 	useCategories,
 	useCollections,
 	useModalState,
+	useTableSortState,
 	useUser,
 } from "@/lib/hooks";
 import { toMoneyString, toProperCase } from "@/utils";
@@ -33,6 +33,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import React from "react";
 
 const roboto = Roboto({
 	weight: ["400", "500", "700"],
@@ -77,16 +78,15 @@ export const columns: ColumnDef<Subscription>[] = [
 	{
 		accessorKey: "name",
 		header: ({ column }) => {
+			const { toggleSorting, SortIcon } = useTableSortState(column);
 			return (
 				<Button
 					variant="ghost"
 					className="-ml-4"
-					onClick={() => {
-						column.toggleSorting(false);
-					}}
+					onClick={toggleSorting}
 				>
 					Name
-					<ArrowUpDown className="ml-2 h-4 w-4" />
+					{SortIcon && <SortIcon className="ml-2 h-4 w-4" />}
 				</Button>
 			);
 		},
@@ -153,7 +153,20 @@ export const columns: ColumnDef<Subscription>[] = [
 	},
 	{
 		accessorKey: "category",
-		header: "Category",
+		header: ({ column }) => {
+			const { toggleSorting, SortIcon } = useTableSortState(column);
+
+			return (
+				<Button
+					variant="ghost"
+					className="-ml-4"
+					onClick={toggleSorting}
+				>
+					Category
+					{SortIcon && <SortIcon className="ml-2 h-4 w-4" />}
+				</Button>
+			);
+		},
 		cell: ({ row }) => {
 			return (
 				<Badge className="text-md" variant={"secondary"}>
@@ -168,16 +181,15 @@ export const columns: ColumnDef<Subscription>[] = [
 	{
 		accessorKey: "next_invoice",
 		header: ({ column }) => {
+			const { toggleSorting, SortIcon } = useTableSortState(column);
 			return (
 				<Button
 					variant="ghost"
 					className="-ml-4"
-					onClick={() => {
-						column.toggleSorting(false); // orders subscriptions by closest `next_invoice`
-					}}
+					onClick={toggleSorting}
 				>
 					Next Invoice
-					<ArrowUpDown className="ml-2 h-4 w-4" />
+					{SortIcon && <SortIcon className="ml-2 h-4 w-4" />}
 				</Button>
 			);
 		},
