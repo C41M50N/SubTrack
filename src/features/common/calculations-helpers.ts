@@ -2,25 +2,11 @@ import dayjs from "dayjs";
 import type { SubscriptionFrequency } from ".";
 import type { Subscription } from "../subscriptions";
 
-type Month =
-	| "January"
-	| "February"
-	| "March"
-	| "April"
-	| "May"
-	| "June"
-	| "July"
-	| "August"
-	| "September"
-	| "October"
-	| "November"
-	| "December";
-type Year = number;
 export function getNextNMonths(n: number) {
-	const res: Array<[Month, number, Year]> = [];
+	const res: Array<dayjs.Dayjs> = [];
 	for (let offset = 0; offset < n; offset++) {
 		const day = dayjs().add(1 + offset, "month");
-		res.push([day.format("MMMM") as Month, day.month(), day.year()]);
+		res.push(day);
 	}
 	return res;
 }

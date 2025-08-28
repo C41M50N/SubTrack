@@ -136,7 +136,9 @@ export default function DashboardPage() {
 									{!isSubsLoading && subscriptions && (
 										<AccordionContent>
 											{getNextNMonths(12).map((data) => {
-												const [monthStr, month, year] = data;
+												const monthStr = data.format("MMMM");
+												const month = data.month();
+												const year = data.year();
 												return (
 													<div
 														key={`${monthStr}-${year}`}

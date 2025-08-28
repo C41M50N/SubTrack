@@ -8,16 +8,19 @@ import { Input } from "../ui/input";
 import { DataTableFilter } from "./data-table-filter";
 import { DataTableViewOptions } from "./data-table-view-options";
 import MoreOptions from "./more-options";
+import { SearchInput } from "../common/search-input";
+import { MonthlyViewSelector } from "./monthly-view-selector";
+import type { Subscription } from "@/features/subscriptions";
 
-type Props<TData> = {
-	table: Table<TData>;
+type Props = {
+	table: Table<Subscription>;
 	categories: string[];
 };
 
-export default function DataTableToolbar<TData>({
+export default function DataTableToolbar({
 	table,
 	categories,
-}: Props<TData>) {
+}: Props) {
 	const newSubscriptionModalState = useNewSubscriptionModal();
 	const isFiltered = table.getState().columnFilters.length > 0;
 
@@ -26,14 +29,15 @@ export default function DataTableToolbar<TData>({
 			<div className="flex flex-1 space-x-2 items-end">
 				<CollectionSelector />
 
+				<MonthlyViewSelector />
+
 				<div className="flex flex-row space-x-2">
-					<Input
-						placeholder="Filter subscriptions..."
+					<SearchInput
 						value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
 						onChange={(event) =>
 							table.getColumn("name")?.setFilterValue(event.target.value)
 						}
-						className="h-10 w-[200px] lg:w-[280px]"
+						className="h-10 w-[150px] lg:w-[180px]"
 					/>
 					{table.getColumn("category") && (
 						<DataTableFilter
@@ -57,8 +61,6 @@ export default function DataTableToolbar<TData>({
 			</div>
 
 			<div className="flex flex-row space-x-2">
-				<DataTableViewOptions table={table} />
-
 				{/* Add Subscription Button */}
 				<Button
 					size="sm"
@@ -69,7 +71,7 @@ export default function DataTableToolbar<TData>({
 					Add Subscription
 				</Button>
 
-				<MoreOptions />
+				<MoreOptions table={table} />
 			</div>
 		</div>
 	);

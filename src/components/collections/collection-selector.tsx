@@ -62,7 +62,7 @@ export default function CollectionSelector() {
 					value={selectedCollectionId || undefined}
 					onValueChange={(collectionId) => setGlobalCollectionId(collectionId)}
 				>
-					<SelectTrigger className="w-[160px] lg:w-[200px] h-10 text-sm">
+					<SelectTrigger className="w-[150px] lg:w-[180px] h-10 text-sm">
 						<div className="ml-1 flex flex-row gap-4">
 							<GalleryVerticalEndIcon className="size-4 mt-0.5" />
 							<SelectValue
