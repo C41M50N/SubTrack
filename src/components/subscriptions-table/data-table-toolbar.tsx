@@ -24,7 +24,7 @@ export default function DataTableToolbar({
 	data,
 }: Props) {
 	const newSubscriptionModalState = useNewSubscriptionModal();
-	const isFiltered = table.getState().columnFilters.length > 0;
+	const isFiltered = table.getState().columnFilters.length > 0 && table.getState().columnFilters.some(filter => filter.id !== 'id');
 
 	return (
 		<div className="flex justify-between items-end">
@@ -39,7 +39,7 @@ export default function DataTableToolbar({
 						onChange={(event) =>
 							table.getColumn("name")?.setFilterValue(event.target.value)
 						}
-						className="h-10 w-[150px] lg:w-[180px]"
+						className="h-10 w-[120px] lg:w-[150px]"
 					/>
 					{table.getColumn("category") && (
 						<DataTableFilter
