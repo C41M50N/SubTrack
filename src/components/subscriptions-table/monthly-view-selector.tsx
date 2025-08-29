@@ -2,22 +2,48 @@ import React from "react";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { getNextNMonths } from "@/features/common/calculations-helpers";
 import { CalendarDaysIcon } from "lucide-react";
+import type { Table } from "@tanstack/react-table";
+import type { Subscription } from "@/features/subscriptions";
+import { getSubscriptionsInMonth } from "@/features/subscriptions/utils";
+import dayjs from "dayjs";
 
-export function MonthlyViewSelector() {
+type MonthlyViewSelectorProps = {
+  table: Table<Subscription>;
+  subscriptions: Subscription[];
+};
+
+export function MonthlyViewSelector({ table, subscriptions }: MonthlyViewSelectorProps) {
   const options = [
     "ALL",
     ...getNextNMonths(13).map((d) => d.format("MMM YYYY").toUpperCase())
   ];
 
+  const [selectedOption, setSelectedOption] = React.useState("ALL");
+
+  const filteredSubscriptionIds = (
+    selectedOption === "ALL"
+      ? subscriptions.map(sub => sub.id)
+      : getSubscriptionsInMonth(
+          subscriptions,
+          dayjs(selectedOption, "MMM YYYY").month(),
+          dayjs(selectedOption, "MMM YYYY").year()
+        )
+  );
+
+  React.useEffect(() => {  
+    // Update the table filter whenever the selected option changes
+    table.getColumn("id")?.setFilterValue(filteredSubscriptionIds);
+  }, [selectedOption, table, subscriptions]);
+
 	return (
-		<Select defaultValue="ALL">
+		<Select value={selectedOption} onValueChange={setSelectedOption}>
       <SelectTrigger className="w-[120px] lg:w-[150px] h-10 text-sm">
         <div className="w-full flex flex-row gap-0">
           <CalendarDaysIcon className="size-4 mt-0.5 ml-1" />
           <span className="flex-grow overflow-hidden text-ellipsis whitespace-nowrap">
             <SelectValue
               placeholder={
-              <span className="font-medium">Select Month</span>
+                <span className="font-medium">Select Month</span>
               }
             />
           </span>

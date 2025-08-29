@@ -63,7 +63,7 @@ export default function MoreOptions(props: MoreOptionsProps) {
 					.getAllColumns()
 					.filter(
 						(column) =>
-							typeof column.accessorFn !== "undefined" && column.getCanHide(),
+							typeof column.accessorFn !== "undefined" && column.getCanHide() && column.id !== "id",
 					)
 					.map((column) => {
 						return (

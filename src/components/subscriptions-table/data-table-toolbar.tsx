@@ -15,11 +15,13 @@ import type { Subscription } from "@/features/subscriptions";
 type Props = {
 	table: Table<Subscription>;
 	categories: string[];
+	data: Subscription[];
 };
 
 export default function DataTableToolbar({
 	table,
 	categories,
+	data,
 }: Props) {
 	const newSubscriptionModalState = useNewSubscriptionModal();
 	const isFiltered = table.getState().columnFilters.length > 0;
@@ -29,7 +31,7 @@ export default function DataTableToolbar({
 			<div className="flex flex-1 space-x-2 items-end">
 				<CollectionSelector />
 
-				<MonthlyViewSelector />
+				<MonthlyViewSelector table={table} subscriptions={data} />
 
 				<div className="flex flex-row space-x-2">
 					<SearchInput

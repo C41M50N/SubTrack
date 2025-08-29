@@ -49,6 +49,13 @@ const lato = Lato({
 
 export const columns: ColumnDef<Subscription>[] = [
 	{
+		id: "id",
+		accessorKey: "id",
+		filterFn: (row, id, value: string[]) => {
+			return value.includes(row.getValue(id));
+		}
+	},
+	{
 		id: "select",
 		header: ({ table }) => {
 			return (

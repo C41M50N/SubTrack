@@ -41,7 +41,7 @@ export default function DataTable({
 }: DataTableProps) {
 	const [rowSelection, setRowSelection] = React.useState({});
 	const [columnVisibility, setColumnVisibility] =
-		React.useState<VisibilityState>({});
+		React.useState<VisibilityState>({ id: false });
 	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
 		[],
 	);
@@ -81,11 +81,11 @@ export default function DataTable({
 
 	React.useEffect(() => {
 		onTableChange();
-	}, [rowSelection]);
+	}, [rowSelection, columnFilters, sorting]);
 
 	return (
 		<div className="space-y-4">
-			<DataTableToolbar table={table} categories={categories} />
+			<DataTableToolbar table={table} categories={categories} data={data} />
 
 			<div className="rounded-md border">
 				<Table>
