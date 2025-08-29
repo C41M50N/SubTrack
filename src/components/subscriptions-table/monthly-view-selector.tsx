@@ -1,11 +1,10 @@
 import React from "react";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { getNextNMonths } from "@/features/common/calculations-helpers";
 import { CalendarDaysIcon } from "lucide-react";
 import type { Table } from "@tanstack/react-table";
 import type { Subscription } from "@/features/subscriptions";
-import { getSubscriptionsInMonth } from "@/features/subscriptions/utils";
-import dayjs from "dayjs";
+import { getNextNMonths, getSubscriptionsInMonth } from "@/features/subscriptions/utils";
+import dayjs from "@/lib/dayjs";
 
 type MonthlyViewSelectorProps = {
   table: Table<Subscription>;
@@ -27,7 +26,7 @@ export function MonthlyViewSelector({ table, subscriptions }: MonthlyViewSelecto
           subscriptions,
           dayjs(selectedOption, "MMM YYYY").month(),
           dayjs(selectedOption, "MMM YYYY").year()
-        )
+        ).map(sub => sub.id)
   );
 
   React.useEffect(() => {  

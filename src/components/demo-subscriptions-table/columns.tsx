@@ -27,6 +27,7 @@ import {
 	useDemoSubscriptions,
 	useSelectedDemoSubscriptions,
 } from "@/features/demo-subscriptions/stores";
+import { frequencyToDisplayText } from "@/features/subscriptions/utils";
 
 const roboto = Roboto({
 	weight: ["400", "500", "700"],
@@ -134,29 +135,10 @@ export const columns: ColumnDef<DemoSubscription>[] = [
 			const amount = Number.parseFloat(row.getValue("amount"));
 			const formatted = toMoneyString(amount);
 
-			const toX = (data: SubscriptionFrequency): string => {
-				switch (data) {
-					case "weekly":
-						return "week";
-					case "bi-weekly":
-						return "2 weeks";
-					case "monthly":
-						return "month";
-					case "bi-monthly":
-						return "2 months";
-					case "yearly":
-						return "year";
-					case "bi-yearly":
-						return "2 years";
-					default:
-						return "";
-				}
-			};
-
 			return (
 				<div className="text-left">
 					<div className="font-semibold text-lg">{formatted}</div>
-					every {toX(row.original.frequency)}
+					every {frequencyToDisplayText(row.original.frequency)}
 				</div>
 			);
 		},

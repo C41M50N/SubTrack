@@ -16,11 +16,8 @@ import {
 	selectedCollectionIdAtom,
 	selectedSubscriptionsAtom,
 } from "@/features/common/atoms";
-import {
-	getMonthCost,
-	getNextNMonths,
-} from "@/features/common/calculations-helpers";
 import { Statistics } from "@/features/common/subscription-stats";
+import { getNextNMonths, getSubscriptionsInMonth } from "@/features/subscriptions/utils";
 import MainLayout from "@/layouts/main";
 import { useCategories, useUser } from "@/lib/hooks";
 import { toMoneyString } from "@/utils";
@@ -148,13 +145,13 @@ export default function DashboardPage() {
 															<span className="flex-1">{`${monthStr} ${year}`}</span>
 															<span>
 																{toMoneyString(
-																	getMonthCost(
+																	getSubscriptionsInMonth(
 																		selectedSubscriptions.length > 0
 																			? selectedSubscriptions
 																			: subscriptions,
 																		month,
 																		year,
-																	),
+																	).reduce((acc, sub) => acc + sub.amount, 0),
 																)}
 															</span>
 														</div>

@@ -1,110 +1,58 @@
 import type { StatisticItem } from ".";
-import type { Subscription } from "../subscriptions";
 
 export const Statistics: Array<StatisticItem> = [
 	{
 		description: "cost per week",
 		getResult: (subscriptions) => {
-			let result = 0.0;
-			for (let i = 0; i < subscriptions.length; i++) {
-				const subscription = subscriptions[i] as Subscription;
-				switch (subscription.frequency) {
-					case "weekly":
-						result += subscription.amount;
-						break;
+			const frequencyMultipliers = new Map([
+				["weekly", 1],
+				["bi-weekly", 1 / 2.0],
+				["monthly", 1 / 4.3], // around 4.3 weeks in a month
+				["bi-monthly", 1 / (4.3 * 2)],
+				["yearly", 1 / 52.0], // around 52 weeks in a year
+				["bi-yearly", 1 / (52.0 * 2)],
+			]);
 
-					case "bi-weekly":
-						result += subscription.amount / 2.0;
-						break;
-
-					case "monthly":
-						result += subscription.amount / 4.3; // around 4.3 weeks in a month
-						break;
-
-					case "bi-monthly":
-						result += subscription.amount / (4.3 * 2);
-						break;
-
-					case "yearly":
-						result += subscription.amount / 52.0; // around 52 weeks in a year
-						break;
-
-					case "bi-yearly":
-						result += subscription.amount / (52.0 * 2);
-						break;
-				}
-			}
-			return result;
+			return subscriptions.reduce((result, subscription) => {
+				const multiplier = frequencyMultipliers.get(subscription.frequency) ?? 0;
+				return result + subscription.amount * multiplier;
+			}, 0.0);
 		},
 	},
 	{
 		description: "cost per month",
 		getResult: (subscriptions) => {
-			let result = 0.0;
-			for (let i = 0; i < subscriptions.length; i++) {
-				const subscription = subscriptions[i] as Subscription;
-				switch (subscription.frequency) {
-					case "weekly":
-						result += subscription.amount * 4.3; // around 4.3 weeks in a month
-						break;
+			const frequencyMultipliers = new Map([
+				["weekly", 4.3], // around 4.3 weeks in a month
+				["bi-weekly", 4.3 / 2.0],
+				["monthly", 1],
+				["bi-monthly", 1 / 2.0],
+				["yearly", 1 / 12.0], // 12 months in a year
+				["bi-yearly", 1 / (12.0 * 2)],
+			]);
 
-					case "bi-weekly":
-						result += subscription.amount * (4.3 / 2.0);
-						break;
-
-					case "monthly":
-						result += subscription.amount;
-						break;
-
-					case "bi-monthly":
-						result += subscription.amount / 2.0;
-						break;
-
-					case "yearly":
-						result += subscription.amount / 12.0; // 12 months in a year
-						break;
-
-					case "bi-yearly":
-						result += subscription.amount / (12.0 * 2);
-						break;
-				}
-			}
-			return result;
+			return subscriptions.reduce((result, subscription) => {
+				const multiplier = frequencyMultipliers.get(subscription.frequency) ?? 0;
+				return result + subscription.amount * multiplier;
+			}, 0.0);
 		},
 	},
 	{
 		description: "cost per year",
 		getResult: (subscriptions) => {
-			let result = 0.0;
-			for (let i = 0; i < subscriptions.length; i++) {
-				const subscription = subscriptions[i] as Subscription;
-				switch (subscription.frequency) {
-					case "weekly":
-						result += subscription.amount * 52.0; // around 52 weeks in a year
-						break;
+			const frequencyMultipliers = new Map([
+				["weekly", 52.0], // around 52 weeks in a year
+				["bi-weekly", 52.0 / 2.0],
+				["monthly", 12.0], // 12 months in a year
+				["bi-monthly", 12.0 / 2.0],
+				["yearly", 1],
+				["bi-yearly", 1 / 2.0],
+			]);
 
-					case "bi-weekly":
-						result += subscription.amount * (52.0 / 2.0);
-						break;
-
-					case "monthly":
-						result += subscription.amount * 12.0; // 12 months in a year
-						break;
-
-					case "bi-monthly":
-						result += subscription.amount * (12.0 / 2.0);
-						break;
-
-					case "yearly":
-						result += subscription.amount;
-						break;
-
-					case "bi-yearly":
-						result += subscription.amount / 2.0;
-						break;
-				}
-			}
-			return result;
+			return subscriptions.reduce((result, subscription) => {
+				const multiplier = frequencyMultipliers.get(subscription.frequency) ?? 0;
+				return result + subscription.amount * multiplier;
+			}, 0.0);
 		},
 	},
 ];
