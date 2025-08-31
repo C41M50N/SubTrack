@@ -14,7 +14,7 @@ import dayjs from "@/lib/dayjs";
 import type { Table } from "@tanstack/react-table";
 import { download, generateCsv, mkConfig } from "export-to-csv";
 import { useAtom } from "jotai";
-import { EllipsisVerticalIcon, ImportIcon, Settings2Icon, SettingsIcon } from "lucide-react";
+import { ImportIcon, SettingsIcon } from "lucide-react";
 import React from "react";
 import { Switch } from "../ui/switch";
 import type { Subscription } from "@/features/subscriptions";
@@ -54,7 +54,7 @@ export default function MoreOptions(props: MoreOptionsProps) {
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
 				<Button variant="outline" className="p-0 h-10 w-8">
-					<Settings2Icon className="size-5" />
+					<SettingsIcon className="size-4" />
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end" className="w-[150px]">

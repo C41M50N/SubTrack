@@ -50,7 +50,11 @@ export default function DataTableToolbar({
 					{isFiltered && (
 						<Button
 							variant="ghost"
-							onClick={() => table.resetColumnFilters()}
+							onClick={() => {
+								const currentFilters = table.getState().columnFilters;
+								const idFilter = currentFilters.find(filter => filter.id === 'id');
+								table.setColumnFilters(idFilter ? [idFilter] : []);
+							}}
 							className="h-10 px-2 lg:px-3"
 						>
 							Reset

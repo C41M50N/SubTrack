@@ -5,6 +5,7 @@ import type { Table } from "@tanstack/react-table";
 import type { Subscription } from "@/features/subscriptions";
 import { getNextNMonths, getSubscriptionsInMonth } from "@/features/subscriptions/utils";
 import dayjs from "@/lib/dayjs";
+import { ScrollArea } from "../ui/scroll-area";
 
 type MonthlyViewSelectorProps = {
   table: Table<Subscription>;
@@ -48,14 +49,18 @@ export function MonthlyViewSelector({ table, subscriptions }: MonthlyViewSelecto
           </span>
         </div>
       </SelectTrigger>
-      <SelectContent>
-        <SelectGroup>
-          {options.map((option) => (
-            <SelectItem key={option} value={option}>
-              {option}
-            </SelectItem>
-          ))}
-        </SelectGroup>
+      <SelectContent className="max-h-48 overflow-y-scroll">
+        <ScrollArea className="w-full h-44">
+          <SelectGroup>
+            {options.map((option) => (
+              <SelectItem key={option} value={option}>
+                <span className="text-sm text-left font-medium">
+                  {option}
+                </span>
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </ScrollArea>
       </SelectContent>
     </Select>
 	);
