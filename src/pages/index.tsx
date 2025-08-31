@@ -1,235 +1,229 @@
-import FeatureCard from "@/components/common/feature-card";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { useSession } from "@/features/auth/auth-client";
-import { IconDashboard, IconExternalLink } from "@tabler/icons-react";
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { IconDashboard, IconExternalLink } from '@tabler/icons-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import FeatureCard from '@/components/common/feature-card';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { useSession } from '@/features/auth/auth-client';
 
 export default function LandingPage() {
-	const router = useRouter();
-	const { data: session } = useSession();
+  const router = useRouter();
+  const { data: session } = useSession();
 
-	return (
-		<>
-			{/* Subtle Grid Backdrop */}
-			<div className="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]" />
+  return (
+    <>
+      {/* Subtle Grid Backdrop */}
+      <div className="-z-10 absolute inset-0 h-full w-full bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px] bg-white" />
 
-			<div className="min-h-screen flex flex-col justify-between">
-				<header className="h-24 mx-auto w-full max-w-[1440px] px-8 pt-1 2xl:px-0 flex flex-row items-center gap-2">
-					<Link href={"/"} className="cursor-pointer">
-						<Image
-							alt="SubTrack"
-							width={265}
-							height={30}
-							src={"/subtrack_full.jpg"}
-						/>
-					</Link>
+      <div className="flex min-h-screen flex-col justify-between">
+        <header className="mx-auto flex h-24 w-full max-w-[1440px] flex-row items-center gap-2 px-8 pt-1 2xl:px-0">
+          <Link className="cursor-pointer" href={'/'}>
+            <Image
+              alt="SubTrack"
+              height={30}
+              src={'/subtrack_full.jpg'}
+              width={265}
+            />
+          </Link>
 
-					<div className="flex-1" />
+          <div className="flex-1" />
 
-					<div className="hidden md:flex flex-row gap-0.5">
-						<Link href="/demo">
-							<Button size="lg" variant="ghost_link">
-								<span className="text-xl">Demo</span>
-							</Button>
-						</Link>
+          <div className="hidden flex-row gap-0.5 md:flex">
+            <Link href="https://github.com/C41M50N/SubTrack">
+              <Button
+                className="flex flex-row gap-1"
+                size="lg"
+                variant="ghost_link"
+              >
+                <span className="text-xl">GitHub</span>
+                <IconExternalLink className="size-5" />
+              </Button>
+            </Link>
+          </div>
 
-						<Link href="https://github.com/C41M50N/SubTrack">
-							<Button
-								size="lg"
-								variant="ghost_link"
-								className="flex flex-row gap-1"
-							>
-								<span className="text-xl">GitHub</span>
-								<IconExternalLink className="size-5" />
-							</Button>
-						</Link>
-					</div>
+          <div className="ml-1" />
 
-					<div className="ml-1" />
+          <Separator
+            className="hidden h-2/5 bg-gray-400 md:block"
+            orientation="vertical"
+          />
 
-					<Separator
-						orientation="vertical"
-						className="hidden md:block h-2/5 bg-gray-400"
-					/>
+          <div className="ml-0" />
 
-					<div className="ml-0" />
+          {!session && (
+            <div className="flex flex-row gap-2">
+              <Link href="/auth/login">
+                <Button size="lg" variant="ghost">
+                  <span className="font-semibold text-lg">Login</span>
+                </Button>
+              </Link>
 
-					{!session && (
-						<div className="flex flex-row gap-2">
-							<Link href="/auth/login">
-								<Button size="lg" variant="ghost">
-									<span className="font-semibold text-lg">Login</span>
-								</Button>
-							</Link>
+              <Link href="/auth/signup">
+                <Button size="lg" variant="default">
+                  <span className="font-semibold text-lg">Get Started</span>
+                </Button>
+              </Link>
+            </div>
+          )}
 
-							<Link href="/auth/signup">
-								<Button size="lg" variant="default">
-									<span className="font-semibold text-lg">Get Started</span>
-								</Button>
-							</Link>
-						</div>
-					)}
+          {session && (
+            <Button
+              onClick={() => router.push('/dashboard')}
+              size="lg"
+              variant="default"
+            >
+              <IconDashboard className="mr-2" size={20} />
+              <span className="font-semibold text-lg">Dashboard</span>
+            </Button>
+          )}
+        </header>
 
-					{session && (
-						<Button
-							variant="default"
-							size="lg"
-							onClick={() => router.push("/dashboard")}
-						>
-							<IconDashboard className="mr-2" size={20} />
-							<span className="font-semibold text-lg">Dashboard</span>
-						</Button>
-					)}
-				</header>
+        <section className="mx-auto flex max-w-[720px] flex-col items-center justify-center gap-9 pt-14 md:pt-24">
+          <h1 className="text-center font-bold text-4xl md:text-7xl">
+            Organize Your Digital Subscriptions
+          </h1>
+          <h2 className="text-center text-black/50 text-lg md:text-2xl">
+            SubTrack is the simplest way to track how much your digital
+            subscriptions are costing you.
+          </h2>
+        </section>
 
-				<section className="max-w-[720px] pt-14 md:pt-24 mx-auto flex flex-col items-center justify-center gap-9">
-					<h1 className="text-4xl md:text-7xl font-bold text-center">
-						Organize Your Digital Subscriptions
-					</h1>
-					<h2 className="text-lg md:text-2xl text-center text-black/50">
-						SubTrack is the simplest way to track how much your digital
-						subscriptions are costing you.
-					</h2>
-				</section>
+        <section className="mx-auto mb-auto max-w-[1200px] px-8 pt-12 pb-14 md:pt-24 2xl:px-0">
+          <div className="rounded-xl border-[5px] border-black/70 px-[1px] pb-1">
+            <Image
+              alt={'Dashboard Image'}
+              className="mt-1"
+              height={2000}
+              priority
+              quality={100}
+              src={'/dashboard.png'}
+              width={3000}
+            />
+          </div>
+        </section>
 
-				<section className="pt-12 md:pt-24 pb-14 mx-auto max-w-[1200px] mb-auto px-8 2xl:px-0">
-					<div className="border-[5px] pb-1 px-[1px] border-black/70 rounded-xl">
-						<Image
-							className="mt-1"
-							src={"/dashboard.png"}
-							width={3000}
-							height={2000}
-							quality={100}
-							priority
-							alt={"Dashboard Image"}
-						/>
-					</div>
-				</section>
+        <section className="mx-auto mb-auto max-w-[1200px] px-8 pt-12 pb-12 md:pt-24 md:pb-24 2xl:px-0">
+          <div className="flex flex-col items-center">
+            <h3 className="font-bold text-3xl md:text-4xl">Features</h3>
 
-				<section className="pt-12 md:pt-24 pb-12 md:pb-24 mx-auto max-w-[1200px] mb-auto px-8 2xl:px-0">
-					<div className="flex flex-col items-center">
-						<h3 className="text-3xl md:text-4xl font-bold">Features</h3>
+            <div className="mt-10 grid gap-x-14 gap-y-14 md:mt-14 md:gap-y-20 lg:w-full lg:grid-cols-2 lg:px-2 xl:w-[1150px] 2xl:w-[1350px]">
+              <FeatureCard
+                image={
+                  <Image
+                    alt=""
+                    className="rounded-lg"
+                    height={350}
+                    priority
+                    quality={100}
+                    src="/assets/table.png"
+                    width={500}
+                  />
+                }
+                subtitle="Manage subscriptions via feature-rich dashboard table"
+                title="Manage Subscriptions"
+              />
 
-						<div className="mt-10 md:mt-14 2xl:w-[1350px] xl:w-[1150px] lg:w-full lg:px-2 grid lg:grid-cols-2 gap-x-14 gap-y-14 md:gap-y-20">
-							<FeatureCard
-								title="Manage Subscriptions"
-								subtitle="Manage subscriptions via feature-rich dashboard table"
-								image={
-									<Image
-										className="rounded-lg"
-										width={500}
-										height={350}
-										quality={100}
-										priority
-										alt=""
-										src="/assets/table.png"
-									/>
-								}
-							/>
+              <FeatureCard
+                image={
+                  <Image
+                    alt=""
+                    className="rounded-lg"
+                    height={200}
+                    priority
+                    quality={100}
+                    src="/assets/metrics.png"
+                    width={350}
+                  />
+                }
+                subtitle="Gain insights on your subscriptions via cost metrics"
+                title="Gain Insights"
+              />
 
-							<FeatureCard
-								title="Gain Insights"
-								subtitle="Gain insights on your subscriptions via cost metrics"
-								image={
-									<Image
-										className="rounded-lg"
-										width={350}
-										height={200}
-										quality={100}
-										priority
-										alt=""
-										src="/assets/metrics.png"
-									/>
-								}
-							/>
+              <FeatureCard
+                image={
+                  <Image
+                    alt=""
+                    className="rounded-lg"
+                    height={380}
+                    priority
+                    quality={100}
+                    src="/assets/categories.png"
+                    width={460}
+                  />
+                }
+                subtitle="Organize subscriptions using custom categories"
+                title="Categorize"
+              />
 
-							<FeatureCard
-								title="Categorize"
-								subtitle="Organize subscriptions using custom categories"
-								image={
-									<Image
-										className="rounded-lg"
-										width={460}
-										height={380}
-										quality={100}
-										priority
-										alt=""
-										src="/assets/categories.png"
-									/>
-								}
-							/>
+              <FeatureCard
+                image={
+                  <Image
+                    alt=""
+                    className="rounded-lg"
+                    height={200}
+                    priority
+                    quality={100}
+                    src="/assets/collections.png"
+                    width={380}
+                  />
+                }
+                subtitle="Separate subscriptions into various collections"
+                title="Stay Organized"
+              />
 
-							<FeatureCard
-								title="Stay Organized"
-								subtitle="Separate subscriptions into various collections"
-								image={
-									<Image
-										className="rounded-lg"
-										width={380}
-										height={200}
-										quality={100}
-										priority
-										alt=""
-										src="/assets/collections.png"
-									/>
-								}
-							/>
+              <FeatureCard
+                image={
+                  <Image
+                    alt=""
+                    className="rounded-lg"
+                    height={200}
+                    priority
+                    quality={100}
+                    src="/assets/export.png"
+                    width={380}
+                  />
+                }
+                subtitle="Export your subscriptions to a CSV file"
+                title="Export Your Data"
+              />
 
-							<FeatureCard
-								title="Export Your Data"
-								subtitle="Export your subscriptions to a CSV file"
-								image={
-									<Image
-										className="rounded-lg"
-										width={380}
-										height={200}
-										quality={100}
-										priority
-										alt=""
-										src="/assets/export.png"
-									/>
-								}
-							/>
+              <FeatureCard
+                image={
+                  <Image
+                    alt=""
+                    className="rounded-lg"
+                    height={200}
+                    priority
+                    quality={100}
+                    src="/assets/email.png"
+                    width={380}
+                  />
+                }
+                subtitle="Stay informed about your subscriptions with a monthly summary email"
+                title="Stay Informed"
+              />
+            </div>
+          </div>
+        </section>
 
-							<FeatureCard
-								title="Stay Informed"
-								subtitle="Stay informed about your subscriptions with a monthly summary email"
-								image={
-									<Image
-										className="rounded-lg"
-										width={380}
-										height={200}
-										quality={100}
-										priority
-										alt=""
-										src="/assets/email.png"
-									/>
-								}
-							/>
-						</div>
-					</div>
-				</section>
+        <section className="pb-8 md:pb-24" />
 
-				<section className="pb-8 md:pb-24" />
-
-				<footer className="bg-gray-50 h-16 flex">
-					<div className="mx-auto my-auto">
-						<span className="text-xs font-medium">
-							Made by{" "}
-							<Link
-								href="https://www.linkedin.com/in/charles-buffington/"
-								className="font-bold"
-							>
-								Charles Buffington
-							</Link>
-							. All rights reserved.
-						</span>
-					</div>
-				</footer>
-			</div>
-		</>
-	);
+        <footer className="flex h-16 bg-gray-50">
+          <div className="mx-auto my-auto">
+            <span className="font-medium text-xs">
+              Made by{' '}
+              <Link
+                className="font-bold"
+                href="https://www.linkedin.com/in/charles-buffington/"
+              >
+                Charles Buffington
+              </Link>
+              . All rights reserved.
+            </span>
+          </div>
+        </footer>
+      </div>
+    </>
+  );
 }
