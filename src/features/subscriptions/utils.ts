@@ -79,14 +79,14 @@ export function step(
   return curr.subtract(stepAmount, stepUnit);
 }
 
-export function frequencyToDisplayText(frequency: Subscription["frequency"]): string {
+export function frequencyToDisplayText(frequency: Subscription["frequency"], compact: boolean = false): string {
   const displayMap: Record<Subscription["frequency"], string> = {
-    "weekly": "week",
-    "bi-weekly": "2 weeks", 
-    "monthly": "month",
-    "bi-monthly": "2 months",
-    "yearly": "year",
-    "bi-yearly": "2 years",
+    "weekly": compact ? "wk" : "week",
+    "bi-weekly": compact ? "2wk" : "2 weeks",
+    "monthly": compact ? "mo" : "month",
+    "bi-monthly": compact ? "2mo" : "2 months",
+    "yearly": compact ? "yr" : "year",
+    "bi-yearly": compact ? "2yr" : "2 years",
   };
 
   return displayMap[frequency];

@@ -9,7 +9,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { selectedSubscriptionsAtom } from "@/features/common/atoms";
+import { selectedSubscriptionsAtom, tableSizeAtom } from "@/features/common/atoms";
 import dayjs from "@/lib/dayjs";
 import type { Table } from "@tanstack/react-table";
 import { download, generateCsv, mkConfig } from "export-to-csv";
@@ -24,8 +24,7 @@ type MoreOptionsProps = {
 };
 
 export default function MoreOptions(props: MoreOptionsProps) {
-	const [tableSize, setTableSize] = React.useState<"default" | "compact">("default");
-
+	const [tableSize, setTableSize] = useAtom(tableSizeAtom);
 	const [subscriptions] = useAtom(selectedSubscriptionsAtom);
 
 	function exportSubscriptionsToCSV() {

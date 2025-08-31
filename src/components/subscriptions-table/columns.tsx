@@ -18,7 +18,7 @@ import {
 	useTableSortState,
 	useUser,
 } from "@/lib/hooks";
-import { toMoneyString, toProperCase } from "@/utils";
+import { cn, toMoneyString, toProperCase } from "@/utils";
 
 import DeleteSubscriptionModal from "@/components/subscriptions/delete-subscription-modal";
 import EditSubscriptionModal from "@/components/subscriptions/edit-subscription-modal";
@@ -35,6 +35,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import React from "react";
 import { frequencyToDisplayText } from "@/features/subscriptions/utils";
+import { tableSizeAtom } from "@/features/common/atoms";
+import { useAtom } from "jotai";
 
 const roboto = Roboto({
 	weight: ["400", "500", "700"],
@@ -100,26 +102,25 @@ export const columns: ColumnDef<Subscription>[] = [
 		},
 		cell: ({ row }) => {
 			const icon_ref = row.original.icon_ref;
+			const [tableSize] = useAtom(tableSizeAtom);
 			return (
 				<div className="flex flex-row space-x-3 items-center">
 					{icon_ref.includes(".") ? (
 						<Image
 							alt={toProperCase(icon_ref)}
 							src={`/${icon_ref}`}
-							height={24}
-							width={24}
-							className="w-[24px] h-[24px]"
+							height={tableSize === "compact" ? 20 : 24}
+							width={tableSize === "compact" ? 20 : 24}
 						/>
 					) : (
 						<Image
 							alt={toProperCase(icon_ref)}
 							src={`/${icon_ref}.svg`}
-							height={24}
-							width={24}
-							className="w-[24px] h-[24px]"
+							height={tableSize === "compact" ? 20 : 24}
+							width={tableSize === "compact" ? 20 : 24}
 						/>
 					)}
-					<div className="text-lg font-medium">{row.original.name}</div>
+					<div className={cn("font-medium", tableSize === "compact" ? "text-base" : "text-lg")}>{row.original.name}</div>
 				</div>
 			);
 		},
@@ -131,11 +132,22 @@ export const columns: ColumnDef<Subscription>[] = [
 		cell: ({ row }) => {
 			const amount = Number.parseFloat(row.getValue("amount"));
 			const formatted = toMoneyString(amount);
+			const [tableSize] = useAtom(tableSizeAtom);
+
+			if (tableSize === "compact") {
+				return (
+					<div className="text-left flex flex-row items-end">
+						<div className="mr-0.5 font-semibold text-base leading-none">{formatted}</div>
+						<span className="mr-[1px] text-sm leading-none">/</span>
+						<span className="text-xs leading-none">{frequencyToDisplayText(row.original.frequency, true)}</span>
+					</div>
+				);
+			}
 
 			return (
 				<div className="text-left">
-					<div className="font-semibold text-lg">{formatted}</div>
-					every {frequencyToDisplayText(row.original.frequency)}
+					<div className={cn("font-semibold text-lg")}>{formatted}</div>
+					<span className="ml-1">{frequencyToDisplayText(row.original.frequency)}</span>
 				</div>
 			);
 		},
@@ -157,8 +169,9 @@ export const columns: ColumnDef<Subscription>[] = [
 			);
 		},
 		cell: ({ row }) => {
+			const [tableSize] = useAtom(tableSizeAtom);
 			return (
-				<Badge className="text-md" variant={"secondary"}>
+				<Badge className={cn(tableSize === "compact" ? "text-xs" : "text-md")} variant={"secondary"}>
 					{row.original.category}
 				</Badge>
 			);
@@ -183,6 +196,18 @@ export const columns: ColumnDef<Subscription>[] = [
 			);
 		},
 		cell: ({ row }) => {
+			const [tableSize] = useAtom(tableSizeAtom);
+
+			if (tableSize === "compact") {
+				return (
+					<div className="text-left">
+						<span className="text-sm font-medium">
+							{dayjs(row.original.next_invoice).format("MMM D, YYYY")}
+						</span>
+					</div>
+				);
+			}
+
 			return (
 				<div className="text-left">
 					<span className="text-[16px] font-medium">
