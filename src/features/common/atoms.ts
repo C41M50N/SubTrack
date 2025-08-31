@@ -1,9 +1,10 @@
 import type { Collection } from "@prisma/client";
 import { atom } from "jotai";
+import { atomWithStorage, createJSONStorage } from 'jotai/utils'
 import type { Subscription } from "../subscriptions";
 
 export const selectedSubscriptionsAtom = atom<Array<Subscription>>([]);
 
 export const selectedCollectionIdAtom = atom<Collection["id"] | null>(null);
 
-export const tableSizeAtom = atom<"default" | "compact">("default");
+export const tableSizeAtom = atomWithStorage<"default" | "compact">("table-size", "default", createJSONStorage(), { getOnInit: true });
