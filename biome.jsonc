@@ -10,6 +10,9 @@
       "a11y": {
         "useSemanticElements": "off"
       },
+      "style": {
+        "noMagicNumbers": "info"
+      },
       "suspicious": {
         "noArrayIndexKey": "off"
       },
