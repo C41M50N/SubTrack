@@ -2,14 +2,14 @@ import { Toaster } from "@/components/ui/toaster";
 import Head from "next/head";
 
 type AuthLayoutProps = {
-  children: React.ReactNode;
-  title?: string;
-}
+	children: React.ReactNode;
+	title?: string;
+};
 
 export default function AuthLayout({ children, title }: AuthLayoutProps) {
-  return (
-    <>
-      <Head>
+	return (
+		<>
+			<Head>
 				<title>{title}</title>
 				<link
 					rel="apple-touch-icon"
@@ -30,10 +30,10 @@ export default function AuthLayout({ children, title }: AuthLayoutProps) {
 				/>
 				<link rel="manifest" href="/site.webmanifest" />
 			</Head>
-      <div className="h-screen sm:-mt-10 flex justify-center items-center">
-        {children}
-        <Toaster />
-      </div>
-    </>
-  )
+			<div className="h-screen sm:-mt-10 flex justify-center items-center">
+				{children}
+				<Toaster />
+			</div>
+		</>
+	);
 }

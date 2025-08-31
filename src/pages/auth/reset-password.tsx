@@ -153,9 +153,9 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 	if (session) {
 		return {
 			redirect: {
-				destination: "/dashboard"
-			}
-		}
+				destination: "/dashboard",
+			},
+		};
 	}
 
 	const token = context.query.token as string | undefined;

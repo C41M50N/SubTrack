@@ -12,13 +12,13 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/use-toast";
 import { signIn, signUp } from "@/features/auth/auth-client";
+import AuthLayout from "@/layouts/auth";
 import { getServerAuthSession } from "@/server/api/trpc";
 import { Loader2, X } from "lucide-react";
-import type { GetServerSidePropsContext } from "next/types";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import type { GetServerSidePropsContext } from "next/types";
 import { useState } from "react";
-import AuthLayout from "@/layouts/auth";
 
 export default function SignUpPage() {
 	const router = useRouter();
@@ -266,10 +266,10 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 	if (session) {
 		return {
 			redirect: {
-				destination: "/dashboard"
-			}
-		}
+				destination: "/dashboard",
+			},
+		};
 	}
 
-	return { props: {} }
+	return { props: {} };
 }

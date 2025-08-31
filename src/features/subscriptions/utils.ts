@@ -1,5 +1,5 @@
-import type { Dayjs } from "dayjs";
 import dayjs from "@/lib/dayjs";
+import type { Dayjs } from "dayjs";
 import type { Subscription } from ".";
 
 /**
@@ -8,12 +8,12 @@ import type { Subscription } from ".";
  * @returns An array of dayjs objects representing the next N months.
  */
 export function getNextNMonths(n: number): Dayjs[] {
-  const res: Array<dayjs.Dayjs> = [];
-  for (let offset = 0; offset < n; offset++) {
-    const day = dayjs().add(1 + offset, "month");
-    res.push(day);
-  }
-  return res;
+	const res: Array<dayjs.Dayjs> = [];
+	for (let offset = 0; offset < n; offset++) {
+		const day = dayjs().add(1 + offset, "month");
+		res.push(day);
+	}
+	return res;
 }
 
 /**
@@ -23,31 +23,35 @@ export function getNextNMonths(n: number): Dayjs[] {
  * @param year - The year to filter subscriptions by.
  * @returns An array of subscription IDs that renew in the specified month and year.
  */
-export function getSubscriptionsInMonth(subscriptions: Subscription[], month: number, year: number): Subscription[] {
-  const start = dayjs().set('month', month).set('year', year).startOf("month");
-  const end = start.endOf("month");
+export function getSubscriptionsInMonth(
+	subscriptions: Subscription[],
+	month: number,
+	year: number,
+): Subscription[] {
+	const start = dayjs().set("month", month).set("year", year).startOf("month");
+	const end = start.endOf("month");
 
-  const subsWithAdjustedDates = subscriptions.map((sub) => {
-    let pastInvoiceDate = dayjs(sub.next_invoice);
-    while (!pastInvoiceDate.isBefore(start)) {
-      pastInvoiceDate = step('bwd', pastInvoiceDate, sub.frequency)
-    }
-    return { ...sub, next_invoice: pastInvoiceDate.toDate() }
-  })
+	const subsWithAdjustedDates = subscriptions.map((sub) => {
+		let pastInvoiceDate = dayjs(sub.next_invoice);
+		while (!pastInvoiceDate.isBefore(start)) {
+			pastInvoiceDate = step("bwd", pastInvoiceDate, sub.frequency);
+		}
+		return { ...sub, next_invoice: pastInvoiceDate.toDate() };
+	});
 
-  const result: Subscription[] = [];
-  for (const sub of subsWithAdjustedDates) {
-    let curr = dayjs(sub.next_invoice);
-    while (curr.isBefore(end)) {
-      if (curr.month() === month && curr.year() === year) {
-        result.push(sub);
-        break;
-      }
-      curr = step('fwd', curr, sub.frequency);
-    }
-  }
+	const result: Subscription[] = [];
+	for (const sub of subsWithAdjustedDates) {
+		let curr = dayjs(sub.next_invoice);
+		while (curr.isBefore(end)) {
+			if (curr.month() === month && curr.year() === year) {
+				result.push(sub);
+				break;
+			}
+			curr = step("fwd", curr, sub.frequency);
+		}
+	}
 
-  return result;
+	return result;
 }
 
 /**
@@ -58,36 +62,42 @@ export function getSubscriptionsInMonth(subscriptions: Subscription[], month: nu
  * @returns The next or previous invoice date.
  */
 export function step(
-  dir: 'fwd' | 'bwd',
-  curr: dayjs.Dayjs,
-  frequency: Subscription["frequency"],
+	dir: "fwd" | "bwd",
+	curr: dayjs.Dayjs,
+	frequency: Subscription["frequency"],
 ): dayjs.Dayjs {
-  const frequencyMap: Record<Subscription["frequency"], [number, dayjs.ManipulateType]> = {
-    "weekly": [1, "week"],
-    "bi-weekly": [2, "week"],
-    "monthly": [1, "month"],
-    "bi-monthly": [2, "month"],
-    "yearly": [1, "year"],
-    "bi-yearly": [2, "year"],
-  };
+	const frequencyMap: Record<
+		Subscription["frequency"],
+		[number, dayjs.ManipulateType]
+	> = {
+		"weekly": [1, "week"],
+		"bi-weekly": [2, "week"],
+		"monthly": [1, "month"],
+		"bi-monthly": [2, "month"],
+		"yearly": [1, "year"],
+		"bi-yearly": [2, "year"],
+	};
 
-  const [stepAmount, stepUnit] = frequencyMap[frequency];
+	const [stepAmount, stepUnit] = frequencyMap[frequency];
 
-  if (dir === 'fwd') {
-    return curr.add(stepAmount, stepUnit);
-  }
-  return curr.subtract(stepAmount, stepUnit);
+	if (dir === "fwd") {
+		return curr.add(stepAmount, stepUnit);
+	}
+	return curr.subtract(stepAmount, stepUnit);
 }
 
-export function frequencyToDisplayText(frequency: Subscription["frequency"], compact: boolean = false): string {
-  const displayMap: Record<Subscription["frequency"], string> = {
-    "weekly": compact ? "wk" : "week",
-    "bi-weekly": compact ? "2wk" : "2 weeks",
-    "monthly": compact ? "mo" : "month",
-    "bi-monthly": compact ? "2mo" : "2 months",
-    "yearly": compact ? "yr" : "year",
-    "bi-yearly": compact ? "2yr" : "2 years",
-  };
+export function frequencyToDisplayText(
+	frequency: Subscription["frequency"],
+	compact = false,
+): string {
+	const displayMap: Record<Subscription["frequency"], string> = {
+		"weekly": compact ? "wk" : "week",
+		"bi-weekly": compact ? "2wk" : "2 weeks",
+		"monthly": compact ? "mo" : "month",
+		"bi-monthly": compact ? "2mo" : "2 months",
+		"yearly": compact ? "yr" : "year",
+		"bi-yearly": compact ? "2yr" : "2 years",
+	};
 
-  return displayMap[frequency];
+	return displayMap[frequency];
 }

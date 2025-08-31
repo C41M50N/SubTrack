@@ -33,10 +33,10 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import React from "react";
-import { frequencyToDisplayText } from "@/features/subscriptions/utils";
 import { tableSizeAtom } from "@/features/common/atoms";
+import { frequencyToDisplayText } from "@/features/subscriptions/utils";
 import { useAtom } from "jotai";
+import React from "react";
 
 const roboto = Roboto({
 	weight: ["400", "500", "700"],
@@ -56,7 +56,7 @@ export const columns: ColumnDef<Subscription>[] = [
 		accessorKey: "id",
 		filterFn: (row, id, value: string[]) => {
 			return value.includes(row.getValue(id));
-		}
+		},
 	},
 	{
 		id: "select",
@@ -90,11 +90,7 @@ export const columns: ColumnDef<Subscription>[] = [
 		header: ({ column }) => {
 			const { toggleSorting, SortIcon } = useTableSortState(column);
 			return (
-				<Button
-					variant="ghost"
-					className="-ml-4"
-					onClick={toggleSorting}
-				>
+				<Button variant="ghost" className="-ml-4" onClick={toggleSorting}>
 					Name
 					{SortIcon && <SortIcon className="ml-2 h-4 w-4" />}
 				</Button>
@@ -120,7 +116,14 @@ export const columns: ColumnDef<Subscription>[] = [
 							width={tableSize === "compact" ? 20 : 24}
 						/>
 					)}
-					<div className={cn("font-medium", tableSize === "compact" ? "text-base" : "text-lg")}>{row.original.name}</div>
+					<div
+						className={cn(
+							"font-medium",
+							tableSize === "compact" ? "text-base" : "text-lg",
+						)}
+					>
+						{row.original.name}
+					</div>
 				</div>
 			);
 		},
@@ -137,9 +140,13 @@ export const columns: ColumnDef<Subscription>[] = [
 			if (tableSize === "compact") {
 				return (
 					<div className="text-left flex flex-row items-end">
-						<div className="mr-0.5 font-semibold text-base leading-none">{formatted}</div>
+						<div className="mr-0.5 font-semibold text-base leading-none">
+							{formatted}
+						</div>
 						<span className="mr-[1px] text-sm leading-none">/</span>
-						<span className="text-xs leading-none">{frequencyToDisplayText(row.original.frequency, true)}</span>
+						<span className="text-xs leading-none">
+							{frequencyToDisplayText(row.original.frequency, true)}
+						</span>
 					</div>
 				);
 			}
@@ -147,7 +154,9 @@ export const columns: ColumnDef<Subscription>[] = [
 			return (
 				<div className="text-left">
 					<div className={cn("font-semibold text-lg")}>{formatted}</div>
-					<span className="ml-1">{frequencyToDisplayText(row.original.frequency)}</span>
+					<span className="ml-1">
+						{frequencyToDisplayText(row.original.frequency)}
+					</span>
 				</div>
 			);
 		},
@@ -158,11 +167,7 @@ export const columns: ColumnDef<Subscription>[] = [
 			const { toggleSorting, SortIcon } = useTableSortState(column);
 
 			return (
-				<Button
-					variant="ghost"
-					className="-ml-4"
-					onClick={toggleSorting}
-				>
+				<Button variant="ghost" className="-ml-4" onClick={toggleSorting}>
 					Category
 					{SortIcon && <SortIcon className="ml-2 h-4 w-4" />}
 				</Button>
@@ -171,7 +176,10 @@ export const columns: ColumnDef<Subscription>[] = [
 		cell: ({ row }) => {
 			const [tableSize] = useAtom(tableSizeAtom);
 			return (
-				<Badge className={cn(tableSize === "compact" ? "text-xs" : "text-md")} variant={"secondary"}>
+				<Badge
+					className={cn(tableSize === "compact" ? "text-xs" : "text-md")}
+					variant={"secondary"}
+				>
 					{row.original.category}
 				</Badge>
 			);
@@ -185,11 +193,7 @@ export const columns: ColumnDef<Subscription>[] = [
 		header: ({ column }) => {
 			const { toggleSorting, SortIcon } = useTableSortState(column);
 			return (
-				<Button
-					variant="ghost"
-					className="-ml-4"
-					onClick={toggleSorting}
-				>
+				<Button variant="ghost" className="-ml-4" onClick={toggleSorting}>
 					Next Invoice
 					{SortIcon && <SortIcon className="ml-2 h-4 w-4" />}
 				</Button>
@@ -248,9 +252,7 @@ export const columns: ColumnDef<Subscription>[] = [
 								onClick={() => editModalState.setState("open")}
 							>
 								<IconPencil className="mr-2.5 size-5" />
-								<span
-									className={`text-base font-medium ${lato.className}`}
-								>
+								<span className={`text-base font-medium ${lato.className}`}>
 									Edit
 								</span>
 							</DropdownMenuItem>
@@ -264,9 +266,7 @@ export const columns: ColumnDef<Subscription>[] = [
 										onClick={() => setReminderModalState.setState("open")}
 									>
 										<IconAlarm className="mr-2.5 size-5" />
-										<span
-											className={`text-base font-medium ${lato.className}`}
-										>
+										<span className={`text-base font-medium ${lato.className}`}>
 											Set Cancel Reminder
 										</span>
 									</DropdownMenuItem>
@@ -280,9 +280,7 @@ export const columns: ColumnDef<Subscription>[] = [
 								onClick={() => deleteModalState.setState("open")}
 							>
 								<IconTrash className="mr-2.5 size-5" />
-								<span
-									className={`text-base font-medium ${lato.className}`}
-								>
+								<span className={`text-base font-medium ${lato.className}`}>
 									Delete
 								</span>
 							</DropdownMenuItem>

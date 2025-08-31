@@ -1,7 +1,6 @@
 import dayjs from "@/lib/dayjs";
 import { toMoneyString } from "@/utils";
 import type { Subscription } from "@prisma/client";
-import { Text } from "./primitives/text";
 import {
 	Body,
 	Column,
@@ -13,116 +12,117 @@ import {
 	Row,
 	Tailwind,
 } from "@react-email/components";
+import { Text } from "./primitives/text";
 
 const ExampleRenewingSoon = [
 	{
-		id: 'cm5cxngtd00074qpots1rfna6',
-		name: 'Claude Pro',
+		id: "cm5cxngtd00074qpots1rfna6",
+		name: "Claude Pro",
 		amount: 2000,
-		frequency: 'monthly',
-		category: 'productivity',
+		frequency: "monthly",
+		category: "productivity",
 		next_invoice: dayjs("2025-02-13T05:00:00.000Z").toDate(),
 		last_invoice: dayjs("2025-01-13T05:00:00.000Z").toDate(),
-		icon_ref: 'default',
+		icon_ref: "default",
 		send_alert: true,
-		collection_id: 'cm5cxn3he0001127rbsz8xkhq',
-		user_id: '1Ax7J3cTdWr3a8GtcZPNtQHvDgkXqlLl'
+		collection_id: "cm5cxn3he0001127rbsz8xkhq",
+		user_id: "1Ax7J3cTdWr3a8GtcZPNtQHvDgkXqlLl",
 	},
 	{
-		id: 'cm5cxngtd00054qpohwiik7ni',
-		name: 'Vercel',
+		id: "cm5cxngtd00054qpohwiik7ni",
+		name: "Vercel",
 		amount: 2000,
-		frequency: 'monthly',
-		category: 'productivity',
+		frequency: "monthly",
+		category: "productivity",
 		next_invoice: dayjs("2025-02-09T04:00:00.000Z").toDate(),
 		last_invoice: dayjs("2025-01-09T04:00:00.000Z").toDate(),
-		icon_ref: 'default',
+		icon_ref: "default",
 		send_alert: true,
-		collection_id: 'cm5cxn3he0001127rbsz8xkhq',
-		user_id: '1Ax7J3cTdWr3a8GtcZPNtQHvDgkXqlLl'
+		collection_id: "cm5cxn3he0001127rbsz8xkhq",
+		user_id: "1Ax7J3cTdWr3a8GtcZPNtQHvDgkXqlLl",
 	},
 	{
-		id: 'cm5cxngtd000g4qpos1o0dw3s',
-		name: 'Uploadthing 100GB',
+		id: "cm5cxngtd000g4qpos1o0dw3s",
+		name: "Uploadthing 100GB",
 		amount: 1000,
-		frequency: 'monthly',
-		category: 'dev:jumpdrive',
+		frequency: "monthly",
+		category: "dev:jumpdrive",
 		next_invoice: dayjs("2025-01-18T05:40:38.043Z").toDate(),
 		last_invoice: dayjs("2024-12-18T05:40:38.043Z").toDate(),
-		icon_ref: 'default',
+		icon_ref: "default",
 		send_alert: true,
-		collection_id: 'cm5cxn3he0001127rbsz8xkhq',
-		user_id: '1Ax7J3cTdWr3a8GtcZPNtQHvDgkXqlLl'
-	}
-]
+		collection_id: "cm5cxn3he0001127rbsz8xkhq",
+		user_id: "1Ax7J3cTdWr3a8GtcZPNtQHvDgkXqlLl",
+	},
+];
 
 const ExampleRenewedRecently = [
 	{
-		id: 'cm5cxngtd00084qpoiu4c1658',
-		name: 'Spotify + Hulu',
+		id: "cm5cxngtd00084qpoiu4c1658",
+		name: "Spotify + Hulu",
 		amount: 1199,
-		frequency: 'monthly',
-		category: 'entertainment',
+		frequency: "monthly",
+		category: "entertainment",
 		next_invoice: dayjs("2025-01-16T04:00:00.000Z").toDate(),
 		last_invoice: dayjs("2024-12-16T04:00:00.000Z").toDate(),
-		icon_ref: 'spotify',
+		icon_ref: "spotify",
 		send_alert: true,
-		collection_id: 'cm5cxn3he0001127rbsz8xkhq',
-		user_id: '1Ax7J3cTdWr3a8GtcZPNtQHvDgkXqlLl'
+		collection_id: "cm5cxn3he0001127rbsz8xkhq",
+		user_id: "1Ax7J3cTdWr3a8GtcZPNtQHvDgkXqlLl",
 	},
 	{
-		id: 'cm5cxngtd000g4qpos1o0dw3s',
-		name: 'Uploadthing 100GB',
+		id: "cm5cxngtd000g4qpos1o0dw3s",
+		name: "Uploadthing 100GB",
 		amount: 1000,
-		frequency: 'monthly',
-		category: 'dev:jumpdrive',
+		frequency: "monthly",
+		category: "dev:jumpdrive",
 		next_invoice: dayjs("2025-01-18T05:40:38.043Z").toDate(),
 		last_invoice: dayjs("2024-12-18T05:40:38.043Z").toDate(),
-		icon_ref: 'default',
+		icon_ref: "default",
 		send_alert: true,
-		collection_id: 'cm5cxn3he0001127rbsz8xkhq',
-		user_id: '1Ax7J3cTdWr3a8GtcZPNtQHvDgkXqlLl'
+		collection_id: "cm5cxn3he0001127rbsz8xkhq",
+		user_id: "1Ax7J3cTdWr3a8GtcZPNtQHvDgkXqlLl",
 	},
 	{
-		id: 'cm5cxngtd000h4qpoapl6v6v5',
-		name: 'Netflix',
+		id: "cm5cxngtd000h4qpoapl6v6v5",
+		name: "Netflix",
 		amount: 1549,
-		frequency: 'monthly',
-		category: 'entertainment',
+		frequency: "monthly",
+		category: "entertainment",
 		next_invoice: dayjs("2025-01-21T05:00:00.000Z").toDate(),
 		last_invoice: dayjs("null").toDate(),
-		icon_ref: 'netflix',
+		icon_ref: "netflix",
 		send_alert: true,
-		collection_id: 'cm5cxn3he0001127rbsz8xkhq',
-		user_id: '1Ax7J3cTdWr3a8GtcZPNtQHvDgkXqlLl'
+		collection_id: "cm5cxn3he0001127rbsz8xkhq",
+		user_id: "1Ax7J3cTdWr3a8GtcZPNtQHvDgkXqlLl",
 	},
 	{
-		id: 'cm5cxngtd00054qpohwiik7ni',
-		name: 'Vercel',
+		id: "cm5cxngtd00054qpohwiik7ni",
+		name: "Vercel",
 		amount: 2000,
-		frequency: 'monthly',
-		category: 'productivity',
+		frequency: "monthly",
+		category: "productivity",
 		next_invoice: dayjs("2025-02-09T04:00:00.000Z").toDate(),
 		last_invoice: dayjs("2025-01-09T04:00:00.000Z").toDate(),
-		icon_ref: 'default',
+		icon_ref: "default",
 		send_alert: true,
-		collection_id: 'cm5cxn3he0001127rbsz8xkhq',
-		user_id: '1Ax7J3cTdWr3a8GtcZPNtQHvDgkXqlLl'
+		collection_id: "cm5cxn3he0001127rbsz8xkhq",
+		user_id: "1Ax7J3cTdWr3a8GtcZPNtQHvDgkXqlLl",
 	},
 	{
-		id: 'cm5cxngtd00074qpots1rfna6',
-		name: 'Claude Pro',
+		id: "cm5cxngtd00074qpots1rfna6",
+		name: "Claude Pro",
 		amount: 2000,
-		frequency: 'monthly',
-		category: 'productivity',
+		frequency: "monthly",
+		category: "productivity",
 		next_invoice: dayjs("2025-02-13T05:00:00.000Z").toDate(),
 		last_invoice: dayjs("2025-01-13T05:00:00.000Z").toDate(),
-		icon_ref: 'default',
+		icon_ref: "default",
 		send_alert: true,
-		collection_id: 'cm5cxn3he0001127rbsz8xkhq',
-		user_id: '1Ax7J3cTdWr3a8GtcZPNtQHvDgkXqlLl'
-	}
-]
+		collection_id: "cm5cxn3he0001127rbsz8xkhq",
+		user_id: "1Ax7J3cTdWr3a8GtcZPNtQHvDgkXqlLl",
+	},
+];
 
 export type MonthlyReviewEmailProps = {
 	userName: string;
@@ -160,16 +160,17 @@ export function MonthlyReviewEmail({
 							width={135}
 							className="mb-3"
 						/>
-						<Text className="text-xl font-bold">{dayjs().format("MMMM")} Subscriptions Review</Text>
+						<Text className="text-xl font-bold">
+							{dayjs().format("MMMM")} Subscriptions Review
+						</Text>
 
 						{renewingSoonSubs.length > 0 && (
 							<Row className="mt-3">
 								<Column>
-									<Text className="text-lg font-bold">
-										Renewing soon
-									</Text>
+									<Text className="text-lg font-bold">Renewing soon</Text>
 									<Text className="text-xs font-medium">
-										The following subscriptions are renewing within the next 32 days.
+										The following subscriptions are renewing within the next 32
+										days.
 									</Text>
 									<ul className="pl-6 mt-2 mb-2">
 										{renewingSoonSubs.map((sub) => (
@@ -189,16 +190,16 @@ export function MonthlyReviewEmail({
 						{renewedRecentlySubs.length > 0 && (
 							<Row className="mt-1">
 								<Column>
-									<Text className="text-lg font-bold">
-										Renewed recently
-									</Text>
+									<Text className="text-lg font-bold">Renewed recently</Text>
 									<Text className="text-xs font-medium">
 										The following subscriptions are renewed recently.
 									</Text>
 									<ul className="pl-6 mt-2 mb-2">
 										{renewedRecentlySubs.map((sub) => {
 											if (!sub.last_invoice) {
-												throw new Error("invalid recently renewed subscription");
+												throw new Error(
+													"invalid recently renewed subscription",
+												);
 											}
 											return (
 												<li key={sub.id} className="py-0.5">

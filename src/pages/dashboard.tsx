@@ -17,7 +17,10 @@ import {
 	selectedSubscriptionsAtom,
 } from "@/features/common/atoms";
 import { Statistics } from "@/features/common/subscription-stats";
-import { getNextNMonths, getSubscriptionsInMonth } from "@/features/subscriptions/utils";
+import {
+	getNextNMonths,
+	getSubscriptionsInMonth,
+} from "@/features/subscriptions/utils";
 import MainLayout from "@/layouts/main";
 import { useCategories, useUser } from "@/lib/hooks";
 import { toMoneyString } from "@/utils";

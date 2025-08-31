@@ -9,7 +9,11 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { selectedSubscriptionsAtom, tableSizeAtom } from "@/features/common/atoms";
+import {
+	selectedSubscriptionsAtom,
+	tableSizeAtom,
+} from "@/features/common/atoms";
+import type { Subscription } from "@/features/subscriptions";
 import dayjs from "@/lib/dayjs";
 import type { Table } from "@tanstack/react-table";
 import { download, generateCsv, mkConfig } from "export-to-csv";
@@ -17,7 +21,6 @@ import { useAtom } from "jotai";
 import { ImportIcon, SettingsIcon } from "lucide-react";
 import React from "react";
 import { Switch } from "../ui/switch";
-import type { Subscription } from "@/features/subscriptions";
 
 type MoreOptionsProps = {
 	table: Table<Subscription>;
@@ -62,7 +65,9 @@ export default function MoreOptions(props: MoreOptionsProps) {
 					.getAllColumns()
 					.filter(
 						(column) =>
-							typeof column.accessorFn !== "undefined" && column.getCanHide() && column.id !== "id",
+							typeof column.accessorFn !== "undefined" &&
+							column.getCanHide() &&
+							column.id !== "id",
 					)
 					.map((column) => {
 						return (
@@ -76,21 +81,20 @@ export default function MoreOptions(props: MoreOptionsProps) {
 								{column.id.replaceAll("_", " ")}
 							</DropdownMenuCheckboxItem>
 						);
-					})
-				}
+					})}
 
 				<DropdownMenuSeparator />
 
 				<DropdownMenuLabel>Table Size</DropdownMenuLabel>
 				<DropdownMenuItem
 					onSelect={(e) => e.preventDefault()}
-					onClick={() => setTableSize(tableSize === "compact" ? "default" : "compact")}
+					onClick={() =>
+						setTableSize(tableSize === "compact" ? "default" : "compact")
+					}
 				>
 					<div className="pl-1 flex flex-row gap-4 items-center">
 						<Switch size="sm" checked={tableSize === "compact"} />
-						<span>
-							{tableSize === "default" ? "Default" : "Compact"}
-						</span>
+						<span>{tableSize === "default" ? "Default" : "Compact"}</span>
 					</div>
 				</DropdownMenuItem>
 
@@ -99,15 +103,11 @@ export default function MoreOptions(props: MoreOptionsProps) {
 				<DropdownMenuLabel>Options</DropdownMenuLabel>
 				<DropdownMenuItem onClick={() => {}}>
 					<ImportIcon className="mr-2.5 size-4" />
-					<span>
-						Import Data
-					</span>
+					<span>Import Data</span>
 				</DropdownMenuItem>
 				<DropdownMenuItem onClick={exportSubscriptionsToCSV}>
 					<ImportIcon className="mr-2.5 size-4 rotate-180" />
-					<span>
-						Export Data
-					</span>
+					<span>Export Data</span>
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>

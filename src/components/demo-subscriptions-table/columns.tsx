@@ -206,9 +206,7 @@ export const columns: ColumnDef<DemoSubscription>[] = [
 								onClick={() => editModalState.setState("open")}
 							>
 								<IconPencil className="mr-2.5 size-5" />
-								<span
-									className={`text-base font-medium ${lato.className}`}
-								>
+								<span className={`text-base font-medium ${lato.className}`}>
 									Edit
 								</span>
 							</DropdownMenuItem>
@@ -220,9 +218,7 @@ export const columns: ColumnDef<DemoSubscription>[] = [
 								onClick={() => deleteModalState.setState("open")}
 							>
 								<IconTrash className="mr-2.5 size-5" />
-								<span
-									className={`text-base font-medium ${lato.className}`}
-								>
+								<span className={`text-base font-medium ${lato.className}`}>
 									Delete
 								</span>
 							</DropdownMenuItem>

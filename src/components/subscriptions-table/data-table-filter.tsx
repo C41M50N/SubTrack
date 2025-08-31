@@ -42,7 +42,9 @@ export function DataTableFilter<TData, TValue>({
 		<Popover>
 			<PopoverTrigger asChild>
 				<Button variant="outline" size="sm" className="h-10 border-dashed">
-					<ListFilterIcon className={cn("size-4 mr-2", selectedValues.size > 0 && "mr-1")} />
+					<ListFilterIcon
+						className={cn("size-4 mr-2", selectedValues.size > 0 && "mr-1")}
+					/>
 					{title}
 					{selectedValues?.size > 0 && (
 						<>

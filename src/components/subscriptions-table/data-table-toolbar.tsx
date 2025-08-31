@@ -1,14 +1,14 @@
+import type { Subscription } from "@/features/subscriptions";
 import { useNewSubscriptionModal } from "@/features/subscriptions/stores";
 import { IconCircleX, IconPlus } from "@tabler/icons-react";
 import type { Table } from "@tanstack/react-table";
 import React from "react";
 import CollectionSelector from "../collections/collection-selector";
+import { SearchInput } from "../common/search-input";
 import { Button } from "../ui/button";
 import { DataTableFilter } from "./data-table-filter";
-import MoreOptions from "./more-options";
-import { SearchInput } from "../common/search-input";
 import { MonthlyViewSelector } from "./monthly-view-selector";
-import type { Subscription } from "@/features/subscriptions";
+import MoreOptions from "./more-options";
 
 type Props = {
 	table: Table<Subscription>;
@@ -16,13 +16,11 @@ type Props = {
 	data: Subscription[];
 };
 
-export default function DataTableToolbar({
-	table,
-	categories,
-	data,
-}: Props) {
+export default function DataTableToolbar({ table, categories, data }: Props) {
 	const newSubscriptionModalState = useNewSubscriptionModal();
-	const isFiltered = table.getState().columnFilters.length > 0 && table.getState().columnFilters.some(filter => filter.id !== 'id');
+	const isFiltered =
+		table.getState().columnFilters.length > 0 &&
+		table.getState().columnFilters.some((filter) => filter.id !== "id");
 
 	return (
 		<div className="flex justify-between items-end">
@@ -52,7 +50,9 @@ export default function DataTableToolbar({
 							variant="ghost"
 							onClick={() => {
 								const currentFilters = table.getState().columnFilters;
-								const idFilter = currentFilters.find(filter => filter.id === 'id');
+								const idFilter = currentFilters.find(
+									(filter) => filter.id === "id",
+								);
 								table.setColumnFilters(idFilter ? [idFilter] : []);
 							}}
 							className="h-10 px-2 lg:px-3"

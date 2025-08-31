@@ -23,11 +23,14 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { selectedSubscriptionsAtom, tableSizeAtom } from "@/features/common/atoms";
+import {
+	selectedSubscriptionsAtom,
+	tableSizeAtom,
+} from "@/features/common/atoms";
 import type { Subscription } from "@/features/subscriptions";
+import { cn } from "@/utils";
 import { useAtom } from "jotai";
 import DataTableToolbar from "./data-table-toolbar";
-import { cn } from "@/utils";
 
 interface DataTableProps {
 	columns: ColumnDef<Subscription>[];
@@ -117,7 +120,12 @@ export default function DataTable({
 									data-state={row.getIsSelected() && "selected"}
 								>
 									{row.getVisibleCells().map((cell) => (
-										<TableCell key={cell.id} className={cn(tableSize === "compact" && "pl-4 pr-1 py-1")}>
+										<TableCell
+											key={cell.id}
+											className={cn(
+												tableSize === "compact" && "pl-4 pr-1 py-1",
+											)}
+										>
 											{flexRender(
 												cell.column.columnDef.cell,
 												cell.getContext(),
