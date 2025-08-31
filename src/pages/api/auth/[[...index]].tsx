@@ -1,16 +1,16 @@
-import { auth } from "@/server/auth";
-import { toNodeHandler } from "better-auth/node";
-import type { NextApiRequest, NextApiResponse } from "next";
+import { toNodeHandler } from 'better-auth/node';
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { auth } from '@/server/auth';
 
 export default async function handler(
-	req: NextApiRequest,
-	res: NextApiResponse,
+  req: NextApiRequest,
+  res: NextApiResponse
 ) {
-	return await toNodeHandler(auth)(req, res);
+  return await toNodeHandler(auth)(req, res);
 }
 
 export const config = {
-	api: {
-		bodyParser: false,
-	},
+  api: {
+    bodyParser: false,
+  },
 };

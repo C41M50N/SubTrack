@@ -1,39 +1,39 @@
-import { Toaster } from "@/components/ui/toaster";
-import Head from "next/head";
+import Head from 'next/head';
+import { Toaster } from '@/components/ui/toaster';
 
 type AuthLayoutProps = {
-	children: React.ReactNode;
-	title?: string;
+  children: React.ReactNode;
+  title?: string;
 };
 
 export default function AuthLayout({ children, title }: AuthLayoutProps) {
-	return (
-		<>
-			<Head>
-				<title>{title}</title>
-				<link
-					rel="apple-touch-icon"
-					sizes="180x180"
-					href="/apple-touch-icon.png"
-				/>
-				<link
-					rel="icon"
-					type="image/png"
-					sizes="32x32"
-					href="/favicon-32x32.png"
-				/>
-				<link
-					rel="icon"
-					type="image/png"
-					sizes="16x16"
-					href="/favicon-16x16.png"
-				/>
-				<link rel="manifest" href="/site.webmanifest" />
-			</Head>
-			<div className="h-screen sm:-mt-10 flex justify-center items-center">
-				{children}
-				<Toaster />
-			</div>
-		</>
-	);
+  return (
+    <>
+      <Head>
+        <title>{title}</title>
+        <link
+          href="/apple-touch-icon.png"
+          rel="apple-touch-icon"
+          sizes="180x180"
+        />
+        <link
+          href="/favicon-32x32.png"
+          rel="icon"
+          sizes="32x32"
+          type="image/png"
+        />
+        <link
+          href="/favicon-16x16.png"
+          rel="icon"
+          sizes="16x16"
+          type="image/png"
+        />
+        <link href="/site.webmanifest" rel="manifest" />
+      </Head>
+      <div className="sm:-mt-10 flex h-screen items-center justify-center">
+        {children}
+        <Toaster />
+      </div>
+    </>
+  );
 }

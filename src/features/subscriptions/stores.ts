@@ -1,5 +1,5 @@
-import { createModalStateStore } from "@/lib/hooks";
+import { createModalStateStore } from '@/lib/hooks';
 
 export const useNewSubscriptionModal = createModalStateStore({
-	defaultState: "closed",
+  defaultState: 'closed',
 });

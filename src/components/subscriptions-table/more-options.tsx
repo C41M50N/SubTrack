@@ -1,115 +1,115 @@
-"use client";
-import { Button } from "@/components/ui/button";
+'use client';
+import type { Table } from '@tanstack/react-table';
+import { download, generateCsv, mkConfig } from 'export-to-csv';
+import { useAtom } from 'jotai';
+import { ImportIcon, SettingsIcon } from 'lucide-react';
+import React from 'react';
+import { Button } from '@/components/ui/button';
 import {
-	DropdownMenu,
-	DropdownMenuCheckboxItem,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
-	selectedSubscriptionsAtom,
-	tableSizeAtom,
-} from "@/features/common/atoms";
-import type { Subscription } from "@/features/subscriptions";
-import dayjs from "@/lib/dayjs";
-import type { Table } from "@tanstack/react-table";
-import { download, generateCsv, mkConfig } from "export-to-csv";
-import { useAtom } from "jotai";
-import { ImportIcon, SettingsIcon } from "lucide-react";
-import React from "react";
-import { Switch } from "../ui/switch";
+  selectedSubscriptionsAtom,
+  tableSizeAtom,
+} from '@/features/common/atoms';
+import type { Subscription } from '@/features/subscriptions';
+import dayjs from '@/lib/dayjs';
+import { Switch } from '../ui/switch';
 
 type MoreOptionsProps = {
-	table: Table<Subscription>;
+  table: Table<Subscription>;
 };
 
 export default function MoreOptions(props: MoreOptionsProps) {
-	const [tableSize, setTableSize] = useAtom(tableSizeAtom);
-	const [subscriptions] = useAtom(selectedSubscriptionsAtom);
+  const [tableSize, setTableSize] = useAtom(tableSizeAtom);
+  const [subscriptions] = useAtom(selectedSubscriptionsAtom);
 
-	function exportSubscriptionsToCSV() {
-		const csvConfig = mkConfig({
-			filename: `SubTrack Subscriptions - ${dayjs().format("YYYY-MM-DD")}`,
-			useKeysAsHeaders: true,
-		});
+  function exportSubscriptionsToCSV() {
+    const csvConfig = mkConfig({
+      filename: `SubTrack Subscriptions - ${dayjs().format('YYYY-MM-DD')}`,
+      useKeysAsHeaders: true,
+    });
 
-		const csv = generateCsv(csvConfig)(
-			subscriptions
-				.map(({ id, user_id, icon_ref, ...rest }) => rest)
-				.map(({ next_invoice, last_invoice, ...rest }) => ({
-					...rest,
-					next_invoice: dayjs(next_invoice).format("MM/DD/YYYY"),
-					last_invoice:
-						last_invoice !== null
-							? dayjs(last_invoice).format("MM/DD/YYYY")
-							: "",
-				})),
-		);
+    const csv = generateCsv(csvConfig)(
+      subscriptions
+        .map(({ id, user_id, icon_ref, ...rest }) => rest)
+        .map(({ next_invoice, last_invoice, ...rest }) => ({
+          ...rest,
+          next_invoice: dayjs(next_invoice).format('MM/DD/YYYY'),
+          last_invoice:
+            last_invoice !== null
+              ? dayjs(last_invoice).format('MM/DD/YYYY')
+              : '',
+        }))
+    );
 
-		download(csvConfig)(csv);
-	}
+    download(csvConfig)(csv);
+  }
 
-	return (
-		<DropdownMenu>
-			<DropdownMenuTrigger asChild>
-				<Button variant="outline" className="p-0 h-10 w-8">
-					<SettingsIcon className="size-4" />
-				</Button>
-			</DropdownMenuTrigger>
-			<DropdownMenuContent align="end" className="w-[150px]">
-				<DropdownMenuLabel>Toggle Columns</DropdownMenuLabel>
-				{props.table
-					.getAllColumns()
-					.filter(
-						(column) =>
-							typeof column.accessorFn !== "undefined" &&
-							column.getCanHide() &&
-							column.id !== "id",
-					)
-					.map((column) => {
-						return (
-							<DropdownMenuCheckboxItem
-								key={column.id}
-								className="capitalize"
-								onSelect={(e) => e.preventDefault()}
-								checked={column.getIsVisible()}
-								onCheckedChange={(value) => column.toggleVisibility(!!value)}
-							>
-								{column.id.replaceAll("_", " ")}
-							</DropdownMenuCheckboxItem>
-						);
-					})}
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button className="h-10 w-8 p-0" variant="outline">
+          <SettingsIcon className="size-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-[150px]">
+        <DropdownMenuLabel>Toggle Columns</DropdownMenuLabel>
+        {props.table
+          .getAllColumns()
+          .filter(
+            (column) =>
+              typeof column.accessorFn !== 'undefined' &&
+              column.getCanHide() &&
+              column.id !== 'id'
+          )
+          .map((column) => {
+            return (
+              <DropdownMenuCheckboxItem
+                checked={column.getIsVisible()}
+                className="capitalize"
+                key={column.id}
+                onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                onSelect={(e) => e.preventDefault()}
+              >
+                {column.id.replaceAll('_', ' ')}
+              </DropdownMenuCheckboxItem>
+            );
+          })}
 
-				<DropdownMenuSeparator />
+        <DropdownMenuSeparator />
 
-				<DropdownMenuLabel>Table Size</DropdownMenuLabel>
-				<DropdownMenuItem
-					onSelect={(e) => e.preventDefault()}
-					onClick={() =>
-						setTableSize(tableSize === "compact" ? "default" : "compact")
-					}
-				>
-					<div className="pl-1 flex flex-row gap-4 items-center">
-						<Switch size="sm" checked={tableSize === "compact"} />
-						<span>{tableSize === "default" ? "Default" : "Compact"}</span>
-					</div>
-				</DropdownMenuItem>
+        <DropdownMenuLabel>Table Size</DropdownMenuLabel>
+        <DropdownMenuItem
+          onClick={() =>
+            setTableSize(tableSize === 'compact' ? 'default' : 'compact')
+          }
+          onSelect={(e) => e.preventDefault()}
+        >
+          <div className="flex flex-row items-center gap-4 pl-1">
+            <Switch checked={tableSize === 'compact'} size="sm" />
+            <span>{tableSize === 'default' ? 'Default' : 'Compact'}</span>
+          </div>
+        </DropdownMenuItem>
 
-				<DropdownMenuSeparator />
+        <DropdownMenuSeparator />
 
-				<DropdownMenuLabel>Options</DropdownMenuLabel>
-				<DropdownMenuItem onClick={() => {}}>
-					<ImportIcon className="mr-2.5 size-4" />
-					<span>Import Data</span>
-				</DropdownMenuItem>
-				<DropdownMenuItem onClick={exportSubscriptionsToCSV}>
-					<ImportIcon className="mr-2.5 size-4 rotate-180" />
-					<span>Export Data</span>
-				</DropdownMenuItem>
-			</DropdownMenuContent>
-		</DropdownMenu>
-	);
+        <DropdownMenuLabel>Options</DropdownMenuLabel>
+        <DropdownMenuItem onClick={() => {}}>
+          <ImportIcon className="mr-2.5 size-4" />
+          <span>Import Data</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={exportSubscriptionsToCSV}>
+          <ImportIcon className="mr-2.5 size-4 rotate-180" />
+          <span>Export Data</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }
