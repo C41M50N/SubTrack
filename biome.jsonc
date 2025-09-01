@@ -14,7 +14,13 @@
         "noMagicNumbers": "info"
       },
       "suspicious": {
-        "noArrayIndexKey": "off"
+        "noArrayIndexKey": "off",
+        "noConsole": {
+          "level": "warn",
+          "options": {
+            "allow": ["info", "warn", "error"]
+          }
+        }
       },
       "correctness": {
         "useExhaustiveDependencies": "off"

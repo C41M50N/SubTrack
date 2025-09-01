@@ -65,8 +65,8 @@ export default function TodoistSettingsPage() {
   const projectId = todoistProjectForm.watch('projectId');
 
   React.useEffect(() => {
-    console.log(todoistProjectForm);
-    console.log(isGetTodoistProjectsLoading);
+    console.info(todoistProjectForm);
+    console.info(isGetTodoistProjectsLoading);
     if (user && !isGetTodoistProjectsLoading) {
       todoistProjectForm.setValue('projectId', user.todoistProjectId, {
         shouldDirty: true,

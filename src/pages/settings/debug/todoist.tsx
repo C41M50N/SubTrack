@@ -13,7 +13,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -22,7 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
 import MainLayout from '@/layouts/main';
 import SettingsLayout from '@/layouts/settings';
 import { useUser } from '@/lib/hooks';
@@ -49,7 +47,7 @@ export default function TodoistDebugSettingsPage() {
   React.useEffect(() => {
     if (user && user.todoistProjectId !== '') {
       todoistProjectForm.setValue('projectId', user.todoistProjectId);
-      console.log('Setting form value', user.todoistProjectId);
+      console.info('Setting form value', user.todoistProjectId);
     }
   }, [projects]);
 
@@ -61,7 +59,7 @@ export default function TodoistDebugSettingsPage() {
           <Form {...todoistProjectForm}>
             <form
               className="w-full max-w-xs space-y-4"
-              onSubmit={todoistProjectForm.handleSubmit((values) =>
+              onSubmit={todoistProjectForm.handleSubmit(() =>
                 todoistProjectForm.setValue('projectId', '2325471566')
               )}
             >

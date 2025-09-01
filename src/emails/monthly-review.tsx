@@ -125,13 +125,11 @@ const ExampleRenewedRecently = [
 ];
 
 export type MonthlyReviewEmailProps = {
-  userName: string;
   renewingSoon: Subscription[];
   renewedRecently: Subscription[];
 };
 
 export function MonthlyReviewEmail({
-  userName = 'Chuck Norris',
   renewingSoon = ExampleRenewingSoon,
   renewedRecently = ExampleRenewedRecently,
 }: Readonly<MonthlyReviewEmailProps>) {

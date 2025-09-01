@@ -76,7 +76,7 @@ export default async function handler(
         break;
     }
 
-    console.log(
+    console.info(
       `updating 'next_invoice' on "${sub.name}" for ${sub.user.name} ...`
     );
 
@@ -89,7 +89,7 @@ export default async function handler(
     });
   }
 
-  console.log(
+  console.info(
     `Updated the 'next_invoice' field on ${subscriptions.length} subscriptions`
   );
 

@@ -2,8 +2,6 @@ import type { Subscription as SubscriptionDTO } from '@prisma/client';
 import dayjs from 'dayjs';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { sendReviewEmail } from '@/emails';
-import { MonthlyReviewEmail } from '@/emails/monthly-review';
-import { resend } from '@/lib/resend';
 import { prisma } from '@/server/db';
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
@@ -64,8 +62,8 @@ export default async function handler(
     (sub: SubscriptionDTO) => sub.user_id
   );
 
-  console.log(groupRenewedRecentlySubscriptions);
-  console.log(groupRenewingSoonSubscriptions);
+  console.info(groupRenewedRecentlySubscriptions);
+  console.info(groupRenewingSoonSubscriptions);
 
   const userIds = new Set([
     ...Object.keys(groupRenewingSoonSubscriptions),
@@ -82,13 +80,12 @@ export default async function handler(
     await sendReviewEmail({
       to: user.email,
       emailProps: {
-        userName: user.name,
         renewingSoon: renewingSoonSubs ?? [],
         renewedRecently: renewedRecentlySubs ?? [],
       },
     });
 
-    console.log(`Sent alert email to ${JSON.stringify(user)}`);
+    console.info(`Sent alert email to ${JSON.stringify(user)}`);
   }
 
   return res.send({});
