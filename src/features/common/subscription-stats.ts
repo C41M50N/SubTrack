@@ -1,7 +1,7 @@
 import type { Subscription } from '../subscriptions';
 import type { StatisticItem } from '.';
 
-export const Statistics: Array<StatisticItem> = [
+export const Statistics: StatisticItem[] = [
   {
     description: 'cost per week',
     getResult: (subscriptions) => {

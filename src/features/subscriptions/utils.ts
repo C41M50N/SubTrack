@@ -8,7 +8,7 @@ import type { Subscription } from '.';
  * @returns An array of dayjs objects representing the next N months.
  */
 export function getNextNMonths(n: number): Dayjs[] {
-  const res: Array<dayjs.Dayjs> = [];
+  const res: dayjs.Dayjs[] = [];
   for (let offset = 0; offset < n; offset++) {
     const day = dayjs().add(1 + offset, 'month');
     res.push(day);

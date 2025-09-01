@@ -5,14 +5,12 @@ import { Check, ChevronsUpDown } from 'lucide-react';
 import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import type z from 'zod';
-import { LoadingSpinner } from '@/components/common/loading-spinner';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Command,
   CommandEmpty,
-  CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
@@ -51,18 +49,14 @@ import {
   type Subscription,
 } from '@/features/subscriptions';
 import dayjs from '@/lib/dayjs';
-import {
-  type ModalState,
-  useCategories,
-  useUpdateSubscription,
-} from '@/lib/hooks';
-import { cn, sleep, toProperCase } from '@/utils';
+import { type ModalState, useUpdateSubscription } from '@/lib/hooks';
+import { cn, toProperCase } from '@/utils';
 
 type EditSubscriptionModalProps = {
   state: ModalState;
   subscription: Subscription;
-  categories: Array<string>;
-  collections: Array<Omit<Collection, 'user_id'>>;
+  categories: string[];
+  collections: Omit<Collection, 'user_id'>[];
 };
 
 export default function EditSubscriptionModal({
@@ -268,12 +262,11 @@ export default function EditSubscriptionModal({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {categories &&
-                          categories.map((v) => (
-                            <SelectItem key={v} value={v}>
-                              {v}
-                            </SelectItem>
-                          ))}
+                        {categories.map((v) => (
+                          <SelectItem key={v} value={v}>
+                            {v}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />

@@ -3,7 +3,7 @@ import { atom } from 'jotai';
 import { atomWithStorage, createJSONStorage } from 'jotai/utils';
 import type { Subscription } from '../subscriptions';
 
-export const selectedSubscriptionsAtom = atom<Array<Subscription>>([]);
+export const selectedSubscriptionsAtom = atom<Subscription[]>([]);
 
 export const selectedCollectionIdAtom = atom<Collection['id'] | null>(null);
 

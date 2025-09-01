@@ -10,7 +10,7 @@ export const auth = betterAuth({
     enabled: true,
     autoSignIn: true,
     requireEmailVerification: true,
-    async sendResetPassword(data, request) {
+    async sendResetPassword(data, _request) {
       // Send an email to the user with a link to reset their password
       await sendPasswordResetEmail({
         to: data.user.email,
@@ -25,7 +25,7 @@ export const auth = betterAuth({
   emailVerification: {
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
-    async sendVerificationEmail(data, request) {
+    async sendVerificationEmail(data, _request) {
       // Send an email to the user with a verification link
       await sendVerificationEmail({
         to: data.user.email,

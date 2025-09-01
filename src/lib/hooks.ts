@@ -20,9 +20,9 @@ export type ModalState = ReturnType<typeof useModalState>;
 
 import { create } from 'zustand';
 
-interface CreateModalStateStoreParams {
+type CreateModalStateStoreParams = {
   defaultState?: ModalState['state'];
-}
+};
 
 type ModalStateStoreState = {
   state: ModalState['state'];
@@ -32,7 +32,7 @@ type ModalStateStoreState = {
 export function createModalStateStore({
   defaultState = 'closed',
 }: CreateModalStateStoreParams) {
-  return create<ModalStateStoreState>((set, get) => ({
+  return create<ModalStateStoreState>((set) => ({
     state: defaultState,
     set(newState) {
       set(() => ({ state: newState }));
@@ -124,7 +124,7 @@ export const useCreateSubscription = () => {
   return { createSubscription, isCreateSubscriptionLoading };
 };
 
-export const useUpdateSubscription = (enabled = true) => {
+export const useUpdateSubscription = () => {
   const ctx = api.useContext();
   const {
     mutateAsync: updateSubscription,
@@ -175,7 +175,6 @@ export const useDeleteSubscription = () => {
 };
 
 export const useCollections = () => {
-  const ctx = api.useContext();
   const { data: collections, isLoading: isGetCollectionsLoading } =
     api.collections.getCollections.useQuery(undefined, {
       staleTime: Number.POSITIVE_INFINITY,

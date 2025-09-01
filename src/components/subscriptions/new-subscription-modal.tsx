@@ -14,7 +14,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import {
   Command,
   CommandEmpty,
-  CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
@@ -43,7 +42,6 @@ import {
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -52,7 +50,7 @@ import { FREQUENCIES, ICONS } from '@/features/common';
 import { selectedCollectionIdAtom } from '@/features/common/atoms';
 import { CreateSubscriptionSchema } from '@/features/subscriptions';
 import { useNewSubscriptionModal } from '@/features/subscriptions/stores';
-import { type ModalState, useCreateSubscription } from '@/lib/hooks';
+import { useCreateSubscription } from '@/lib/hooks';
 import { cn, toProperCase } from '@/utils';
 
 type NewSubscriptionModalProps = {

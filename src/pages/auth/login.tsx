@@ -8,10 +8,8 @@ import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,9 +17,7 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from '@/components/ui/use-toast';
 import { signIn } from '@/features/auth/auth-client';
 import AuthLayout from '@/layouts/auth';
-import { createCaller } from '@/server/api/root';
 import { getServerAuthSession } from '@/server/api/trpc';
-import { prisma } from '@/server/db';
 
 export default function SignInPage() {
   const router = useRouter();
@@ -99,7 +95,7 @@ export default function SignInPage() {
                           description: ctx.error.message,
                         });
                       },
-                      onSuccess: async () => {
+                      onSuccess: () => {
                         router.push('/dashboard');
                       },
                     },

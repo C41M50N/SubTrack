@@ -36,7 +36,9 @@ export default async function importData(
       select: { categories: true },
     });
 
-    if (!categoryList) throw new Error('missing categoryList');
+    if (!categoryList) {
+      throw new Error('missing categoryList');
+    }
 
     const currentCategories = categoryList.categories;
 
@@ -93,7 +95,9 @@ export default async function importData(
           title: collectionTitle,
         },
       });
-      if (!collection) break;
+      if (!collection) {
+        break;
+      }
 
       // biome-ignore lint/style/noNonNullAssertion: guaranteed to be non-null
       const subscriptions = data.collections.find(

@@ -3,7 +3,6 @@ import type { Table } from '@tanstack/react-table';
 import { download, generateCsv, mkConfig } from 'export-to-csv';
 import { useAtom } from 'jotai';
 import { ImportIcon, SettingsIcon } from 'lucide-react';
-import React from 'react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,

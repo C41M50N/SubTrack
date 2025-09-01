@@ -30,11 +30,11 @@ import type { Subscription } from '@/features/subscriptions';
 import { cn } from '@/utils';
 import DataTableToolbar from './data-table-toolbar';
 
-interface DataTableProps {
+type DataTableProps = {
   columns: ColumnDef<Subscription>[];
   data: Subscription[];
   categories: string[];
-}
+};
 
 export default function DataTable({
   columns,

@@ -6,7 +6,9 @@ export default async function createJSONExport(ctx: AuthenticatedContext) {
     select: { categories: true },
   });
 
-  if (!categoryList) throw new Error('missing categoryList');
+  if (!categoryList) {
+    throw new Error('missing categoryList');
+  }
 
   const categories = categoryList.categories;
 

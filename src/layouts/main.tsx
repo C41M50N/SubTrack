@@ -1,10 +1,4 @@
-import {
-  IconDashboard,
-  IconEdit,
-  IconPlus,
-  IconSettings,
-  IconSettingsFilled,
-} from '@tabler/icons-react';
+import { IconDashboard, IconSettings } from '@tabler/icons-react';
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';

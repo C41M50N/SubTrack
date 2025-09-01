@@ -42,7 +42,9 @@ export default function DataSettingsPage({
     });
 
   async function onImportData() {
-    if (!file) return;
+    if (!file) {
+      return;
+    }
     const contents = await file.text();
     importData({ json: contents, overwrite });
   }
@@ -56,12 +58,12 @@ export default function DataSettingsPage({
   }
 
   function onExportData() {
-    const file = new File(
+    const _file = new File(
       [exportJSON],
       `SubTrack Data - ${dayjs().format()}.json`,
       { type: 'application/json' }
     );
-    downloadFile(file);
+    downloadFile(_file);
   }
 
   return (

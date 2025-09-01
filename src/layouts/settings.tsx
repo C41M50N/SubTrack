@@ -10,7 +10,7 @@ type NavItem = {
   href: string;
 };
 
-const SettingsNavItems: Array<NavItem> = [
+const SettingsNavItems: NavItem[] = [
   {
     title: 'Account',
     href: '/settings/account',

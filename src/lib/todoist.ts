@@ -40,7 +40,9 @@ export function createTodoistAPI(apikey: string) {
 
 export async function sanityCheck(api: TodoistApi): Promise<void> {
   const projects = await api.getProjects();
-  if (!projects) throw InvalidTodoistAPIKey();
+  if (!projects) {
+    throw InvalidTodoistAPIKey();
+  }
 }
 
 export async function getProjects(api: TodoistApi): Promise<TodoistProject[]> {
@@ -68,7 +70,9 @@ export async function getProjectName(
 ): Promise<string> {
   await sanityCheck(api);
   const project = await api.getProject(project_id);
-  if (!project) throw InvalidTodoistProject();
+  if (!project) {
+    throw InvalidTodoistProject();
+  }
   return project.name;
 }
 

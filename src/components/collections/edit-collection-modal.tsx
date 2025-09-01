@@ -50,11 +50,11 @@ export default function EditCollectionModal({ state, collection }: Props) {
     mutateAsync: editCollectionTitle,
     isLoading: isEditCollectionLoading,
   } = api.collections.editCollectionTitle.useMutation({
-    onSuccess(data, variables, context) {
+    onSuccess() {
       form.reset();
       ctx.collections.getCollections.refetch();
     },
-    onError(error, variables, context) {
+    onError(error) {
       toast({
         variant: 'error',
         title: error.message,

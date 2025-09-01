@@ -46,11 +46,11 @@ export default function NewCollectionModal({ state }: Props) {
     mutateAsync: createCollection,
     isLoading: isCreateCollectionLoading,
   } = api.collections.createCollection.useMutation({
-    onSuccess(data, variables, context) {
+    onSuccess() {
       form.reset();
       ctx.collections.getCollections.refetch();
     },
-    onError(error, variables, context) {
+    onError(error) {
       toast({
         variant: 'error',
         title: error.message,
