@@ -292,6 +292,7 @@ export const columns: ColumnDef<Subscription>[] = [
           <DeleteSubscriptionModal
             state={deleteModalState}
             subscription_id={subscription.id}
+            subscription_name={subscription.name}
           />
           <SetCancelReminderModal
             state={setReminderModalState}

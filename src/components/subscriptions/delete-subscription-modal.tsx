@@ -14,11 +14,13 @@ import { type ModalState, useDeleteSubscription } from '@/lib/hooks';
 type DeleteSubscriptionModalProps = {
   state: ModalState;
   subscription_id: SubscriptionId;
+  subscription_name: string;
 };
 
 export default function DeleteSubscriptionModal({
   state,
   subscription_id,
+  subscription_name,
 }: DeleteSubscriptionModalProps) {
   const { deleteSubscription, isDeleteSubscriptionLoading } =
     useDeleteSubscription();
@@ -35,13 +37,12 @@ export default function DeleteSubscriptionModal({
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete Subscription</DialogTitle>
-          <DialogDescription>
-            This action cannot be undone. Are you sure you want to permanently
-            delete this subscription from our servers?
+          <DialogTitle>Delete {subscription_name}?</DialogTitle>
+          <DialogDescription className="pt-0.5">
+            Are you sure you want to permanently delete this subscription?
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter>
+        <DialogFooter className="pt-6">
           <Button
             className="gap-1"
             isLoading={isDeleteSubscriptionLoading}
@@ -49,7 +50,7 @@ export default function DeleteSubscriptionModal({
             type="submit"
             variant={'destructive'}
           >
-            <IconTrash size={20} strokeWidth={1.75} />
+            <IconTrash size={18} strokeWidth={1.75} />
             <span>Delete</span>
           </Button>
         </DialogFooter>
