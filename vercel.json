@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/functions/sendAlerts",
-      "schedule": "0 6 15 * *"
+      "schedule": "30 0 1 * *"
     },
     {
       "path": "/api/functions/updateNextInvoice",
