@@ -1,42 +1,10 @@
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
-import { sendPasswordResetEmail, sendVerificationEmail } from '@/emails';
 import { env } from '@/env.mjs';
 import initializeUserData from '@/features/users/actions/initialize-user-data';
 import { prisma } from './db';
 
 export const auth = betterAuth({
-  emailAndPassword: {
-    enabled: true,
-    autoSignIn: true,
-    requireEmailVerification: true,
-    async sendResetPassword(data, _request) {
-      // Send an email to the user with a link to reset their password
-      await sendPasswordResetEmail({
-        to: data.user.email,
-        emailProps: {
-          userName: data.user.name.split(' ')[0] as string,
-          resetURL: data.url,
-        },
-      });
-    },
-  },
-
-  emailVerification: {
-    sendOnSignUp: true,
-    autoSignInAfterVerification: true,
-    async sendVerificationEmail(data, _request) {
-      // Send an email to the user with a verification link
-      await sendVerificationEmail({
-        to: data.user.email,
-        emailProps: {
-          userName: data.user.name.split(' ')[0] as string,
-          verifyURL: data.url,
-        },
-      });
-    },
-  },
-
   socialProviders: {
     google: {
       clientId: env.GOOGLE_CLIENT_ID,

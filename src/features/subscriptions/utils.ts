@@ -103,3 +103,14 @@ export function frequencyToDisplayText(
 
   return displayMap[frequency];
 }
+
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+export function groupBy<T>(arr: T[], fn: (item: T) => any) {
+  return arr.reduce<Record<string, T[]>>((prev, curr) => {
+    const groupKey = fn(curr);
+    const group = prev[groupKey] || [];
+    group.push(curr);
+    // biome-ignore lint/performance/noAccumulatingSpread: <explanation>
+    return { ...prev, [groupKey]: group };
+  }, {});
+}

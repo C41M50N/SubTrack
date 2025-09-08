@@ -1,5 +1,11 @@
+/** biome-ignore-all lint/style/noNonNullAssertion: <explanation> */
+import type { Subscription } from '@prisma/client';
+import dayjs from 'dayjs';
 import { WebhookClient } from 'discord.js';
 import { env } from '@/env.mjs';
+import { toMoneyString } from '@/utils';
+import type { SubscriptionFrequency } from './common';
+import { frequencyToDisplayText } from './subscriptions/utils';
 
 class DiscordNotifications {
   private readonly client: WebhookClient;
@@ -8,7 +14,18 @@ class DiscordNotifications {
     this.client = new WebhookClient({ url: webhookUrl });
   }
 
-  async sendNotification(message: string): Promise<void> {
+  async sendMonthlyReviewNotification(
+    renewedSubs: Subscription[],
+    renewingSubs: Subscription[]
+  ): Promise<void> {
+    const message = `
+    ## ${dayjs().format('MMMM')} Subscriptions Review
+    ### Subscriptions Renewing This Month
+    ${renewingSubs.map((sub) => `- ${sub.name} renewing on <t:${Math.floor(sub.next_invoice.getTime() / 1000)}:R> (${toMoneyString(sub.amount)}/${frequencyToDisplayText(sub.frequency as SubscriptionFrequency)})`).join('\n')}
+    ### Subscriptions Renewed Last Month
+    ${renewedSubs.map((sub) => `- ${sub.name} renewed on <t:${Math.floor(sub.last_invoice!.getTime() / 1000)}:R> (${toMoneyString(sub.amount)}/${frequencyToDisplayText(sub.frequency as SubscriptionFrequency)})`).join('\n')}
+    `;
+
     try {
       await this.client.send({ content: message });
     } catch (error) {

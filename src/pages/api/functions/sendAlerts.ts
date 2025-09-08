@@ -1,19 +1,9 @@
 import type { Subscription as SubscriptionDTO } from '@prisma/client';
 import dayjs from 'dayjs';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { sendReviewEmail } from '@/emails';
+import { notifications } from '@/features/notifications';
+import { groupBy } from '@/features/subscriptions/utils';
 import { prisma } from '@/server/db';
-
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-function groupBy<T>(arr: T[], fn: (item: T) => any) {
-  return arr.reduce<Record<string, T[]>>((prev, curr) => {
-    const groupKey = fn(curr);
-    const group = prev[groupKey] || [];
-    group.push(curr);
-    // biome-ignore lint/performance/noAccumulatingSpread: <explanation>
-    return { ...prev, [groupKey]: group };
-  }, {});
-}
 
 export default async function handler(
   req: NextApiRequest,
@@ -70,22 +60,28 @@ export default async function handler(
     ...Object.keys(groupRenewedRecentlySubscriptions),
   ]);
   for (const userId of userIds) {
+    // const renewingSoonSubs = groupRenewingSoonSubscriptions[userId]?.sort(
+    //   (a, b) => a.next_invoice.getTime() - b.next_invoice.getTime()
+    // );
+    // const renewedRecentlySubs = groupRenewedRecentlySubscriptions[userId]?.sort(
+    //   // biome-ignore lint/style/noNonNullAssertion: <explanation>
+    //   (a, b) => b.last_invoice!.getTime() - a.last_invoice!.getTime()
+    // );
+
     const renewingSoonSubs = groupRenewingSoonSubscriptions[userId];
     const renewedRecentlySubs = groupRenewedRecentlySubscriptions[userId];
+
     const user = await prisma.user.findUniqueOrThrow({
       where: { id: userId },
       select: { name: true, email: true },
     });
 
-    await sendReviewEmail({
-      to: user.email,
-      emailProps: {
-        renewingSoon: renewingSoonSubs ?? [],
-        renewedRecently: renewedRecentlySubs ?? [],
-      },
-    });
+    await notifications.sendMonthlyReviewNotification(
+      renewedRecentlySubs ?? [],
+      renewingSoonSubs ?? []
+    );
 
-    console.info(`Sent alert email to ${JSON.stringify(user)}`);
+    console.info(`Sent monthly review notification to ${JSON.stringify(user)}`);
   }
 
   return res.send({});
