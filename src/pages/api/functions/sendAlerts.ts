@@ -70,17 +70,21 @@ export default async function handler(
     //   (a, b) => b.last_invoice!.getTime() - a.last_invoice!.getTime()
     // );
 
-    const renewingSoonSubs = groupRenewingSoonSubscriptions[userId];
-    const renewedRecentlySubs = groupRenewedRecentlySubscriptions[userId];
+    const renewingSoonSubs = groupRenewingSoonSubscriptions[userId] ?? [];
+    const renewedRecentlySubs = groupRenewedRecentlySubscriptions[userId] ?? [];
 
     const user = await prisma.user.findUniqueOrThrow({
       where: { id: userId },
       select: { name: true, email: true },
     });
 
+    if (renewingSoonSubs.length === 0 && renewedRecentlySubs.length === 0) {
+      return;
+    }
+
     await notifications.sendMonthlyReviewNotification(
-      renewedRecentlySubs ?? [],
-      renewingSoonSubs ?? []
+      renewedRecentlySubs,
+      renewingSoonSubs
     );
 
     console.info(`Sent monthly review notification to ${JSON.stringify(user)}`);

@@ -18,13 +18,17 @@ class DiscordNotifications {
     renewedSubs: Subscription[],
     renewingSubs: Subscription[]
   ): Promise<void> {
-    const message = `
-    ## ${dayjs().format('MMMM')} Subscriptions Review
-    ### Subscriptions Renewing This Month
-    ${renewingSubs.map((sub) => `- ${sub.name} renewing on <t:${Math.floor(sub.next_invoice.getTime() / 1000)}:R> (${toMoneyString(sub.amount)}/${frequencyToDisplayText(sub.frequency as SubscriptionFrequency)})`).join('\n')}
-    ### Subscriptions Renewed Last Month
-    ${renewedSubs.map((sub) => `- ${sub.name} renewed on <t:${Math.floor(sub.last_invoice!.getTime() / 1000)}:R> (${toMoneyString(sub.amount)}/${frequencyToDisplayText(sub.frequency as SubscriptionFrequency)})`).join('\n')}
-    `;
+    let message = `# ${dayjs().format('MMMM')} Subscriptions Review\n`;
+
+    if (renewingSubs.length > 0) {
+      message += `## Subscriptions Renewing This Month
+      ${renewingSubs.map((sub) => `- ${sub.name} renewing on <t:${Math.floor(sub.next_invoice.getTime() / 1000)}:R> (${toMoneyString(sub.amount)}/${frequencyToDisplayText(sub.frequency as SubscriptionFrequency)})`).join('\n')}\n`;
+    }
+
+    if (renewedSubs.length > 0) {
+      message += `## Subscriptions Renewed Last Month
+      ${renewedSubs.map((sub) => `- ${sub.name} renewed on <t:${Math.floor(sub.last_invoice!.getTime() / 1000)}:R> (${toMoneyString(sub.amount)}/${frequencyToDisplayText(sub.frequency as SubscriptionFrequency)})`).join('\n')}`;
+    }
 
     try {
       await this.client.send({ content: message });
