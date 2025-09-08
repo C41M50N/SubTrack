@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-import { LoadingSpinner } from '@/components/common/loading-spinner';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -10,7 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import type { Subscription } from '@/features/subscriptions';
-import { type ModalState, useUser } from '@/lib/hooks';
+import type { ModalState } from '@/lib/hooks';
 import { api } from '@/utils/api';
 
 type SetCancelReminderModalProps = {
@@ -22,19 +21,16 @@ export default function SetCancelReminderModal({
   state,
   subscription,
 }: SetCancelReminderModalProps) {
-  const { user } = useUser();
-
-  const { data: projectName, isLoading: isProjectNameLoading } =
-    api.main.getTodoistProjectName.useQuery(undefined, {
-      enabled: user ? user.todoistAPIKey !== '' : false,
-    });
-
   const {
     mutate: createTodoistReminder,
     isLoading: isCreateTodoistReminderLoading,
   } = api.main.createTodoistReminder.useMutation({
     onSuccess: () => state.setState('closed'),
   });
+
+  const reminder_date = dayjs(subscription.next_invoice)
+    .subtract(2, 'days')
+    .toDate();
 
   return (
     <Dialog
@@ -44,20 +40,13 @@ export default function SetCancelReminderModal({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Set Cancel Reminder for {subscription.name}</DialogTitle>
-        </DialogHeader>
-
-        {user && !isProjectNameLoading && (
-          <DialogDescription>
+          <DialogDescription className="mt-4">
             A Todoist task will be created to remind you to cancel your "
-            {subscription.name}" subscription. The task will be placed in the "
-            {projectName}" project with a due date of{' '}
-            {dayjs(subscription.next_invoice)
-              .subtract(2, 'days')
-              .format('MMMM D, YYYY')}
-            .
+            {subscription.name}" subscription. The task will be placed in a{' '}
+            Todoist project with a due date of{' '}
+            {dayjs(reminder_date).format('MMMM D, YYYY')}.
           </DialogDescription>
-        )}
-        {(!user || isProjectNameLoading) && <LoadingSpinner />}
+        </DialogHeader>
 
         <DialogFooter>
           <Button
@@ -65,9 +54,7 @@ export default function SetCancelReminderModal({
             onClick={() =>
               createTodoistReminder({
                 title: subscription.name,
-                reminder_date: dayjs(subscription.next_invoice)
-                  .subtract(2, 'days')
-                  .toDate(),
+                reminder_date,
               })
             }
           >

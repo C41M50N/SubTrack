@@ -14,8 +14,13 @@ export const env = createEnv({
     // Add `.min(1) on ID and SECRET if you want to make sure they're not empty
     GOOGLE_CLIENT_ID: z.string(),
     GOOGLE_CLIENT_SECRET: z.string(),
-    RESEND_API_KEY: z.string(),
     CRON_SECRET: z.string(),
+    TODOIST_API_KEY: z.string(),
+    TODOIST_PROJECT_ID: z.string(),
+    DISCORD_WEBHOOK_URL: z
+      .string()
+      .url()
+      .startsWith('https://discord.com/api/webhooks/'),
   },
 
   /**
@@ -37,8 +42,10 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
-    RESEND_API_KEY: process.env.RESEND_API_KEY,
     CRON_SECRET: process.env.CRON_SECRET,
+    TODOIST_API_KEY: process.env.TODOIST_API_KEY,
+    TODOIST_PROJECT_ID: process.env.TODOIST_PROJECT_ID,
+    DISCORD_WEBHOOK_URL: process.env.DISCORD_WEBHOOK_URL,
     NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
   },
   /**

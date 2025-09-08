@@ -30,7 +30,6 @@ import {
   useCollections,
   useModalState,
   useTableSortState,
-  useUser,
 } from '@/lib/hooks';
 import { cn, toMoneyString, toProperCase } from '@/utils';
 
@@ -225,7 +224,6 @@ export const columns: ColumnDef<Subscription>[] = [
     cell: ({ row }) => {
       const subscription = row.original;
 
-      const { user } = useUser();
       const { categories } = useCategories();
       const { collections } = useCollections();
 
@@ -255,21 +253,17 @@ export const columns: ColumnDef<Subscription>[] = [
 
               <DropdownMenuSeparator />
 
-              {user && user.todoistAPIKey !== '' && (
-                <>
-                  <DropdownMenuItem
-                    className="cursor-pointer"
-                    onClick={() => setReminderModalState.setState('open')}
-                  >
-                    <IconAlarm className="mr-2.5 size-5" />
-                    <span className={`font-medium text-base ${lato.className}`}>
-                      Set Cancel Reminder
-                    </span>
-                  </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => setReminderModalState.setState('open')}
+              >
+                <IconAlarm className="mr-2.5 size-5" />
+                <span className={`font-medium text-base ${lato.className}`}>
+                  Set Cancel Reminder
+                </span>
+              </DropdownMenuItem>
 
-                  <DropdownMenuSeparator />
-                </>
-              )}
+              <DropdownMenuSeparator />
 
               <DropdownMenuItem
                 className="cursor-pointer text-red-700"
