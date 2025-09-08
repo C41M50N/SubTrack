@@ -17,11 +17,13 @@ export default async function handler(
     return res.status(401).json({ success: false });
   }
 
+  const now = dayjs();
+
   const renewingSoonSubscriptions = await prisma.subscription.findMany({
     where: {
       next_invoice: {
-        lte: dayjs().add(32, 'days').toDate(),
-        gte: dayjs().toDate(),
+        lte: now.endOf('month').toDate(),
+        gte: now.startOf('month').toDate(),
       },
       send_alert: { equals: true },
     },
@@ -33,8 +35,8 @@ export default async function handler(
   const renewedRecentlySubscriptions = await prisma.subscription.findMany({
     where: {
       last_invoice: {
-        lte: dayjs().toDate(),
-        gte: dayjs().subtract(30, 'days').toDate(),
+        lte: now.subtract(1, 'month').startOf('month').toDate(),
+        gte: now.subtract(1, 'month').endOf('month').toDate(),
       },
       send_alert: { equals: true },
     },
