@@ -1,10 +1,10 @@
 /** biome-ignore-all lint/style/noNonNullAssertion: <explanation> */
-import type { Subscription } from '@prisma/client';
 import dayjs from 'dayjs';
 import { WebhookClient } from 'discord.js';
 import { env } from '@/env.mjs';
 import { toMoneyString } from '@/utils';
 import type { SubscriptionFrequency } from './common';
+import type { Subscription } from './subscriptions';
 import { frequencyToDisplayText } from './subscriptions/utils';
 
 class DiscordNotifications {
