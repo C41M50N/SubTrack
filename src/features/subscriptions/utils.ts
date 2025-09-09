@@ -94,11 +94,11 @@ export function frequencyToDisplayText(
   // biome-ignore format: consistency
   const displayMap: Record<Subscription['frequency'], string> = {
     "weekly": compact ? 'wk' : 'week',
-    "bi-weekly": compact ? '2wk' : '2 weeks',
-    "monthly": compact ? 'mo' : 'month',
-    "bi-monthly": compact ? '2mo' : '2 months',
+    "bi-weekly": compact ? '2w' : '2 weeks',
+    "monthly": compact ? 'm' : 'month',
+    "bi-monthly": compact ? '2m' : '2 months',
     "yearly": compact ? 'yr' : 'year',
-    "bi-yearly": compact ? '2yr' : '2 years',
+    "bi-yearly": compact ? '2y' : '2 years',
   };
 
   return displayMap[frequency];
