@@ -15,8 +15,8 @@ class DiscordNotifications {
   }
 
   async sendMonthlyReviewNotification(
-    renewedSubs: Subscription[],
-    renewingSubs: Subscription[]
+    renewingSubs: Subscription[],
+    renewedSubs: Subscription[]
   ): Promise<void> {
     let message = `# ${dayjs().format('MMMM')} Subscriptions Review\n`;
 

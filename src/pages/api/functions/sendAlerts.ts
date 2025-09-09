@@ -70,8 +70,8 @@ export default async function handler(
     }
 
     await notifications.sendMonthlyReviewNotification(
-      renewedRecentlySubs,
-      renewingSoonSubs
+      renewingSoonSubs,
+      renewedRecentlySubs
     );
 
     const user = await prisma.user.findUniqueOrThrow({
