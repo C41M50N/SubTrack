@@ -6,11 +6,10 @@ import {
 } from '@tabler/icons-react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { useAtom } from 'jotai';
-import { Lato } from 'next/font/google';
 import Image from 'next/image';
+import SetCancelReminderModal from '@/components/subscriptions/add-cancel-reminder-modal';
 import DeleteSubscriptionModal from '@/components/subscriptions/delete-subscription-modal';
 import EditSubscriptionModal from '@/components/subscriptions/edit-subscription-modal';
-import SetCancelReminderModal from '@/components/subscriptions/set-cancel-reminder-modal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -32,18 +31,6 @@ import {
   useTableSortState,
 } from '@/lib/hooks';
 import { cn, toMoneyString, toProperCase } from '@/utils';
-
-// const roboto = Roboto({
-//   weight: ['400', '500', '700'],
-//   style: ['normal'],
-//   subsets: ['latin'],
-// });
-
-const lato = Lato({
-  weight: ['400', '700'],
-  style: ['normal'],
-  subsets: ['latin'],
-});
 
 export const columns: ColumnDef<Subscription>[] = [
   {
@@ -229,7 +216,7 @@ export const columns: ColumnDef<Subscription>[] = [
 
       const deleteModalState = useModalState();
       const editModalState = useModalState();
-      const setReminderModalState = useModalState();
+      const addReminderModalState = useModalState();
 
       return (
         <div key={subscription.id}>
@@ -240,27 +227,23 @@ export const columns: ColumnDef<Subscription>[] = [
                 <IconDotsVertical />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="center" side="right">
+            <DropdownMenuContent align="start" alignOffset={-6} side="right">
               <DropdownMenuItem
                 className="cursor-pointer"
                 onClick={() => editModalState.setState('open')}
               >
                 <IconPencil className="mr-2.5 size-5" />
-                <span className={`font-medium text-base ${lato.className}`}>
-                  Edit
-                </span>
+                <span className={'font-medium text-sm'}>Edit</span>
               </DropdownMenuItem>
 
               <DropdownMenuSeparator />
 
               <DropdownMenuItem
                 className="cursor-pointer"
-                onClick={() => setReminderModalState.setState('open')}
+                onClick={() => addReminderModalState.setState('open')}
               >
                 <IconAlarm className="mr-2.5 size-5" />
-                <span className={`font-medium text-base ${lato.className}`}>
-                  Set Cancel Reminder
-                </span>
+                <span className={'font-medium text-sm'}>Add Reminder</span>
               </DropdownMenuItem>
 
               <DropdownMenuSeparator />
@@ -270,9 +253,7 @@ export const columns: ColumnDef<Subscription>[] = [
                 onClick={() => deleteModalState.setState('open')}
               >
                 <IconTrash className="mr-2.5 size-5" />
-                <span className={`font-medium text-base ${lato.className}`}>
-                  Delete
-                </span>
+                <span className={'font-medium text-sm'}>Delete</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -289,7 +270,7 @@ export const columns: ColumnDef<Subscription>[] = [
             subscription_name={subscription.name}
           />
           <SetCancelReminderModal
-            state={setReminderModalState}
+            state={addReminderModalState}
             subscription={subscription}
           />
         </div>

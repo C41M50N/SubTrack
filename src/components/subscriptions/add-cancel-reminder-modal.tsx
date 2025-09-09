@@ -12,15 +12,15 @@ import type { Subscription } from '@/features/subscriptions';
 import type { ModalState } from '@/lib/hooks';
 import { api } from '@/utils/api';
 
-type SetCancelReminderModalProps = {
+type AddCancelReminderModalProps = {
   state: ModalState;
   subscription: Subscription;
 };
 
-export default function SetCancelReminderModal({
+export default function AddCancelReminderModal({
   state,
   subscription,
-}: SetCancelReminderModalProps) {
+}: AddCancelReminderModalProps) {
   const {
     mutate: createTodoistReminder,
     isLoading: isCreateTodoistReminderLoading,
@@ -39,7 +39,7 @@ export default function SetCancelReminderModal({
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Set Cancel Reminder for {subscription.name}</DialogTitle>
+          <DialogTitle>Add Cancel Reminder for {subscription.name}</DialogTitle>
           <DialogDescription className="mt-4">
             A Todoist task will be created to remind you to cancel your "
             {subscription.name}" subscription. The task will be placed in a{' '}
@@ -50,6 +50,12 @@ export default function SetCancelReminderModal({
 
         <DialogFooter>
           <Button
+            onClick={() => state.setState('closed')}
+            variant="destructive"
+          >
+            Cancel
+          </Button>
+          <Button
             isLoading={isCreateTodoistReminderLoading}
             onClick={() =>
               createTodoistReminder({
@@ -58,14 +64,7 @@ export default function SetCancelReminderModal({
               })
             }
           >
-            Set Reminder
-          </Button>
-
-          <Button
-            onClick={() => state.setState('closed')}
-            variant="destructive"
-          >
-            Cancel
+            Add Reminder
           </Button>
         </DialogFooter>
       </DialogContent>
