@@ -95,7 +95,7 @@ export function frequencyToDisplayText(
   const displayMap: Record<Subscription['frequency'], string> = {
     "weekly": compact ? 'wk' : 'week',
     "bi-weekly": compact ? '2w' : '2 weeks',
-    "monthly": compact ? 'm' : 'month',
+    "monthly": compact ? 'mo' : 'month',
     "bi-monthly": compact ? '2m' : '2 months',
     "yearly": compact ? 'yr' : 'year',
     "bi-yearly": compact ? '2y' : '2 years',
