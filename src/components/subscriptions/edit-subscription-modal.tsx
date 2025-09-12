@@ -149,7 +149,7 @@ export default function EditSubscriptionModal({
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
-                      <PopoverContent className="w-64 p-0">
+                      <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
                         <Command
                           defaultValue={field.value}
                           onValueChange={field.onChange}
