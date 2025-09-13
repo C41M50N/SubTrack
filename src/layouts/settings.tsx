@@ -16,10 +16,6 @@ const SettingsNavItems: NavItem[] = [
     href: '/settings/account',
   },
   {
-    title: 'Categories',
-    href: '/settings/categories',
-  },
-  {
     title: 'Own Your Data',
     href: '/settings/data',
   },

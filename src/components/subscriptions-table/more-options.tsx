@@ -18,6 +18,7 @@ import {
   tableSizeAtom,
 } from '@/features/common/atoms';
 import type { Subscription } from '@/features/subscriptions';
+import { useManageCategoriesModalState } from '@/features/subscriptions/stores';
 import dayjs from '@/lib/dayjs';
 import { Switch } from '../ui/switch';
 
@@ -28,6 +29,7 @@ type MoreOptionsProps = {
 export default function MoreOptions(props: MoreOptionsProps) {
   const [tableSize, setTableSize] = useAtom(tableSizeAtom);
   const [subscriptions] = useAtom(selectedSubscriptionsAtom);
+  const manageCategoriesModalState = useManageCategoriesModalState();
 
   function exportSubscriptionsToCSV() {
     const csvConfig = mkConfig({
@@ -58,7 +60,7 @@ export default function MoreOptions(props: MoreOptionsProps) {
           <SettingsIcon className="size-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[150px]">
+      <DropdownMenuContent align="end">
         <DropdownMenuLabel>Toggle Columns</DropdownMenuLabel>
         {props.table
           .getAllColumns()
@@ -100,13 +102,19 @@ export default function MoreOptions(props: MoreOptionsProps) {
         <DropdownMenuSeparator />
 
         <DropdownMenuLabel>Options</DropdownMenuLabel>
-        <DropdownMenuItem onClick={() => {}}>
+        <DropdownMenuItem>
           <ImportIcon className="mr-2.5 size-4" />
           <span>Import Data</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={exportSubscriptionsToCSV}>
           <ImportIcon className="mr-2.5 size-4 rotate-180" />
           <span>Export Data</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => manageCategoriesModalState.set('open')}
+        >
+          <SettingsIcon className="mr-2.5 size-4" />
+          <span>Manage Categories</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

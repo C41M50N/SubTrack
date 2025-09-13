@@ -47,6 +47,7 @@ export const columns: ColumnDef<Subscription>[] = [
         <Checkbox
           aria-label="Select all"
           checked={table.getIsAllPageRowsSelected()}
+          className="mt-1"
           onCheckedChange={(value) => {
             table.toggleAllPageRowsSelected(!!value);
           }}
@@ -58,6 +59,7 @@ export const columns: ColumnDef<Subscription>[] = [
         <Checkbox
           aria-label="Select row"
           checked={row.getIsSelected()}
+          className="mt-1"
           onCheckedChange={(value) => {
             row.toggleSelected(!!value);
           }}
@@ -137,7 +139,7 @@ export const columns: ColumnDef<Subscription>[] = [
         <div className="text-left">
           <div className={cn('font-semibold text-lg')}>{formatted}</div>
           <span className="ml-1">
-            {frequencyToDisplayText(row.original.frequency)}
+            every {frequencyToDisplayText(row.original.frequency)}
           </span>
         </div>
       );

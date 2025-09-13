@@ -69,12 +69,15 @@ export function useTableSortState(column: Column<any, unknown>) {
 }
 
 export const useCategories = (enabled = true) => {
-  const { data: categories, isInitialLoading: isCategoriesLoading } =
-    api.categories.getCategories.useQuery(undefined, {
-      staleTime: Number.POSITIVE_INFINITY,
-      enabled,
-    });
-  return { categories, isCategoriesLoading } as const;
+  const {
+    data: categories,
+    isInitialLoading: isCategoriesLoading,
+    refetch: refetchCategories,
+  } = api.categories.getCategories.useQuery(undefined, {
+    staleTime: 1000 * 60 * 30, // 30 minutes
+    enabled,
+  });
+  return { categories, isCategoriesLoading, refetchCategories } as const;
 };
 
 export const useSetCategories = () => {

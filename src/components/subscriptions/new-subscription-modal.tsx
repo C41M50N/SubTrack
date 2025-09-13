@@ -129,6 +129,7 @@ export default function NewSubscriptionModal({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Icon</FormLabel>
+                    {/* TODO: GENERALIZE THIS SELECT POPOVER */}
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>

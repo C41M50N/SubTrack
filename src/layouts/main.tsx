@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import type React from 'react';
 import NewSubscriptionModal from '@/components/subscriptions/new-subscription-modal';
+import { ManageCategoriesModal } from '@/components/subscriptions-table/manage-categories-modal';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,7 +29,7 @@ export default function MainLayout({ children, title }: MainLayoutProps) {
   const router = useRouter();
   const { data: session } = useSession();
 
-  const { categories } = useCategories();
+  const { categories, refetchCategories } = useCategories();
   const { collections } = useCollections();
 
   return (
@@ -57,7 +58,7 @@ export default function MainLayout({ children, title }: MainLayoutProps) {
               </Link>
               <Link
                 className="flex flex-row gap-1 rounded-md p-2 px-2 font-medium text-md text-muted-foreground transition-colors hover:text-primary"
-                href={'/settings/categories'}
+                href={'/settings/account'}
               >
                 <IconSettings />
                 Settings
@@ -132,6 +133,10 @@ export default function MainLayout({ children, title }: MainLayoutProps) {
         <NewSubscriptionModal
           categories={categories || []}
           collections={collections || []}
+        />
+        <ManageCategoriesModal
+          categories={categories || []}
+          onClose={refetchCategories}
         />
       </main>
     </>
