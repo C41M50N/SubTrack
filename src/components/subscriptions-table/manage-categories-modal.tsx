@@ -1,5 +1,7 @@
 import { XIcon } from 'lucide-react';
 import React from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -8,12 +10,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useManageCategoriesModalState } from '@/features/subscriptions/stores';
 import { useSetCategories } from '@/lib/hooks';
-import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
 
 type ManageCategoriesModalProps = {
   categories: string[];
