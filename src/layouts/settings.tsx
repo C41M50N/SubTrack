@@ -49,7 +49,7 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
                   pathname === item.href
                     ? 'bg-muted hover:bg-muted'
                     : 'hover:bg-transparent hover:underline',
-                  'justify-start rounded-sm border border-gray-500 border-opacity-30 text-md'
+                  'justify-start rounded-sm border border-gray-400 border-opacity-30 text-md'
                 )}
                 href={item.href}
                 key={item.href}
