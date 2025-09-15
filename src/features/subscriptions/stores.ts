@@ -7,3 +7,15 @@ export const useNewSubscriptionModal = createModalStateStore({
 export const useManageCategoriesModalState = createModalStateStore({
   defaultState: 'closed',
 });
+
+export const useExportDataModalState = createModalStateStore({
+  defaultState: 'closed',
+});
+
+export const useImportDataModalState = createModalStateStore({
+  defaultState: 'closed',
+});
+
+export const useDownloadCSVModalState = createModalStateStore({
+  defaultState: 'closed',
+});

@@ -49,10 +49,7 @@ export default function AddCancelReminderModal({
         </DialogHeader>
 
         <DialogFooter>
-          <Button
-            onClick={() => state.setState('closed')}
-            variant="destructive"
-          >
+          <Button onClick={() => state.setState('closed')} variant="outline">
             Cancel
           </Button>
           <Button

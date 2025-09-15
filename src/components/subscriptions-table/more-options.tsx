@@ -1,8 +1,7 @@
 'use client';
 import type { Table } from '@tanstack/react-table';
-import { download, generateCsv, mkConfig } from 'export-to-csv';
 import { useAtom } from 'jotai';
-import { ImportIcon, SettingsIcon } from 'lucide-react';
+import { DownloadIcon, ImportIcon, SettingsIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -13,13 +12,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  selectedSubscriptionsAtom,
-  tableSizeAtom,
-} from '@/features/common/atoms';
+import { tableSizeAtom } from '@/features/common/atoms';
 import type { Subscription } from '@/features/subscriptions';
-import { useManageCategoriesModalState } from '@/features/subscriptions/stores';
-import dayjs from '@/lib/dayjs';
+import {
+  useDownloadCSVModalState,
+  useExportDataModalState,
+  useImportDataModalState,
+  useManageCategoriesModalState,
+} from '@/features/subscriptions/stores';
 import { Switch } from '../ui/switch';
 
 type MoreOptionsProps = {
@@ -28,30 +28,10 @@ type MoreOptionsProps = {
 
 export default function MoreOptions(props: MoreOptionsProps) {
   const [tableSize, setTableSize] = useAtom(tableSizeAtom);
-  const [subscriptions] = useAtom(selectedSubscriptionsAtom);
   const manageCategoriesModalState = useManageCategoriesModalState();
-
-  function exportSubscriptionsToCSV() {
-    const csvConfig = mkConfig({
-      filename: `SubTrack Subscriptions - ${dayjs().format('YYYY-MM-DD')}`,
-      useKeysAsHeaders: true,
-    });
-
-    const csv = generateCsv(csvConfig)(
-      subscriptions
-        .map(({ id, user_id, icon_ref, ...rest }) => rest)
-        .map(({ next_invoice, last_invoice, ...rest }) => ({
-          ...rest,
-          next_invoice: dayjs(next_invoice).format('MM/DD/YYYY'),
-          last_invoice:
-            last_invoice !== null
-              ? dayjs(last_invoice).format('MM/DD/YYYY')
-              : '',
-        }))
-    );
-
-    download(csvConfig)(csv);
-  }
+  const exportDataModalState = useExportDataModalState();
+  const importDataModalState = useImportDataModalState();
+  const downloadCSVModalState = useDownloadCSVModalState();
 
   return (
     <DropdownMenu>
@@ -102,13 +82,17 @@ export default function MoreOptions(props: MoreOptionsProps) {
         <DropdownMenuSeparator />
 
         <DropdownMenuLabel>Options</DropdownMenuLabel>
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => importDataModalState.set('open')}>
           <ImportIcon className="mr-2.5 size-4" />
           <span>Import Data</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={exportSubscriptionsToCSV}>
+        <DropdownMenuItem onClick={() => exportDataModalState.set('open')}>
           <ImportIcon className="mr-2.5 size-4 rotate-180" />
           <span>Export Data</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => downloadCSVModalState.set('open')}>
+          <DownloadIcon className="mr-2.5 size-4" />
+          <span>Download CSV</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => manageCategoriesModalState.set('open')}

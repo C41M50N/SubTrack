@@ -49,9 +49,7 @@ export function ManageCategoriesModal({
   }
 
   React.useEffect(() => {
-    if (categories) {
-      setCurrentCategories(categories);
-    }
+    setCurrentCategories(categories);
   }, [categories]);
 
   return (

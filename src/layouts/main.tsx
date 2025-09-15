@@ -5,6 +5,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import type React from 'react';
 import NewSubscriptionModal from '@/components/subscriptions/new-subscription-modal';
+import { DownloadCSVModal } from '@/components/subscriptions-table/download-csv-modal';
+import { ExportDataModal } from '@/components/subscriptions-table/export-data-modal';
+import { ImportDataModal } from '@/components/subscriptions-table/import-data-modal';
 import { ManageCategoriesModal } from '@/components/subscriptions-table/manage-categories-modal';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -138,6 +141,9 @@ export default function MainLayout({ children, title }: MainLayoutProps) {
           categories={categories || []}
           onClose={refetchCategories}
         />
+        <ExportDataModal />
+        <ImportDataModal />
+        <DownloadCSVModal />
       </main>
     </>
   );

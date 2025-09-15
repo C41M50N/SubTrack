@@ -67,6 +67,7 @@ export function parseJSON<T>(json: string, schema: z.Schema<T>) {
         const obj = JSON.parse(str);
         return schema.parse(obj);
       } catch (_e) {
+        console.error(_e);
         ctx.addIssue({ code: 'custom', message: 'Invalid JSON format' });
         return z.NEVER;
       }
