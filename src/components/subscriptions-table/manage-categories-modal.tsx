@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useManageCategoriesModalState } from '@/features/subscriptions/stores';
 import { useSetCategories } from '@/lib/hooks';
+import { api } from '@/utils/api';
 
 type ManageCategoriesModalProps = {
   categories: string[];
@@ -27,6 +28,7 @@ export function ManageCategoriesModal({
   const state = useManageCategoriesModalState();
   const { setCategories, isSetCategoriesLoading } = useSetCategories();
   const [currentCategories, setCurrentCategories] = React.useState(categories);
+  const apiUtils = api.useUtils();
 
   function addCategory(category: string) {
     if (!currentCategories.includes(category)) {
@@ -40,6 +42,7 @@ export function ManageCategoriesModal({
 
   async function onSave() {
     await setCategories(currentCategories);
+    await apiUtils.categories.getCategories.invalidate();
     state.set('closed');
   }
 
