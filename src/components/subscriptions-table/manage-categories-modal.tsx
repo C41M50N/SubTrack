@@ -28,6 +28,7 @@ export function ManageCategoriesModal({
   const state = useManageCategoriesModalState();
   const { setCategories, isSetCategoriesLoading } = useSetCategories();
   const [currentCategories, setCurrentCategories] = React.useState(categories);
+  const [inputValue, setInputValue] = React.useState('');
   const apiUtils = api.useUtils();
 
   function addCategory(category: string) {
@@ -87,14 +88,16 @@ export function ManageCategoriesModal({
             ))}
           </div>
           <Input
+            onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={(e) => {
-              const newCategory = e.currentTarget.value.trim();
+              const newCategory = inputValue.trim();
               if (e.key === 'Enter' && newCategory) {
                 addCategory(newCategory);
-                e.currentTarget.value = '';
+                setInputValue('');
               }
             }}
             placeholder="Add a category"
+            value={inputValue}
           />
         </div>
 
