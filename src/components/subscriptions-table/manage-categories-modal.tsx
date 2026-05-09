@@ -27,40 +27,48 @@ export function ManageCategoriesModal({
 }: ManageCategoriesModalProps) {
   const state = useManageCategoriesModalState();
   const { setCategories, isSetCategoriesLoading } = useSetCategories();
-  const [currentCategories, setCurrentCategories] = React.useState(categories);
+  const [draftCategories, setDraftCategories] = React.useState<string[]>([]);
   const [inputValue, setInputValue] = React.useState('');
   const apiUtils = api.useUtils();
+  const isOpen = state.state === 'open';
 
   function addCategory(category: string) {
-    if (!currentCategories.includes(category)) {
-      setCurrentCategories([...currentCategories, category]);
-    }
+    setDraftCategories((currentDraftCategories) => {
+      if (currentDraftCategories.includes(category)) {
+        return currentDraftCategories;
+      }
+      return [...currentDraftCategories, category];
+    });
   }
 
   function removeCategory(category: string) {
-    setCurrentCategories(currentCategories.filter((cat) => cat !== category));
+    setDraftCategories((currentDraftCategories) =>
+      currentDraftCategories.filter((cat) => cat !== category)
+    );
   }
 
   async function onSave() {
-    await setCategories(currentCategories);
+    await setCategories(draftCategories);
     await apiUtils.categories.getCategories.invalidate();
-    state.set('closed');
+    onCloseDialog();
   }
 
   function onCloseDialog() {
+    setDraftCategories(categories);
+    setInputValue('');
     onClose();
     state.set('closed');
   }
 
   React.useEffect(() => {
-    setCurrentCategories(categories);
-  }, [categories]);
+    if (isOpen) {
+      setDraftCategories(categories);
+      setInputValue('');
+    }
+  }, [categories, isOpen]);
 
   return (
-    <Dialog
-      onOpenChange={(open) => !open && onCloseDialog()}
-      open={state.state === 'open'}
-    >
+    <Dialog onOpenChange={(open) => !open && onCloseDialog()} open={isOpen}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Manage Categories</DialogTitle>
@@ -72,7 +80,7 @@ export function ManageCategoriesModal({
         <div>
           <Label>Categories</Label>
           <div className="mt-2 mb-4 flex flex-row flex-wrap gap-2">
-            {currentCategories.map((category) => (
+            {draftCategories.map((category) => (
               <Badge
                 className="flex flex-row gap-1 pr-1.5"
                 key={category}
@@ -109,7 +117,7 @@ export function ManageCategoriesModal({
 
           {/* Reset Button */}
           <Button
-            onClick={() => setCurrentCategories(categories)}
+            onClick={() => setDraftCategories(categories)}
             variant="outline"
           >
             Reset
