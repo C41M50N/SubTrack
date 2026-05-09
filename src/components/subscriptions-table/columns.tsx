@@ -1,5 +1,6 @@
 import {
   IconAlarm,
+  IconArrowsExchange,
   IconDotsVertical,
   IconPencil,
   IconTrash,
@@ -11,6 +12,7 @@ import Image from 'next/image';
 import SetCancelReminderModal from '@/components/subscriptions/add-cancel-reminder-modal';
 import DeleteSubscriptionModal from '@/components/subscriptions/delete-subscription-modal';
 import EditSubscriptionModal from '@/components/subscriptions/edit-subscription-modal';
+import MoveSubscriptionModal from '@/components/subscriptions/move-subscription-modal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -180,12 +182,16 @@ function SubscriptionActionsCell({
   const deleteModalState = useModalState();
   const editModalState = useModalState();
   const addReminderModalState = useModalState();
+  const moveModalState = useModalState();
+  const hasMoveDestination = collections.length > 1;
+  const moveDisabledMessage =
+    'Create another collection to move subscriptions.';
 
   return (
     <div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button className="h-8 w-8 p-0" variant="ghost">
+          <Button className="size-8 p-0" variant="ghost">
             <span className="sr-only">Open menu</span>
             <IconDotsVertical />
           </Button>
@@ -208,6 +214,25 @@ function SubscriptionActionsCell({
             <IconAlarm className="mr-2.5 size-5" />
             <span className="font-medium text-sm">Add Reminder</span>
           </DropdownMenuItem>
+
+          <DropdownMenuSeparator />
+
+          {hasMoveDestination ? (
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() => moveModalState.setState('open')}
+            >
+              <IconArrowsExchange className="mr-2.5 size-5" />
+              <span className="font-medium text-sm">Move to Collection</span>
+            </DropdownMenuItem>
+          ) : (
+            <div title={moveDisabledMessage}>
+              <DropdownMenuItem disabled>
+                <IconArrowsExchange className="mr-2.5 size-5" />
+                <span className="font-medium text-sm">Move to Collection</span>
+              </DropdownMenuItem>
+            </div>
+          )}
 
           <DropdownMenuSeparator />
 
@@ -234,6 +259,11 @@ function SubscriptionActionsCell({
       />
       <SetCancelReminderModal
         state={addReminderModalState}
+        subscription={subscription}
+      />
+      <MoveSubscriptionModal
+        collections={collections}
+        state={moveModalState}
         subscription={subscription}
       />
     </div>

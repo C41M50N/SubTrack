@@ -35,4 +35,9 @@ export const CreateSubscriptionSchema = SubscriptionSchema.omit({
   id: true,
 });
 
+export const MoveSubscriptionSchema = z.object({
+  subscriptionId: z.string(),
+  destinationCollectionId: z.string(),
+});
+
 export type SubscriptionId = Subscription['id'];

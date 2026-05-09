@@ -142,6 +142,31 @@ export const useDeleteSubscription = () => {
   return { deleteSubscription, isDeleteSubscriptionLoading };
 };
 
+export const useMoveSubscription = () => {
+  const ctx = api.useContext();
+  const {
+    mutateAsync: moveSubscription,
+    isLoading: isMoveSubscriptionLoading,
+  } = api.subscriptions.moveSubscription.useMutation({
+    onSuccess: () => {
+      toast({
+        variant: 'success',
+        title: 'Successfully moved subscription!',
+      });
+      ctx.subscriptions.getSubscriptionsFromCollection.invalidate();
+    },
+    onError: (err) => {
+      toast({
+        variant: 'error',
+        title: 'Something went wrong...',
+        description: err.message,
+      });
+    },
+  });
+
+  return { moveSubscription, isMoveSubscriptionLoading };
+};
+
 export const useCollections = () => {
   const { data: collections, isLoading: isGetCollectionsLoading } =
     api.collections.getCollections.useQuery(undefined, {

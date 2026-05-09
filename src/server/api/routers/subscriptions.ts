@@ -1,5 +1,6 @@
 import {
   CreateSubscriptionSchema,
+  MoveSubscriptionSchema,
   SubscriptionSchema,
 } from '@/features/subscriptions';
 import createSubscription from '@/features/subscriptions/actions/create-subscription';
@@ -9,6 +10,7 @@ import deleteSubscription, {
 import getSubscriptionsFromCollection, {
   GetSubscriptionsFromCollectionProps,
 } from '@/features/subscriptions/actions/get-subscriptions-from-collection';
+import moveSubscription from '@/features/subscriptions/actions/move-subscription';
 import updateSubscription from '@/features/subscriptions/actions/update-subscription';
 import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
 
@@ -29,6 +31,12 @@ export const subscriptionsRouter = createTRPCRouter({
     .input(SubscriptionSchema)
     .mutation(async ({ ctx, input }) => {
       return await updateSubscription(ctx, input);
+    }),
+
+  moveSubscription: protectedProcedure
+    .input(MoveSubscriptionSchema)
+    .mutation(async ({ ctx, input }) => {
+      return await moveSubscription(ctx, input);
     }),
 
   deleteSubscription: protectedProcedure
