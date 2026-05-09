@@ -1,12 +1,5 @@
-import type { Table } from '@tanstack/react-table';
 import { CalendarDaysIcon } from 'lucide-react';
-import React from 'react';
-import type { Subscription } from '@/features/subscriptions';
-import {
-  getNextNMonths,
-  getSubscriptionsInMonth,
-} from '@/features/subscriptions/utils';
-import dayjs from '@/lib/dayjs';
+import { getNextNMonths } from '@/features/subscriptions/utils';
 import { ScrollArea } from '../ui/scroll-area';
 import {
   Select,
@@ -18,37 +11,21 @@ import {
 } from '../ui/select';
 
 type MonthlyViewSelectorProps = {
-  table: Table<Subscription>;
-  subscriptions: Subscription[];
+  selectedOption: string;
+  onSelectedOptionChange: (value: string) => void;
 };
 
 export function MonthlyViewSelector({
-  table,
-  subscriptions,
+  selectedOption,
+  onSelectedOptionChange,
 }: MonthlyViewSelectorProps) {
   const options = [
     'ALL',
     ...getNextNMonths(13).map((d) => d.format('MMM YYYY').toUpperCase()),
   ];
 
-  const [selectedOption, setSelectedOption] = React.useState('ALL');
-
-  const filteredSubscriptionIds =
-    selectedOption === 'ALL'
-      ? subscriptions.map((sub) => sub.id)
-      : getSubscriptionsInMonth(
-          subscriptions,
-          dayjs(selectedOption, 'MMM YYYY').month(),
-          dayjs(selectedOption, 'MMM YYYY').year()
-        ).map((sub) => sub.id);
-
-  React.useEffect(() => {
-    // Update the table filter whenever the selected option changes
-    table.getColumn('id')?.setFilterValue(filteredSubscriptionIds);
-  }, [selectedOption, table, subscriptions]);
-
   return (
-    <Select onValueChange={setSelectedOption} value={selectedOption}>
+    <Select onValueChange={onSelectedOptionChange} value={selectedOption}>
       <SelectTrigger className="h-10 w-[120px] text-sm lg:w-[150px]">
         <div className="flex w-full flex-row gap-0">
           <CalendarDaysIcon className="mt-0.5 ml-1 size-4" />

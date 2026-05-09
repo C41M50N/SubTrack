@@ -1,11 +1,8 @@
 import {
   type ColumnDef,
-  type ColumnFiltersState,
   flexRender,
   getCoreRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getFilteredRowModel,
+  type RowSelectionState,
   getSortedRowModel,
   type SortingState,
   useReactTable,
@@ -23,7 +20,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
-  selectedSubscriptionsAtom,
   tableSizeAtom,
 } from '@/features/common/atoms';
 import type { Subscription } from '@/features/subscriptions';
@@ -34,61 +30,69 @@ type DataTableProps = {
   columns: ColumnDef<Subscription>[];
   data: Subscription[];
   categories: string[];
+  searchQuery: string;
+  onSearchQueryChange: (value: string) => void;
+  selectedCategories: string[];
+  onSelectedCategoriesChange: (values: string[]) => void;
+  selectedMonth: string;
+  onSelectedMonthChange: (value: string) => void;
+  onResetFilters: () => void;
+  rowSelection: RowSelectionState;
+  onRowSelectionChange: (rowSelection: RowSelectionState) => void;
 };
 
 export default function DataTable({
   columns,
   data,
   categories,
+  searchQuery,
+  onSearchQueryChange,
+  selectedCategories,
+  onSelectedCategoriesChange,
+  selectedMonth,
+  onSelectedMonthChange,
+  onResetFilters,
+  rowSelection,
+  onRowSelectionChange,
 }: DataTableProps) {
-  const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({ id: false });
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const table = useReactTable({
     data,
     columns,
+    getRowId: (row) => row.id,
     getCoreRowModel: getCoreRowModel(),
-    onRowSelectionChange: setRowSelection,
+    onRowSelectionChange: (updater) => {
+      const nextRowSelection =
+        typeof updater === 'function' ? updater(rowSelection) : updater;
+      onRowSelectionChange(nextRowSelection);
+    },
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
-    onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
-    getFilteredRowModel: getFilteredRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-    onStateChange: onTableChange,
     state: {
       sorting,
       rowSelection,
       columnVisibility,
-      columnFilters,
     },
   });
 
   const [tableSize] = useAtom(tableSizeAtom);
-  const [_, setSelectedSubscriptions] = useAtom(selectedSubscriptionsAtom);
-
-  function onTableChange() {
-    const selectedRows =
-      table.getFilteredSelectedRowModel().rows.length > 0
-        ? table.getFilteredSelectedRowModel().rows
-        : table.getFilteredRowModel().rows;
-
-    const subscriptions = selectedRows.map((row) => row.original);
-    setSelectedSubscriptions(subscriptions);
-  }
-
-  React.useEffect(() => {
-    onTableChange();
-  }, [rowSelection, columnFilters, sorting]);
 
   return (
     <div className="space-y-4">
-      <DataTableToolbar categories={categories} data={data} table={table} />
+      <DataTableToolbar
+        categories={categories}
+        onResetFilters={onResetFilters}
+        onSearchQueryChange={onSearchQueryChange}
+        onSelectedCategoriesChange={onSelectedCategoriesChange}
+        onSelectedMonthChange={onSelectedMonthChange}
+        searchQuery={searchQuery}
+        selectedCategories={selectedCategories}
+        selectedMonth={selectedMonth}
+        table={table}
+      />
 
       <div className="rounded-md border">
         <Table>
@@ -147,8 +151,8 @@ export default function DataTable({
 
         <div className="flex w-full flex-row items-center bg-primary-foreground px-4 py-2 text-left text-md text-muted-foreground">
           <span>
-            {table.getFilteredSelectedRowModel().rows.length} of{' '}
-            {table.getFilteredRowModel().rows.length} row(s) selected
+            {table.getSelectedRowModel().rows.length} of {table.getRowModel().rows.length}{' '}
+            row(s) selected
           </span>
           <Button
             className="ml-auto"

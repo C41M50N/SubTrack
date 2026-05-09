@@ -1,4 +1,5 @@
 import { useAtom } from 'jotai';
+import type { RowSelectionState } from '@tanstack/react-table';
 import React from 'react';
 import { LoadingSpinner } from '@/components/common/loading-spinner';
 import SkeletonStatisticCard from '@/components/subscriptions/skeleton-statistic-card';
@@ -14,15 +15,13 @@ import {
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  selectedCollectionIdAtom,
-  selectedSubscriptionsAtom,
-} from '@/features/common/atoms';
+import { selectedCollectionIdAtom } from '@/features/common/atoms';
 import { Statistics } from '@/features/common/subscription-stats';
 import {
   getNextNMonths,
   getSubscriptionsInMonth,
 } from '@/features/subscriptions/utils';
+import dayjs from '@/lib/dayjs';
 import MainLayout from '@/layouts/main';
 import { useCategories, useUser } from '@/lib/hooks';
 import { toMoneyString } from '@/utils';
@@ -39,19 +38,18 @@ export default function DashboardPage() {
     { staleTime: Number.POSITIVE_INFINITY }
   );
 
-  React.useEffect(() => {
-    if (collections && collections[0]) {
-      setSelectedCollectionId(collections[0].id);
-    }
-  }, [collections]);
-
   const { data: subscriptions, isInitialLoading: isSubsLoading } =
     api.subscriptions.getSubscriptionsFromCollection.useQuery(
       { collectionId: selectedCollectionId || '' },
       { enabled: selectedCollectionId !== null }
     );
-  const [selectedSubscriptions] = useAtom(selectedSubscriptionsAtom);
   const { categories, isCategoriesLoading } = useCategories();
+  const [selectedMonth, setSelectedMonth] = React.useState('ALL');
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [selectedCategories, setSelectedCategories] = React.useState<string[]>(
+    []
+  );
+  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
   const tableColumns = React.useMemo(
     () =>
       categories && collections
@@ -59,6 +57,54 @@ export default function DashboardPage() {
         : [],
     [categories, collections]
   );
+  const visibleSubscriptions = React.useMemo(() => {
+    if (!subscriptions) {
+      return [];
+    }
+
+    const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+
+    return subscriptions.filter((subscription) => {
+      const matchesSearch =
+        normalizedSearchQuery.length === 0 ||
+        subscription.name.toLowerCase().includes(normalizedSearchQuery);
+      const matchesCategory =
+        selectedCategories.length === 0 ||
+        selectedCategories.includes(subscription.category);
+      const matchesMonth =
+        selectedMonth === 'ALL' ||
+        getSubscriptionsInMonth(
+          [subscription],
+          dayjs(selectedMonth, 'MMM YYYY').month(),
+          dayjs(selectedMonth, 'MMM YYYY').year()
+        ).length > 0;
+
+      return matchesSearch && matchesCategory && matchesMonth;
+    });
+  }, [searchQuery, selectedCategories, selectedMonth, subscriptions]);
+
+  React.useEffect(() => {
+    if (selectedCollectionId === null && collections?.[0]) {
+      setSelectedCollectionId(collections[0].id);
+    }
+  }, [collections, selectedCollectionId, setSelectedCollectionId]);
+
+  function resetFilters() {
+    setSearchQuery('');
+    setSelectedCategories([]);
+    setSelectedMonth('ALL');
+  }
+
+  const selectedVisibleSubscriptions = React.useMemo(
+    () =>
+      visibleSubscriptions.filter((subscription) => rowSelection[subscription.id]),
+    [rowSelection, visibleSubscriptions]
+  );
+
+  const subscriptionsForInsights =
+    selectedVisibleSubscriptions.length > 0
+      ? selectedVisibleSubscriptions
+      : visibleSubscriptions;
 
   return (
     <MainLayout title="Dashboard | SubTrack">
@@ -93,7 +139,16 @@ export default function DashboardPage() {
               <DataTable
                 categories={categories}
                 columns={tableColumns}
-                data={subscriptions}
+                data={visibleSubscriptions}
+                onResetFilters={resetFilters}
+                onRowSelectionChange={setRowSelection}
+                onSearchQueryChange={setSearchQuery}
+                onSelectedCategoriesChange={setSelectedCategories}
+                onSelectedMonthChange={setSelectedMonth}
+                rowSelection={rowSelection}
+                searchQuery={searchQuery}
+                selectedCategories={selectedCategories}
+                selectedMonth={selectedMonth}
               />
             )}
         </div>
@@ -109,11 +164,7 @@ export default function DashboardPage() {
                 <StatisticCard
                   description={item.description}
                   key={idx}
-                  value={item.getResult(
-                    selectedSubscriptions.length > 0
-                      ? selectedSubscriptions
-                      : subscriptions
-                  )}
+                  value={item.getResult(subscriptionsForInsights)}
                 />
               ))}
 
@@ -156,9 +207,7 @@ export default function DashboardPage() {
                               <span>
                                 {toMoneyString(
                                   getSubscriptionsInMonth(
-                                    selectedSubscriptions.length > 0
-                                      ? selectedSubscriptions
-                                      : subscriptions,
+                                    subscriptionsForInsights,
                                     month,
                                     year
                                   ).reduce((acc, sub) => acc + sub.amount, 0)

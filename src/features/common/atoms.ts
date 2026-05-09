@@ -1,9 +1,6 @@
 import type { Collection } from '@prisma/client';
-import { atom } from 'jotai';
 import { atomWithStorage, createJSONStorage } from 'jotai/utils';
-import type { Subscription } from '../subscriptions';
-
-export const selectedSubscriptionsAtom = atom<Subscription[]>([]);
+import { atom } from 'jotai';
 
 export const selectedCollectionIdAtom = atom<Collection['id'] | null>(null);
 

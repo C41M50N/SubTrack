@@ -1,4 +1,3 @@
-import type { Column } from '@tanstack/react-table';
 import { CheckIcon, ListFilterIcon } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
@@ -20,51 +19,53 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/utils';
 
-type DataTableFacetedFilterProps<TData, TValue> = {
-  column?: Column<TData, TValue>;
+type DataTableFilterProps = {
   title?: string;
+  selectedValues: string[];
+  onSelectedValuesChange: (values: string[]) => void;
   options: {
     label: string;
     value: string;
+    count?: number;
   }[];
 };
 
-export function DataTableFilter<TData, TValue>({
-  column,
+export function DataTableFilter({
   title,
+  selectedValues,
+  onSelectedValuesChange,
   options,
-}: DataTableFacetedFilterProps<TData, TValue>) {
-  const facets = column?.getFacetedUniqueValues();
-  const selectedValues = new Set(column?.getFilterValue() as string[]);
+}: DataTableFilterProps) {
+  const selectedValueSet = new Set(selectedValues);
 
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button className="h-10 border-dashed" size="sm" variant="outline">
           <ListFilterIcon
-            className={cn('mr-2 size-4', selectedValues.size > 0 && 'mr-1')}
+            className={cn('mr-2 size-4', selectedValueSet.size > 0 && 'mr-1')}
           />
           {title}
-          {selectedValues?.size > 0 && (
+          {selectedValueSet.size > 0 && (
             <>
               <Separator className="mx-2 h-4" orientation="vertical" />
               <Badge
                 className="rounded-sm px-1 font-normal lg:hidden"
                 variant="secondary"
               >
-                {selectedValues.size}
+                {selectedValueSet.size}
               </Badge>
               <div className="hidden space-x-1 lg:flex">
-                {selectedValues.size > 2 ? (
+                {selectedValueSet.size > 2 ? (
                   <Badge
                     className="rounded-sm px-1 font-normal"
                     variant="secondary"
                   >
-                    {selectedValues.size} selected
+                    {selectedValueSet.size} selected
                   </Badge>
                 ) : (
                   options
-                    .filter((option) => selectedValues.has(option.value))
+                    .filter((option) => selectedValueSet.has(option.value))
                     .map((option) => (
                       <Badge
                         className="rounded-sm px-1 font-normal"
@@ -87,20 +88,18 @@ export function DataTableFilter<TData, TValue>({
             <CommandEmpty>No results found.</CommandEmpty>
             <CommandGroup>
               {options.map((option) => {
-                const isSelected = selectedValues.has(option.value);
+                const isSelected = selectedValueSet.has(option.value);
                 return (
                   <CommandItem
                     key={option.value}
                     onSelect={() => {
+                      const nextSelectedValues = new Set(selectedValueSet);
                       if (isSelected) {
-                        selectedValues.delete(option.value);
+                        nextSelectedValues.delete(option.value);
                       } else {
-                        selectedValues.add(option.value);
+                        nextSelectedValues.add(option.value);
                       }
-                      const filterValues = Array.from(selectedValues);
-                      column?.setFilterValue(
-                        filterValues.length ? filterValues : undefined
-                      );
+                      onSelectedValuesChange(Array.from(nextSelectedValues));
                     }}
                   >
                     <div
@@ -114,22 +113,22 @@ export function DataTableFilter<TData, TValue>({
                       <CheckIcon className={cn('h-4 w-4')} />
                     </div>
                     <span>{option.label}</span>
-                    {facets?.get(option.value) && (
+                    {option.count && (
                       <span className="ml-auto flex h-4 w-4 items-center justify-center font-mono text-xs">
-                        {facets.get(option.value)}
+                        {option.count}
                       </span>
                     )}
                   </CommandItem>
                 );
               })}
             </CommandGroup>
-            {selectedValues.size > 0 && (
+            {selectedValueSet.size > 0 && (
               <>
                 <CommandSeparator />
                 <CommandGroup>
                   <CommandItem
                     className="justify-center text-center"
-                    onSelect={() => column?.setFilterValue(undefined)}
+                    onSelect={() => onSelectedValuesChange([])}
                   >
                     Clear filters
                   </CommandItem>

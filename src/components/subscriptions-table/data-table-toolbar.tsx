@@ -12,48 +12,62 @@ import MoreOptions from './more-options';
 type Props = {
   table: Table<Subscription>;
   categories: string[];
-  data: Subscription[];
+  searchQuery: string;
+  onSearchQueryChange: (value: string) => void;
+  selectedCategories: string[];
+  onSelectedCategoriesChange: (values: string[]) => void;
+  selectedMonth: string;
+  onSelectedMonthChange: (value: string) => void;
+  onResetFilters: () => void;
 };
 
-export default function DataTableToolbar({ table, categories, data }: Props) {
+export default function DataTableToolbar({
+  table,
+  categories,
+  searchQuery,
+  onSearchQueryChange,
+  selectedCategories,
+  onSelectedCategoriesChange,
+  selectedMonth,
+  onSelectedMonthChange,
+  onResetFilters,
+}: Props) {
   const newSubscriptionModalState = useNewSubscriptionModal();
   const isFiltered =
-    table.getState().columnFilters.length > 0 &&
-    table.getState().columnFilters.some((filter) => filter.id !== 'id');
+    searchQuery.trim().length > 0 ||
+    selectedCategories.length > 0 ||
+    selectedMonth !== 'ALL';
 
   return (
     <div className="flex items-end justify-between">
       <div className="flex flex-1 items-end space-x-2">
         <CollectionSelector />
 
-        <MonthlyViewSelector subscriptions={data} table={table} />
+        <MonthlyViewSelector
+          onSelectedOptionChange={onSelectedMonthChange}
+          selectedOption={selectedMonth}
+        />
 
         <div className="flex flex-row space-x-2">
           <SearchInput
             className="h-10 w-[120px] lg:w-[150px]"
-            onChange={(event) =>
-              table.getColumn('name')?.setFilterValue(event.target.value)
-            }
-            value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
+            onChange={(event) => onSearchQueryChange(event.target.value)}
+            value={searchQuery}
           />
-          {table.getColumn('category') && (
-            <DataTableFilter
-              column={table.getColumn('category')}
-              options={categories.map((cat) => ({ label: cat, value: cat }))}
-              title={isFiltered ? '' : 'Category'}
-            />
-          )}
+          <DataTableFilter
+            onSelectedValuesChange={onSelectedCategoriesChange}
+            options={categories.map((category) => ({
+              label: category,
+              value: category,
+            }))}
+            selectedValues={selectedCategories}
+            title={isFiltered ? '' : 'Category'}
+          />
 
           {isFiltered && (
             <Button
               className="h-10 px-2 lg:px-3"
-              onClick={() => {
-                const currentFilters = table.getState().columnFilters;
-                const idFilter = currentFilters.find(
-                  (filter) => filter.id === 'id'
-                );
-                table.setColumnFilters(idFilter ? [idFilter] : []);
-              }}
+              onClick={onResetFilters}
               variant="ghost"
             >
               Reset
@@ -64,7 +78,6 @@ export default function DataTableToolbar({ table, categories, data }: Props) {
       </div>
 
       <div className="flex flex-row space-x-2">
-        {/* Add Subscription Button */}
         <Button
           className="h-10"
           onClick={() => newSubscriptionModalState.set('open')}
