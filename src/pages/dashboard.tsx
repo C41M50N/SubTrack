@@ -6,6 +6,7 @@ import SkeletonStatisticCard from '@/components/subscriptions/skeleton-statistic
 import StatisticCard from '@/components/subscriptions/statistic-card';
 import { createSubscriptionColumns } from '@/components/subscriptions-table/columns';
 import DataTable from '@/components/subscriptions-table/data-table';
+import { DashboardModalHost } from '@/components/subscriptions-table/dashboard-modal-host';
 import {
   Accordion,
   AccordionContent,
@@ -43,7 +44,7 @@ export default function DashboardPage() {
       { collectionId: selectedCollectionId || '' },
       { enabled: selectedCollectionId !== null }
     );
-  const { categories, isCategoriesLoading } = useCategories();
+  const { categories, isCategoriesLoading, refetchCategories } = useCategories();
   const [selectedMonth, setSelectedMonth] = React.useState('ALL');
   const [searchQuery, setSearchQuery] = React.useState('');
   const [selectedCategories, setSelectedCategories] = React.useState<string[]>(
@@ -225,6 +226,13 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+      {categories && collections && (
+        <DashboardModalHost
+          categories={categories}
+          collections={collections}
+          onManageCategoriesClose={refetchCategories}
+        />
+      )}
     </MainLayout>
   );
 }

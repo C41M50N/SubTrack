@@ -4,11 +4,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import type React from 'react';
-import NewSubscriptionModal from '@/components/subscriptions/new-subscription-modal';
-import { DownloadCSVModal } from '@/components/subscriptions-table/download-csv-modal';
-import { ExportDataModal } from '@/components/subscriptions-table/export-data-modal';
-import { ImportDataModal } from '@/components/subscriptions-table/import-data-modal';
-import { ManageCategoriesModal } from '@/components/subscriptions-table/manage-categories-modal';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,7 +16,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Toaster } from '@/components/ui/toaster';
 import { signOut, useSession } from '@/features/auth/auth-client';
-import { useCategories, useCollections } from '@/lib/hooks';
 
 type MainLayoutProps = {
   children: React.ReactNode;
@@ -31,9 +25,6 @@ type MainLayoutProps = {
 export default function MainLayout({ children, title }: MainLayoutProps) {
   const router = useRouter();
   const { data: session } = useSession();
-
-  const { categories, refetchCategories } = useCategories();
-  const { collections } = useCollections();
 
   return (
     <>
@@ -133,17 +124,6 @@ export default function MainLayout({ children, title }: MainLayoutProps) {
       <main className="mr-auto ml-auto max-w-[1400px] px-6 pb-8">
         {children}
         <Toaster />
-        <NewSubscriptionModal
-          categories={categories || []}
-          collections={collections || []}
-        />
-        <ManageCategoriesModal
-          categories={categories || []}
-          onClose={refetchCategories}
-        />
-        <ExportDataModal />
-        <ImportDataModal />
-        <DownloadCSVModal />
       </main>
     </>
   );
