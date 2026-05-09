@@ -21,16 +21,24 @@ type ManageCategoriesModalProps = {
   onClose: () => void;
 };
 
-export function ManageCategoriesModal({
+type ManageCategoriesDialogContentProps = {
+  categories: string[];
+  isSetCategoriesLoading: boolean;
+  onCloseDialog: () => void;
+  onSaveCategories: (categories: string[]) => Promise<void>;
+};
+
+function ManageCategoriesDialogContent({
   categories,
-  onClose,
-}: ManageCategoriesModalProps) {
-  const state = useManageCategoriesModalState();
-  const { setCategories, isSetCategoriesLoading } = useSetCategories();
-  const [draftCategories, setDraftCategories] = React.useState<string[]>([]);
+  isSetCategoriesLoading,
+  onCloseDialog,
+  onSaveCategories,
+}: ManageCategoriesDialogContentProps) {
+  const [draftCategories, setDraftCategories] = React.useState<string[]>(
+    categories
+  );
   const [inputValue, setInputValue] = React.useState('');
-  const apiUtils = api.useUtils();
-  const isOpen = state.state === 'open';
+  const [initialCategories] = React.useState(categories);
 
   function addCategory(category: string) {
     setDraftCategories((currentDraftCategories) => {
@@ -48,87 +56,103 @@ export function ManageCategoriesModal({
   }
 
   async function onSave() {
-    await setCategories(draftCategories);
-    await apiUtils.categories.getCategories.invalidate();
+    await onSaveCategories(draftCategories);
     onCloseDialog();
   }
 
+  return (
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Manage Categories</DialogTitle>
+        <DialogDescription>
+          Categories are how you organize your subscriptions.
+        </DialogDescription>
+      </DialogHeader>
+
+      <div>
+        <Label>Categories</Label>
+        <div className="mt-2 mb-4 flex flex-row flex-wrap gap-2">
+          {draftCategories.map((category) => (
+            <Badge
+              className="flex flex-row gap-1 pr-1.5"
+              key={category}
+              variant={'secondary'}
+            >
+              <span className="font-medium text-sm">{category}</span>
+              <XIcon
+                className="ml-1.5 size-4 text-gray-600 hover:cursor-pointer"
+                onClick={() => removeCategory(category)}
+                strokeWidth={2}
+              />
+            </Badge>
+          ))}
+        </div>
+        <Input
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={(e) => {
+            const newCategory = inputValue.trim();
+            if (e.key === 'Enter' && newCategory) {
+              addCategory(newCategory);
+              setInputValue('');
+            }
+          }}
+          placeholder="Add a category"
+          value={inputValue}
+        />
+      </div>
+
+      <DialogFooter>
+        <Button onClick={onCloseDialog} variant="outline">
+          Cancel
+        </Button>
+
+        <Button
+          onClick={() => {
+            setDraftCategories(initialCategories);
+            setInputValue('');
+          }}
+          variant="outline"
+        >
+          Reset
+        </Button>
+
+        <Button isLoading={isSetCategoriesLoading} onClick={onSave}>
+          Save
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  );
+}
+
+export function ManageCategoriesModal({
+  categories,
+  onClose,
+}: ManageCategoriesModalProps) {
+  const state = useManageCategoriesModalState();
+  const { setCategories, isSetCategoriesLoading } = useSetCategories();
+  const apiUtils = api.useUtils();
+  const isOpen = state.state === 'open';
+
+  async function onSaveCategories(nextCategories: string[]) {
+    await setCategories(nextCategories);
+    await apiUtils.categories.getCategories.invalidate();
+  }
+
   function onCloseDialog() {
-    setDraftCategories(categories);
-    setInputValue('');
     onClose();
     state.set('closed');
   }
 
-  React.useEffect(() => {
-    if (isOpen) {
-      setDraftCategories(categories);
-      setInputValue('');
-    }
-  }, [categories, isOpen]);
-
   return (
     <Dialog onOpenChange={(open) => !open && onCloseDialog()} open={isOpen}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Manage Categories</DialogTitle>
-          <DialogDescription>
-            Categories are how you organize your subscriptions.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div>
-          <Label>Categories</Label>
-          <div className="mt-2 mb-4 flex flex-row flex-wrap gap-2">
-            {draftCategories.map((category) => (
-              <Badge
-                className="flex flex-row gap-1 pr-1.5"
-                key={category}
-                variant={'secondary'}
-              >
-                <span className="font-medium text-sm">{category}</span>
-                <XIcon
-                  className="ml-1.5 size-4 text-gray-600 hover:cursor-pointer"
-                  onClick={() => removeCategory(category)}
-                  strokeWidth={2}
-                />
-              </Badge>
-            ))}
-          </div>
-          <Input
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={(e) => {
-              const newCategory = inputValue.trim();
-              if (e.key === 'Enter' && newCategory) {
-                addCategory(newCategory);
-                setInputValue('');
-              }
-            }}
-            placeholder="Add a category"
-            value={inputValue}
-          />
-        </div>
-
-        <DialogFooter>
-          {/* Cancel Button */}
-          <Button onClick={onCloseDialog} variant="outline">
-            Cancel
-          </Button>
-
-          {/* Reset Button */}
-          <Button
-            onClick={() => setDraftCategories(categories)}
-            variant="outline"
-          >
-            Reset
-          </Button>
-
-          {/* Save Button */}
-          <Button isLoading={isSetCategoriesLoading} onClick={onSave}>
-            Save
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+      {isOpen && (
+        <ManageCategoriesDialogContent
+          categories={categories}
+          isSetCategoriesLoading={isSetCategoriesLoading}
+          onCloseDialog={onCloseDialog}
+          onSaveCategories={onSaveCategories}
+        />
+      )}
     </Dialog>
   );
 }
