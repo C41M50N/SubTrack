@@ -3,7 +3,7 @@ import React from 'react';
 import { LoadingSpinner } from '@/components/common/loading-spinner';
 import SkeletonStatisticCard from '@/components/subscriptions/skeleton-statistic-card';
 import StatisticCard from '@/components/subscriptions/statistic-card';
-import { columns } from '@/components/subscriptions-table/columns';
+import { createSubscriptionColumns } from '@/components/subscriptions-table/columns';
 import DataTable from '@/components/subscriptions-table/data-table';
 import {
   Accordion,
@@ -52,6 +52,13 @@ export default function DashboardPage() {
     );
   const [selectedSubscriptions] = useAtom(selectedSubscriptionsAtom);
   const { categories, isCategoriesLoading } = useCategories();
+  const tableColumns = React.useMemo(
+    () =>
+      categories && collections
+        ? createSubscriptionColumns({ categories, collections })
+        : [],
+    [categories, collections]
+  );
 
   return (
     <MainLayout title="Dashboard | SubTrack">
@@ -85,7 +92,7 @@ export default function DashboardPage() {
             categories && (
               <DataTable
                 categories={categories}
-                columns={columns}
+                columns={tableColumns}
                 data={subscriptions}
               />
             )}

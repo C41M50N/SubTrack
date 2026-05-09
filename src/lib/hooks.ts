@@ -1,10 +1,3 @@
-import type { Column } from '@tanstack/react-table';
-import {
-  type ActivityIcon,
-  ArrowDownIcon,
-  ArrowUpDownIcon,
-  ArrowUpIcon,
-} from 'lucide-react';
 import React from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { api } from '@/utils/api';
@@ -38,34 +31,6 @@ export function createModalStateStore({
       set(() => ({ state: newState }));
     },
   }));
-}
-
-type LucideIcon = typeof ActivityIcon;
-
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-export function useTableSortState(column: Column<any, unknown>) {
-  const [sortState, setSortState] = React.useState<'asc' | 'desc' | 'none'>(
-    'none'
-  );
-  const [sortIcon, setSortIcon] = React.useState<LucideIcon>(ArrowUpDownIcon);
-
-  function toggleSorting() {
-    if (sortState === 'none') {
-      setSortState('asc');
-      setSortIcon(ArrowUpIcon);
-      column.toggleSorting(false);
-    } else if (sortState === 'asc') {
-      setSortState('desc');
-      setSortIcon(ArrowDownIcon);
-      column.toggleSorting(true);
-    } else {
-      setSortState('none');
-      setSortIcon(ArrowUpDownIcon);
-      column.clearSorting();
-    }
-  }
-
-  return { sortState, toggleSorting, SortIcon: sortIcon };
 }
 
 export const useCategories = (enabled = true) => {

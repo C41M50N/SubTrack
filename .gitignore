@@ -47,3 +47,5 @@ yarn-error.log*
 .react-email/
 
 .idea/
+
+.pnpm-store/
