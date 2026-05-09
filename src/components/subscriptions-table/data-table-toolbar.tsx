@@ -50,7 +50,7 @@ export default function DataTableToolbar({
 
         <div className="flex flex-row space-x-2">
           <SearchInput
-            className="h-10 w-[120px] lg:w-[150px]"
+            className="h-10 w-[120px] bg-card lg:w-[150px]"
             onChange={(event) => onSearchQueryChange(event.target.value)}
             value={searchQuery}
           />
@@ -66,7 +66,7 @@ export default function DataTableToolbar({
 
           {isFiltered && (
             <Button
-              className="h-10 px-2 lg:px-3"
+              className="h-10 bg-card px-2 lg:px-3"
               onClick={onResetFilters}
               variant="ghost"
             >

@@ -62,7 +62,7 @@ export function SubscriptionInsightsPanel({
               {isSubscriptionsLoading && (
                 <AccordionContent>
                   {loadingBreakdownKeys.map((key) => (
-                    <div className="w-full odd:bg-white even:bg-zinc-50" key={key}>
+                    <div className="w-full even:bg-muted/65 border-t border-t-muted-foreground/20" key={key}>
                       <Skeleton className="w-full" />
                     </div>
                   ))}
@@ -75,10 +75,7 @@ export function SubscriptionInsightsPanel({
                     const month = monthData.month();
                     const year = monthData.year();
                     return (
-                      <div
-                        className="w-full odd:bg-white even:bg-zinc-50"
-                        key={`${monthStr}-${year}`}
-                      >
+                      <div className="w-full even:bg-muted/65 border-t border-t-muted-foreground/20" key={`${monthStr}-${year}`}>
                         <div className="flex flex-row px-4 py-1.5">
                           <span className="flex-1">{`${monthStr} ${year}`}</span>
                           <span>

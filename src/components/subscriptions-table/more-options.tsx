@@ -36,7 +36,7 @@ export default function MoreOptions(props: MoreOptionsProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className="h-10 w-8 p-0" variant="outline">
+        <Button className="h-10 w-8 bg-card p-0" variant="outline">
           <SettingsIcon className="size-4" />
         </Button>
       </DropdownMenuTrigger>

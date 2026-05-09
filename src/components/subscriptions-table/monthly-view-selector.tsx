@@ -26,7 +26,7 @@ export function MonthlyViewSelector({
 
   return (
     <Select onValueChange={onSelectedOptionChange} value={selectedOption}>
-      <SelectTrigger className="h-10 w-[120px] text-sm lg:w-[150px]">
+      <SelectTrigger className="h-10 w-[120px] bg-card text-sm lg:w-[150px]">
         <div className="flex w-full flex-row gap-0">
           <CalendarDaysIcon className="mt-0.5 ml-1 size-4" />
           <span className="flex-grow overflow-hidden text-ellipsis whitespace-nowrap">

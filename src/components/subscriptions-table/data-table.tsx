@@ -2,8 +2,8 @@ import {
   type ColumnDef,
   flexRender,
   getCoreRowModel,
-  type RowSelectionState,
   getSortedRowModel,
+  type RowSelectionState,
   type SortingState,
   useReactTable,
   type VisibilityState,
@@ -19,9 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  tableSizeAtom,
-} from '@/features/common/atoms';
+import { tableSizeAtom } from '@/features/common/atoms';
 import type { Subscription } from '@/features/subscriptions';
 import { cn } from '@/utils';
 import DataTableToolbar from './data-table-toolbar';
@@ -94,7 +92,7 @@ export default function DataTable({
         table={table}
       />
 
-      <div className="rounded-md border">
+      <div className="overflow-hidden rounded-lg border border-border/90 bg-card shadow-sm">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -149,13 +147,13 @@ export default function DataTable({
           </TableBody>
         </Table>
 
-        <div className="flex w-full flex-row items-center bg-primary-foreground px-4 py-2 text-left text-md text-muted-foreground">
+        <div className="flex w-full flex-row items-center border-t bg-muted/65 px-4 py-2 text-left text-md text-muted-foreground">
           <span>
-            {table.getSelectedRowModel().rows.length} of {table.getRowModel().rows.length}{' '}
-            row(s) selected
+            {table.getSelectedRowModel().rows.length} of{' '}
+            {table.getRowModel().rows.length} row(s) selected
           </span>
           <Button
-            className="ml-auto"
+            className="ml-auto bg-card"
             onClick={() => table.resetSorting()}
             type="button"
             variant="outline"
