@@ -43,11 +43,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { FREQUENCIES, ICONS } from '@/features/common';
 import {
   CreateSubscriptionSchema,
   type Subscription,
 } from '@/features/subscriptions';
+import { FREQUENCIES, ICONS } from '@/features/subscriptions/constants';
+import { fromCents } from '@/features/subscriptions/money';
 import dayjs from '@/lib/dayjs';
 import { type ModalState, useUpdateSubscription } from '@/lib/hooks';
 import { cn, toProperCase } from '@/utils';
@@ -72,7 +73,7 @@ export default function EditSubscriptionModal({
     resolver: zodResolver(CreateSubscriptionSchema),
     defaultValues: {
       ...subscription,
-      amount: subscription.amount / 100,
+      amount: fromCents(subscription.amount),
       next_invoice: new Date(subscription.next_invoice),
     },
   });

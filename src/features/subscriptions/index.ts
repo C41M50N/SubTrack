@@ -5,7 +5,13 @@ import {
   ICONS,
   type SubscriptionFrequency,
   type SubscriptionIcon,
-} from '../common';
+} from './constants';
+
+const SUBSCRIPTION_NAME_MIN_LENGTH = 2;
+const SUBSCRIPTION_NAME_MAX_LENGTH = 30;
+const SUBSCRIPTION_AMOUNT_STEP = 0.01;
+const SUBSCRIPTION_AMOUNT_MIN = 0.01;
+const SUBSCRIPTION_AMOUNT_MAX = 100_000.0;
 
 export type Subscription = SubscriptionPrisma & {
   frequency: SubscriptionFrequency;
@@ -16,13 +22,19 @@ export const SubscriptionSchema = z.object({
   id: z.string(),
   name: z
     .string()
-    .min(2, { message: 'Name must be at least 2 characters' })
-    .max(30, { message: 'Name must be at most 30 characters' }),
+    .min(SUBSCRIPTION_NAME_MIN_LENGTH, {
+      message: 'Name must be at least 2 characters',
+    })
+    .max(SUBSCRIPTION_NAME_MAX_LENGTH, {
+      message: 'Name must be at most 30 characters',
+    }),
   amount: z.coerce
     .number()
-    .multipleOf(0.01)
-    .min(0.01, { message: 'Amount must be at least $0.01' })
-    .max(100_000.0, { message: 'Amount must be at most $100,000.00' }),
+    .multipleOf(SUBSCRIPTION_AMOUNT_STEP)
+    .min(SUBSCRIPTION_AMOUNT_MIN, { message: 'Amount must be at least $0.01' })
+    .max(SUBSCRIPTION_AMOUNT_MAX, {
+      message: 'Amount must be at most $100,000.00',
+    }),
   frequency: z.enum(FREQUENCIES),
   category: z.string(),
   icon_ref: z.enum(ICONS),

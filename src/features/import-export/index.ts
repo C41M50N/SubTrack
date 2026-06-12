@@ -1,5 +1,7 @@
 import { z } from 'zod';
-import { FREQUENCIES, ICONS } from '../common';
+import { FREQUENCIES, ICONS } from '../subscriptions/constants';
+
+const DATE_PART_COUNT = 3;
 
 export const DataSchema = z
   .object({
@@ -15,7 +17,7 @@ export const DataSchema = z
           .transform((val) => {
             // Convert MM/DD/YYYY to YYYY-MM-DDTHH:mm:ss.sssZ format (midnight UTC)
             const parts = val.split('/');
-            if (parts.length !== 3) {
+            if (parts.length !== DATE_PART_COUNT) {
               throw new Error(`Invalid date format: ${val}`);
             }
             const [month, day, year] = parts;
@@ -33,7 +35,7 @@ export const DataSchema = z
               return null;
             }
             const parts = val.split('/');
-            if (parts.length !== 3) {
+            if (parts.length !== DATE_PART_COUNT) {
               throw new Error(`Invalid date format: ${val}`);
             }
             const [month, day, year] = parts;

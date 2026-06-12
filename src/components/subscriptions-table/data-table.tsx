@@ -19,8 +19,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { tableSizeAtom } from '@/features/common/atoms';
 import type { Subscription } from '@/features/subscriptions';
+import { tableSizeAtom } from '@/features/subscriptions/stores';
 import { cn } from '@/utils';
 import DataTableToolbar from './data-table-toolbar';
 

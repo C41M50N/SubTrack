@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { CollectionWithoutUserId } from '@/features/collections';
-import { selectedCollectionIdAtom } from '@/features/common/atoms';
+import { selectedCollectionIdAtom } from '@/features/collections/stores';
 import { useModalState } from '@/lib/hooks';
 import { api } from '@/utils/api';
 import DeleteCollectionModal from './delete-collection-modal';

@@ -1,6 +1,7 @@
 import type { z } from 'zod';
 import type { AuthenticatedContext } from '@/server/api/trpc';
 import type { CreateSubscriptionSchema } from '..';
+import { toCents } from '../money';
 
 const MAX_SUBSCRIPTIONS = 300;
 
@@ -25,7 +26,7 @@ export default async function createSubscription(
     data: {
       user_id: ctx.session.user.id,
       ...input,
-      amount: Math.floor(input.amount * 100),
+      amount: toCents(input.amount),
     },
   });
 }

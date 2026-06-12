@@ -2,8 +2,8 @@ import type { RowSelectionState } from '@tanstack/react-table';
 import { useAtom } from 'jotai';
 import React from 'react';
 import { createSubscriptionColumns } from '@/components/subscriptions-table/columns';
-import { selectedCollectionIdAtom } from '@/features/common/atoms';
-import { getSubscriptionsInMonth } from '@/features/subscriptions/utils';
+import { selectedCollectionIdAtom } from '@/features/collections/stores';
+import { getSubscriptionsInMonth } from '@/features/subscriptions/filters';
 import dayjs from '@/lib/dayjs';
 import { useCategories, useUser } from '@/lib/hooks';
 import { api } from '@/utils/api';
@@ -22,11 +22,8 @@ export function useDashboardSubscriptionsView() {
       { collectionId: selectedCollectionId || '' },
       { enabled: selectedCollectionId !== null }
     );
-  const {
-    categories,
-    isCategoriesLoading,
-    refetchCategories,
-  } = useCategories();
+  const { categories, isCategoriesLoading, refetchCategories } =
+    useCategories();
 
   const [selectedMonth, setSelectedMonth] = React.useState('ALL');
   const [searchQuery, setSearchQuery] = React.useState('');

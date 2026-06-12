@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { selectedCollectionIdAtom } from '@/features/common/atoms';
+import { selectedCollectionIdAtom } from '@/features/collections/stores';
 import { useDownloadCSVModalState } from '@/features/subscriptions/stores';
 import { api } from '@/utils/api';
 

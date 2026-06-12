@@ -1,5 +1,5 @@
 import { CalendarDaysIcon } from 'lucide-react';
-import { getNextNMonths } from '@/features/subscriptions/utils';
+import { getNextNMonths } from '@/features/subscriptions/filters';
 import { ScrollArea } from '../ui/scroll-area';
 import {
   Select,
@@ -15,13 +15,17 @@ type MonthlyViewSelectorProps = {
   onSelectedOptionChange: (value: string) => void;
 };
 
+const MONTH_SELECTOR_MONTH_COUNT = 13;
+
 export function MonthlyViewSelector({
   selectedOption,
   onSelectedOptionChange,
 }: MonthlyViewSelectorProps) {
   const options = [
     'ALL',
-    ...getNextNMonths(13).map((d) => d.format('MMM YYYY').toUpperCase()),
+    ...getNextNMonths(MONTH_SELECTOR_MONTH_COUNT).map((d) =>
+      d.format('MMM YYYY').toUpperCase()
+    ),
   ];
 
   return (

@@ -2,8 +2,8 @@ import dayjs from 'dayjs';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { notifications } from '@/features/notifications';
 import type { Subscription } from '@/features/subscriptions';
-import { groupBy } from '@/features/subscriptions/utils';
 import { prisma } from '@/server/db';
+import { groupBy } from '@/utils/group-by';
 
 export default async function handler(
   req: NextApiRequest,

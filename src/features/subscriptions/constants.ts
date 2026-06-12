@@ -1,5 +1,3 @@
-import type { Subscription } from '../subscriptions';
-
 export const FREQUENCIES = [
   'weekly',
   'bi-weekly',
@@ -65,8 +63,3 @@ export const ICONS = [
 
 export type SubscriptionFrequency = (typeof FREQUENCIES)[number];
 export type SubscriptionIcon = (typeof ICONS)[number];
-
-export type StatisticItem = {
-  description: string;
-  getResult: (subscriptions: Subscription[]) => number;
-};

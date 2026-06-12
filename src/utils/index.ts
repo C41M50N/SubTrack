@@ -34,13 +34,6 @@ export function toProperCase(str: string): string {
     .trim();
 }
 
-export function toMoneyString(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(amount / 100);
-}
-
 export function downloadFile(file: File) {
   // Create a URL for the file
   const fileUrl = URL.createObjectURL(file);

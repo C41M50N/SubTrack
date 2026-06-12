@@ -1,11 +1,13 @@
-/** biome-ignore-all lint/style/noNonNullAssertion: <explanation> */
+/** biome-ignore-all lint/style/noNonNullAssertion: renewed subscriptions always include last_invoice */
 import dayjs from 'dayjs';
 import { WebhookClient } from 'discord.js';
 import { env } from '@/env.mjs';
-import { toMoneyString } from '@/utils';
-import type { SubscriptionFrequency } from './common';
 import type { Subscription } from './subscriptions';
-import { frequencyToDisplayText } from './subscriptions/utils';
+import { frequencyToDisplayText } from './subscriptions/billing';
+import type { SubscriptionFrequency } from './subscriptions/constants';
+import { toMoneyString } from './subscriptions/money';
+
+const SECONDS_PER_MILLISECOND = 1000;
 
 class DiscordNotifications {
   private readonly client: WebhookClient;
@@ -27,14 +29,14 @@ class DiscordNotifications {
         0
       );
       message += `**${toMoneyString(totalAmount)} from ${renewingSubs.length} subscriptions.**\n`;
-      message += `${renewingSubs.map((sub) => `- ${sub.name} renewing on <t:${Math.floor(sub.next_invoice.getTime() / 1000)}:R> (${toMoneyString(sub.amount)}/${frequencyToDisplayText(sub.frequency as SubscriptionFrequency)})`).join('\n')}\n`;
+      message += `${renewingSubs.map((sub) => `- ${sub.name} renewing on <t:${Math.floor(sub.next_invoice.getTime() / SECONDS_PER_MILLISECOND)}:R> (${toMoneyString(sub.amount)}/${frequencyToDisplayText(sub.frequency as SubscriptionFrequency)})`).join('\n')}\n`;
     }
 
     if (renewedSubs.length > 0) {
       message += '## Subscriptions Renewed Last Month\n';
       const totalAmount = renewedSubs.reduce((sum, sub) => sum + sub.amount, 0);
       message += `**${toMoneyString(totalAmount)} from ${renewedSubs.length} subscriptions.**\n`;
-      message += `${renewedSubs.map((sub) => `- ${sub.name} renewed on <t:${Math.floor(sub.last_invoice!.getTime() / 1000)}:R> (${toMoneyString(sub.amount)}/${frequencyToDisplayText(sub.frequency as SubscriptionFrequency)})`).join('\n')}`;
+      message += `${renewedSubs.map((sub) => `- ${sub.name} renewed on <t:${Math.floor(sub.last_invoice!.getTime() / SECONDS_PER_MILLISECOND)}:R> (${toMoneyString(sub.amount)}/${frequencyToDisplayText(sub.frequency as SubscriptionFrequency)})`).join('\n')}`;
     }
 
     try {

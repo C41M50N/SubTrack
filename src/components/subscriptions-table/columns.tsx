@@ -24,14 +24,18 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { CollectionWithoutUserId } from '@/features/collections';
-import { tableSizeAtom } from '@/features/common/atoms';
 import type { Subscription } from '@/features/subscriptions';
-import { frequencyToDisplayText } from '@/features/subscriptions/utils';
+import { frequencyToDisplayText } from '@/features/subscriptions/billing';
+import { toMoneyString } from '@/features/subscriptions/money';
+import { tableSizeAtom } from '@/features/subscriptions/stores';
 import dayjs from '@/lib/dayjs';
 import { useModalState } from '@/lib/hooks';
-import { cn, toMoneyString, toProperCase } from '@/utils';
+import { cn, toProperCase } from '@/utils';
 
 type SortableColumn = Column<Subscription, unknown>;
+
+const COMPACT_ICON_SIZE = 20;
+const DEFAULT_ICON_SIZE = 24;
 
 type SubscriptionColumnsOptions = {
   categories: string[];
@@ -46,12 +50,12 @@ function SortableHeader({
   title: string;
 }) {
   const sortDirection = column.getIsSorted();
-  const SortIcon =
-    sortDirection === 'asc'
-      ? ArrowUpIcon
-      : sortDirection === 'desc'
-        ? ArrowDownIcon
-        : ArrowUpDownIcon;
+  let SortIcon = ArrowUpDownIcon;
+  if (sortDirection === 'asc') {
+    SortIcon = ArrowUpIcon;
+  } else if (sortDirection === 'desc') {
+    SortIcon = ArrowDownIcon;
+  }
 
   return (
     <Button
@@ -72,7 +76,8 @@ function SubscriptionNameCell({
 }) {
   const [tableSize] = useAtom(tableSizeAtom);
   const iconRef = subscription.icon_ref;
-  const iconSize = tableSize === 'compact' ? 20 : 24;
+  const iconSize =
+    tableSize === 'compact' ? COMPACT_ICON_SIZE : DEFAULT_ICON_SIZE;
   const iconSrc = iconRef.includes('.') ? `/${iconRef}` : `/${iconRef}.svg`;
 
   return (

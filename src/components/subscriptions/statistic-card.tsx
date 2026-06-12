@@ -1,5 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { toMoneyString } from '@/utils';
+import { toMoneyString } from '@/features/subscriptions/money';
 
 type StatisticCardProps = {
   value: number;

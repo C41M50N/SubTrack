@@ -12,9 +12,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { tableSizeAtom } from '@/features/common/atoms';
 import type { Subscription } from '@/features/subscriptions';
 import {
+  tableSizeAtom,
   useDownloadCSVModalState,
   useExportDataModalState,
   useImportDataModalState,
