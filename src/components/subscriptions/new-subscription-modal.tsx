@@ -49,8 +49,8 @@ import {
 import { selectedCollectionIdAtom } from '@/features/collections/stores';
 import { CreateSubscriptionSchema } from '@/features/subscriptions';
 import { FREQUENCIES, ICONS } from '@/features/subscriptions/constants';
+import { useCreateSubscription } from '@/features/subscriptions/hooks';
 import { useNewSubscriptionModal } from '@/features/subscriptions/stores';
-import { useCreateSubscription } from '@/lib/hooks';
 import { cn, toProperCase } from '@/utils';
 
 type NewSubscriptionModalProps = {

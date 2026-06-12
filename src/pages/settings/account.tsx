@@ -21,7 +21,7 @@ import { authClient, useSession } from '@/features/auth/auth-client';
 import { AccountDetailsSchema } from '@/features/users';
 import MainLayout from '@/layouts/main';
 import SettingsLayout from '@/layouts/settings';
-import { useModalState } from '@/lib/hooks';
+import { useModalState } from '@/lib/modal-state';
 import { api } from '@/utils/api';
 
 export default function AccountSettingsPage() {

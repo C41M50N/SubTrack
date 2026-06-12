@@ -1,73 +1,7 @@
-import React from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { api } from '@/utils/api';
 
-type TModalState = 'open' | 'closed';
-
-export const useModalState = () => {
-  const [state, setState] = React.useState<TModalState>('closed');
-  return { state, setState } as const;
-};
-
-export type ModalState = ReturnType<typeof useModalState>;
-
-import { create } from 'zustand';
-
-type CreateModalStateStoreParams = {
-  defaultState?: ModalState['state'];
-};
-
-type ModalStateStoreState = {
-  state: ModalState['state'];
-  set: (state: ModalState['state']) => void;
-};
-
-export function createModalStateStore({
-  defaultState = 'closed',
-}: CreateModalStateStoreParams) {
-  return create<ModalStateStoreState>((set) => ({
-    state: defaultState,
-    set(newState) {
-      set(() => ({ state: newState }));
-    },
-  }));
-}
-
-export const useCategories = (enabled = true) => {
-  const {
-    data: categories,
-    isInitialLoading: isCategoriesLoading,
-    refetch: refetchCategories,
-  } = api.categories.getCategories.useQuery(undefined, {
-    staleTime: 1000 * 60 * 30, // 30 minutes
-    enabled,
-  });
-  return { categories, isCategoriesLoading, refetchCategories } as const;
-};
-
-export const useSetCategories = () => {
-  const ctx = api.useContext();
-  const { mutateAsync: setCategories, isLoading: isSetCategoriesLoading } =
-    api.categories.setCategories.useMutation({
-      onSuccess: () => {
-        toast({
-          variant: 'success',
-          title: 'Successfully set categories!',
-        });
-        ctx.categories.getCategories.refetch();
-      },
-      onError: (err) => {
-        toast({
-          variant: 'error',
-          title: 'Something went wrong...',
-          description: err.message,
-        });
-      },
-    });
-  return { setCategories, isSetCategoriesLoading };
-};
-
-export const useCreateSubscription = () => {
+export function useCreateSubscription() {
   const ctx = api.useContext();
   const {
     mutateAsync: createSubscription,
@@ -90,9 +24,9 @@ export const useCreateSubscription = () => {
   });
 
   return { createSubscription, isCreateSubscriptionLoading };
-};
+}
 
-export const useUpdateSubscription = () => {
+export function useUpdateSubscription() {
   const ctx = api.useContext();
   const {
     mutateAsync: updateSubscription,
@@ -115,9 +49,9 @@ export const useUpdateSubscription = () => {
   });
 
   return { updateSubscription, isUpdateSubscriptionLoading };
-};
+}
 
-export const useDeleteSubscription = () => {
+export function useDeleteSubscription() {
   const ctx = api.useContext();
   const {
     mutateAsync: deleteSubscription,
@@ -140,9 +74,9 @@ export const useDeleteSubscription = () => {
   });
 
   return { deleteSubscription, isDeleteSubscriptionLoading };
-};
+}
 
-export const useMoveSubscription = () => {
+export function useMoveSubscription() {
   const ctx = api.useContext();
   const {
     mutateAsync: moveSubscription,
@@ -165,21 +99,4 @@ export const useMoveSubscription = () => {
   });
 
   return { moveSubscription, isMoveSubscriptionLoading };
-};
-
-export const useCollections = () => {
-  const { data: collections, isLoading: isGetCollectionsLoading } =
-    api.collections.getCollections.useQuery(undefined, {
-      staleTime: Number.POSITIVE_INFINITY,
-    });
-
-  return { collections, isGetCollectionsLoading };
-};
-
-export function useUser() {
-  const { data: user, refetch: refreshUserData } =
-    api.users.getCurrentUser.useQuery(undefined, {
-      staleTime: Number.POSITIVE_INFINITY,
-    });
-  return { user, refreshUserData };
 }

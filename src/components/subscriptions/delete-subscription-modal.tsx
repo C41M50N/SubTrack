@@ -9,7 +9,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import type { SubscriptionId } from '@/features/subscriptions';
-import { type ModalState, useDeleteSubscription } from '@/lib/hooks';
+import { useDeleteSubscription } from '@/features/subscriptions/hooks';
+import type { ModalState } from '@/lib/modal-state';
 
 type DeleteSubscriptionModalProps = {
   state: ModalState;

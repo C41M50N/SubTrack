@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import type { ModalState } from '@/lib/hooks';
+import type { ModalState } from '@/lib/modal-state';
 import { toProperCase } from '@/utils';
 import { api } from '@/utils/api';
 import { LoadingSpinner } from '../common/loading-spinner';

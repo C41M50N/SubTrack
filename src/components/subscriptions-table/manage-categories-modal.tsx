@@ -12,8 +12,8 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useSetCategories } from '@/features/categories/hooks';
 import { useManageCategoriesModalState } from '@/features/subscriptions/stores';
-import { useSetCategories } from '@/lib/hooks';
 import { api } from '@/utils/api';
 
 type ManageCategoriesModalProps = {
@@ -34,9 +34,8 @@ function ManageCategoriesDialogContent({
   onCloseDialog,
   onSaveCategories,
 }: ManageCategoriesDialogContentProps) {
-  const [draftCategories, setDraftCategories] = React.useState<string[]>(
-    categories
-  );
+  const [draftCategories, setDraftCategories] =
+    React.useState<string[]>(categories);
   const [inputValue, setInputValue] = React.useState('');
   const [initialCategories] = React.useState(categories);
 

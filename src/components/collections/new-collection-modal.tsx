@@ -19,18 +19,25 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/use-toast';
-import type { ModalState } from '@/lib/hooks';
+import type { ModalState } from '@/lib/modal-state';
 import { api } from '@/utils/api';
 
 type Props = {
   state: ModalState;
 };
 
+const COLLECTION_TITLE_MIN_LENGTH = 2;
+const COLLECTION_TITLE_MAX_LENGTH = 30;
+
 const FormSchema = z.object({
   title: z
     .string()
-    .min(2, { message: 'Title must be at least 2 characters' })
-    .max(30, { message: 'Title must be at most 30 characters' }),
+    .min(COLLECTION_TITLE_MIN_LENGTH, {
+      message: 'Title must be at least 2 characters',
+    })
+    .max(COLLECTION_TITLE_MAX_LENGTH, {
+      message: 'Title must be at most 30 characters',
+    }),
 });
 
 export default function NewCollectionModal({ state }: Props) {

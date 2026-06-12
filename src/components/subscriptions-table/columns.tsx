@@ -29,7 +29,7 @@ import { frequencyToDisplayText } from '@/features/subscriptions/billing';
 import { toMoneyString } from '@/features/subscriptions/money';
 import { tableSizeAtom } from '@/features/subscriptions/stores';
 import dayjs from '@/lib/dayjs';
-import { useModalState } from '@/lib/hooks';
+import { useModalState } from '@/lib/modal-state';
 import { cn, toProperCase } from '@/utils';
 
 type SortableColumn = Column<Subscription, unknown>;

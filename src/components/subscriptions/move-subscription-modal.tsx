@@ -18,7 +18,8 @@ import {
 } from '@/components/ui/select';
 import type { CollectionWithoutUserId } from '@/features/collections';
 import type { Subscription } from '@/features/subscriptions';
-import { type ModalState, useMoveSubscription } from '@/lib/hooks';
+import { useMoveSubscription } from '@/features/subscriptions/hooks';
+import type { ModalState } from '@/lib/modal-state';
 
 type MoveSubscriptionModalProps = {
   state: ModalState;
@@ -31,8 +32,7 @@ export default function MoveSubscriptionModal({
   subscription,
   collections,
 }: MoveSubscriptionModalProps) {
-  const { moveSubscription, isMoveSubscriptionLoading } =
-    useMoveSubscription();
+  const { moveSubscription, isMoveSubscriptionLoading } = useMoveSubscription();
 
   const destinationCollections = React.useMemo(
     () =>

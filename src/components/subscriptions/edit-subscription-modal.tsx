@@ -48,9 +48,10 @@ import {
   type Subscription,
 } from '@/features/subscriptions';
 import { FREQUENCIES, ICONS } from '@/features/subscriptions/constants';
+import { useUpdateSubscription } from '@/features/subscriptions/hooks';
 import { fromCents } from '@/features/subscriptions/money';
 import dayjs from '@/lib/dayjs';
-import { type ModalState, useUpdateSubscription } from '@/lib/hooks';
+import type { ModalState } from '@/lib/modal-state';
 import { cn, toProperCase } from '@/utils';
 
 type EditSubscriptionModalProps = {

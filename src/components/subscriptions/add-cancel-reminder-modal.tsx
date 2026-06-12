@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import type { Subscription } from '@/features/subscriptions';
-import type { ModalState } from '@/lib/hooks';
+import type { ModalState } from '@/lib/modal-state';
 import { api } from '@/utils/api';
 
 type AddCancelReminderModalProps = {

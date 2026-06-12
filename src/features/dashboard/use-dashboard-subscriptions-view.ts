@@ -2,10 +2,11 @@ import type { RowSelectionState } from '@tanstack/react-table';
 import { useAtom } from 'jotai';
 import React from 'react';
 import { createSubscriptionColumns } from '@/components/subscriptions-table/columns';
+import { useCategories } from '@/features/categories/hooks';
 import { selectedCollectionIdAtom } from '@/features/collections/stores';
 import { getSubscriptionsInMonth } from '@/features/subscriptions/filters';
+import { useUser } from '@/features/users/hooks';
 import dayjs from '@/lib/dayjs';
-import { useCategories, useUser } from '@/lib/hooks';
 import { api } from '@/utils/api';
 
 export function useDashboardSubscriptionsView() {

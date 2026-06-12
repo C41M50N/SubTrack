@@ -19,7 +19,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import type { CollectionWithoutUserId } from '@/features/collections';
 import { selectedCollectionIdAtom } from '@/features/collections/stores';
-import { useModalState } from '@/lib/hooks';
+import { useModalState } from '@/lib/modal-state';
 import { api } from '@/utils/api';
 import DeleteCollectionModal from './delete-collection-modal';
 import EditCollectionModal from './edit-collection-modal';

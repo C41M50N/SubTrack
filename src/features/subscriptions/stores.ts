@@ -1,5 +1,5 @@
 import { atomWithStorage, createJSONStorage } from 'jotai/utils';
-import { createModalStateStore } from '@/lib/hooks';
+import { createModalStateStore } from '@/lib/modal-state';
 
 export const tableSizeAtom = atomWithStorage<'default' | 'compact'>(
   'table-size',
