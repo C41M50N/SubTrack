@@ -1,6 +1,9 @@
-import type { ColumnDef, RowSelectionState } from '@tanstack/react-table';
+import type { RowSelectionState } from '@tanstack/react-table';
+import React from 'react';
 import { LoadingSpinner } from '@/components/common/loading-spinner';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { CollectionWithoutUserId } from '@/features/collections';
+import { createSubscriptionColumns } from '@/features/dashboard/components/subscriptions-table/columns';
 import DataTable from '@/features/dashboard/components/subscriptions-table/data-table';
 import type { Subscription } from '@/features/subscriptions';
 
@@ -16,7 +19,7 @@ const TABLE_SKELETON_ROW_KEYS = [
 
 type SubscriptionsTableSectionProps = {
   categories: string[];
-  columns: ColumnDef<Subscription>[];
+  collections: CollectionWithoutUserId[];
   data: Subscription[];
   isCategoriesLoading: boolean;
   isSubscriptionsLoading: boolean;
@@ -34,7 +37,7 @@ type SubscriptionsTableSectionProps = {
 
 export function SubscriptionsTableSection({
   categories,
-  columns,
+  collections,
   data,
   isCategoriesLoading,
   isSubscriptionsLoading,
@@ -49,6 +52,11 @@ export function SubscriptionsTableSection({
   onSelectedCategoriesChange,
   onSelectedMonthChange,
 }: SubscriptionsTableSectionProps) {
+  const columns = React.useMemo(
+    () => createSubscriptionColumns({ categories, collections }),
+    [categories, collections]
+  );
+
   if (isSubscriptionsLoading) {
     return (
       <div className="w-full space-y-2 p-2">

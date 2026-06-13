@@ -1,32 +1,78 @@
+import type { RowSelectionState } from '@tanstack/react-table';
+import { useAtom } from 'jotai';
+import React from 'react';
 import { Separator } from '@/components/ui/separator';
+import { useCategories } from '@/features/categories/hooks';
+import { selectedCollectionIdAtom } from '@/features/collections/stores';
 import { DashboardModalHost } from '@/features/dashboard/components/dashboard-modal-host';
 import { SubscriptionInsightsPanel } from '@/features/dashboard/components/subscription-insights-panel';
 import { SubscriptionsTableSection } from '@/features/dashboard/components/subscriptions-table-section';
-import { useDashboardSubscriptionsView } from '@/features/dashboard/use-dashboard-subscriptions-view';
+import {
+  ALL_MONTHS_FILTER,
+  filterDashboardSubscriptions,
+} from '@/features/dashboard/filter-dashboard-subscriptions';
+import { useUser } from '@/features/users/hooks';
 import MainLayout from '@/layouts/main';
+import { api } from '@/utils/api';
 
 export default function DashboardPage() {
-  const {
-    user,
-    categories,
-    collections,
-    isCategoriesLoading,
-    isSubscriptionsLoading,
-    refetchCategories,
-    resetFilters,
-    rowSelection,
-    searchQuery,
-    selectedCategories,
-    selectedMonth,
-    setRowSelection,
-    setSearchQuery,
-    setSelectedCategories,
-    setSelectedMonth,
-    subscriptions,
-    subscriptionsForInsights,
-    tableColumns,
-    visibleSubscriptions,
-  } = useDashboardSubscriptionsView();
+  const { user } = useUser();
+  const [selectedCollectionId, setSelectedCollectionId] = useAtom(
+    selectedCollectionIdAtom
+  );
+  const { data: collections } = api.collections.getCollections.useQuery(
+    undefined,
+    { staleTime: Number.POSITIVE_INFINITY }
+  );
+  const { data: subscriptions, isInitialLoading: isSubscriptionsLoading } =
+    api.subscriptions.getSubscriptionsFromCollection.useQuery(
+      { collectionId: selectedCollectionId || '' },
+      { enabled: selectedCollectionId !== null }
+    );
+  const { categories, isCategoriesLoading, refetchCategories } =
+    useCategories();
+
+  const [selectedMonth, setSelectedMonth] = React.useState(ALL_MONTHS_FILTER);
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [selectedCategories, setSelectedCategories] = React.useState<string[]>(
+    []
+  );
+  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
+
+  const visibleSubscriptions = React.useMemo(
+    () =>
+      filterDashboardSubscriptions(subscriptions ?? [], {
+        searchQuery,
+        selectedCategories,
+        selectedMonth,
+      }),
+    [searchQuery, selectedCategories, selectedMonth, subscriptions]
+  );
+
+  React.useEffect(() => {
+    if (selectedCollectionId === null && collections?.[0]) {
+      setSelectedCollectionId(collections[0].id);
+    }
+  }, [collections, selectedCollectionId, setSelectedCollectionId]);
+
+  const selectedVisibleSubscriptions = React.useMemo(
+    () =>
+      visibleSubscriptions.filter(
+        (subscription) => rowSelection[subscription.id] === true
+      ),
+    [rowSelection, visibleSubscriptions]
+  );
+
+  const subscriptionsForInsights =
+    selectedVisibleSubscriptions.length > 0
+      ? selectedVisibleSubscriptions
+      : visibleSubscriptions;
+
+  function resetFilters() {
+    setSearchQuery('');
+    setSelectedCategories([]);
+    setSelectedMonth(ALL_MONTHS_FILTER);
+  }
 
   return (
     <MainLayout title="Dashboard | SubTrack">
@@ -38,7 +84,7 @@ export default function DashboardPage() {
         <div className="w-full">
           <SubscriptionsTableSection
             categories={categories || []}
-            columns={tableColumns}
+            collections={collections || []}
             data={visibleSubscriptions}
             isCategoriesLoading={isCategoriesLoading}
             isSubscriptionsLoading={isSubscriptionsLoading}
