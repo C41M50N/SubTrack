@@ -1,12 +1,11 @@
 import { toast } from '@/components/ui/use-toast';
 import { api } from '@/utils/api';
-
-const COLLECTION_STALE_TIME_MS = Number.POSITIVE_INFINITY;
+import { REFERENCE_DATA_STALE_TIME_MS } from '@/utils/query-cache';
 
 export function useCollections() {
   const { data: collections, isLoading: isGetCollectionsLoading } =
     api.collections.getCollections.useQuery(undefined, {
-      staleTime: COLLECTION_STALE_TIME_MS,
+      staleTime: REFERENCE_DATA_STALE_TIME_MS,
     });
 
   return { collections, isGetCollectionsLoading } as const;

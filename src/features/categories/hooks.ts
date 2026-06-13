@@ -1,12 +1,11 @@
 import { toast } from '@/components/ui/use-toast';
 import { api } from '@/utils/api';
-
-const CATEGORY_STALE_TIME_MS = 1_800_000;
+import { REFERENCE_DATA_STALE_TIME_MS } from '@/utils/query-cache';
 
 export function useCategories(enabled = true) {
   const { data: categories, isInitialLoading: isCategoriesLoading } =
     api.categories.getCategories.useQuery(undefined, {
-      staleTime: CATEGORY_STALE_TIME_MS,
+      staleTime: REFERENCE_DATA_STALE_TIME_MS,
       enabled,
     });
 

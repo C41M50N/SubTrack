@@ -10,43 +10,28 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
-import { toast } from '@/components/ui/use-toast';
+import { useImportData } from '@/features/import-export/hooks';
 import MainLayout from '@/layouts/main';
 import SettingsLayout from '@/layouts/settings';
 import { createCaller } from '@/server/api/root';
 import { getServerAuthSession } from '@/server/api/trpc';
 import { prisma } from '@/server/db';
 import { downloadFile } from '@/utils';
-import { api } from '@/utils/api';
 
 export default function DataSettingsPage({
   exportDataJSON,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const [overwrite, setOverwrite] = React.useState<boolean>(false);
+  const overwriteRef = React.useRef(false);
   const [file, setFile] = React.useState<File | null>(null);
 
-  const { mutateAsync: importData, isLoading: isImportDataLoading } =
-    api.data.importData.useMutation({
-      onSuccess() {
-        toast({
-          variant: 'success',
-          title: 'Successfully imported data',
-        });
-      },
-      onError() {
-        toast({
-          variant: 'error',
-          title: 'Failed to import data',
-        });
-      },
-    });
+  const { importData, isImportDataLoading } = useImportData();
 
   async function onImportData() {
     if (!file) {
       return;
     }
     const contents = await file.text();
-    importData({ json: contents, overwrite });
+    await importData({ json: contents, overwrite: overwriteRef.current });
   }
 
   function onOverwriteToggleChange(e: ChangeEvent<HTMLInputElement>) {
@@ -93,7 +78,9 @@ export default function DataSettingsPage({
                 <RadioGroup
                   className="flex flex-row space-x-4"
                   defaultValue="append"
-                  onValueChange={(v) => setOverwrite(v === 'overwrite')}
+                  onValueChange={(v) => {
+                    overwriteRef.current = v === 'overwrite';
+                  }}
                 >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem id="append" value="append" />

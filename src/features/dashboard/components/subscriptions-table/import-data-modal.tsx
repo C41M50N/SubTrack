@@ -15,17 +15,19 @@ import {
   DropzoneContent,
   DropzoneEmptyState,
 } from '@/components/ui/shadcn-io/dropzone';
+import { useImportData } from '@/features/import-export/hooks';
 import { useImportDataModalState } from '@/features/subscriptions/stores';
-import { api } from '@/utils/api';
 
-const JSON_IMPORT_MAX_SIZE_BYTES = 1024 * 200;
+const BYTES_PER_KIBIBYTE = 1024;
+const JSON_IMPORT_MAX_SIZE_KIBIBYTES = 200;
+const JSON_IMPORT_MAX_SIZE_BYTES =
+  BYTES_PER_KIBIBYTE * JSON_IMPORT_MAX_SIZE_KIBIBYTES;
 
 export function ImportDataModal() {
   const state = useImportDataModalState();
   const [files, setFiles] = React.useState<File[] | undefined>();
-  const [overwrite, setOverwrite] = React.useState<boolean>(false);
-  const { mutateAsync: importData } = api.data.importData.useMutation();
-  const apiUtils = api.useUtils();
+  const overwriteRef = React.useRef(false);
+  const { importData, isImportDataLoading } = useImportData();
 
   async function onImport() {
     const file = files && files[0];
@@ -39,11 +41,8 @@ export function ImportDataModal() {
     }
 
     const content = await file.text();
-    console.info(overwrite, JSON.parse(content));
-    await importData({ json: content, overwrite });
+    await importData({ json: content, overwrite: overwriteRef.current });
 
-    apiUtils.subscriptions.getSubscriptionsFromCollection.invalidate();
-    apiUtils.categories.getCategories.invalidate();
     setFiles(undefined);
     state.set('closed');
   }
@@ -80,7 +79,9 @@ export function ImportDataModal() {
             <RadioGroup
               className="flex flex-row space-x-4"
               defaultValue="append"
-              onValueChange={(v) => setOverwrite(v === 'overwrite')}
+              onValueChange={(v) => {
+                overwriteRef.current = v === 'overwrite';
+              }}
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem id="append" value="append" />
@@ -97,7 +98,11 @@ export function ImportDataModal() {
           <Button onClick={() => state.set('closed')} variant="outline">
             Cancel
           </Button>
-          <Button disabled={!files || files.length !== 1} onClick={onImport}>
+          <Button
+            disabled={!files || files.length !== 1}
+            isLoading={isImportDataLoading}
+            onClick={onImport}
+          >
             Import
           </Button>
         </DialogFooter>
