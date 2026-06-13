@@ -14,11 +14,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useSetCategories } from '@/features/categories/hooks';
 import { useManageCategoriesModalState } from '@/features/subscriptions/stores';
-import { api } from '@/utils/api';
 
 type ManageCategoriesModalProps = {
   categories: string[];
-  onClose: () => void;
 };
 
 type ManageCategoriesDialogContentProps = {
@@ -34,10 +32,11 @@ function ManageCategoriesDialogContent({
   onCloseDialog,
   onSaveCategories,
 }: ManageCategoriesDialogContentProps) {
-  const [draftCategories, setDraftCategories] =
-    React.useState<string[]>(categories);
+  const initialCategoriesRef = React.useRef(categories);
+  const [draftCategories, setDraftCategories] = React.useState<string[]>(
+    initialCategoriesRef.current
+  );
   const [inputValue, setInputValue] = React.useState('');
-  const [initialCategories] = React.useState(categories);
 
   function addCategory(category: string) {
     setDraftCategories((currentDraftCategories) => {
@@ -107,7 +106,7 @@ function ManageCategoriesDialogContent({
 
         <Button
           onClick={() => {
-            setDraftCategories(initialCategories);
+            setDraftCategories(initialCategoriesRef.current);
             setInputValue('');
           }}
           variant="outline"
@@ -125,20 +124,16 @@ function ManageCategoriesDialogContent({
 
 export function ManageCategoriesModal({
   categories,
-  onClose,
 }: ManageCategoriesModalProps) {
   const state = useManageCategoriesModalState();
   const { setCategories, isSetCategoriesLoading } = useSetCategories();
-  const apiUtils = api.useUtils();
   const isOpen = state.state === 'open';
 
   async function onSaveCategories(nextCategories: string[]) {
     await setCategories(nextCategories);
-    await apiUtils.categories.getCategories.invalidate();
   }
 
   function onCloseDialog() {
-    onClose();
     state.set('closed');
   }
 

@@ -20,10 +20,9 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { toast } from '@/components/ui/use-toast';
 import type { CollectionWithoutUserId } from '@/features/collections';
+import { useEditCollectionTitle } from '@/features/collections/hooks';
 import type { ModalState } from '@/lib/modal-state';
-import { api } from '@/utils/api';
 
 type Props = {
   state: ModalState;
@@ -52,32 +51,19 @@ export default function EditCollectionModal({ state, collection }: Props) {
     },
   });
 
-  const ctx = api.useContext();
-  const {
-    mutateAsync: editCollectionTitle,
-    isLoading: isEditCollectionLoading,
-  } = api.collections.editCollectionTitle.useMutation({
-    onSuccess() {
-      form.reset();
-      ctx.collections.getCollections.refetch();
-    },
-    onError(error) {
-      toast({
-        variant: 'error',
-        title: error.message,
-      });
-    },
-  });
+  const { editCollectionTitle, isEditCollectionLoading } =
+    useEditCollectionTitle();
 
   React.useEffect(() => {
     form.setValue('title', collection.title);
-  }, [state]);
+  }, [collection.title, form]);
 
   async function onSubmit(values: z.infer<typeof FormSchema>) {
     await editCollectionTitle({
       title: values.title,
       collection_id: collection.id,
     });
+    form.reset();
     state.setState('closed');
   }
 

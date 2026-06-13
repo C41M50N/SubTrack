@@ -13,10 +13,10 @@ import {
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { toast } from '@/components/ui/use-toast';
+import { useDeleteCollection } from '@/features/collections/hooks';
+import { useSubscriptionsFromCollection } from '@/features/subscriptions/hooks';
 import type { ModalState } from '@/lib/modal-state';
 import { toProperCase } from '@/utils';
-import { api } from '@/utils/api';
 
 type Props = {
   state: ModalState;
@@ -24,24 +24,9 @@ type Props = {
 };
 
 export default function DeleteCollectionModal({ state, collectionId }: Props) {
-  const ctx = api.useContext();
-
-  const { data: subscriptions, isLoading: isGetSubscriptionsLoading } =
-    api.subscriptions.getSubscriptionsFromCollection.useQuery({ collectionId });
-
-  const { mutateAsync: deleteCollection } =
-    api.collections.deleteCollection.useMutation({
-      onSuccess() {
-        ctx.collections.getCollections.refetch();
-        ctx.subscriptions.getSubscriptionsFromCollection.refetch();
-      },
-      onError(error) {
-        toast({
-          variant: 'error',
-          title: error.message,
-        });
-      },
-    });
+  const { subscriptions, isSubscriptionsLoading } =
+    useSubscriptionsFromCollection(collectionId, state.state === 'open');
+  const { deleteCollection } = useDeleteCollection();
 
   async function onSubmit() {
     await deleteCollection({ collectionId });
@@ -102,7 +87,7 @@ export default function DeleteCollectionModal({ state, collectionId }: Props) {
         <DialogFooter className="mt-2">
           <Button
             className="gap-1"
-            disabled={isGetSubscriptionsLoading}
+            disabled={isSubscriptionsLoading}
             onClick={onSubmit}
             type="submit"
             variant={'destructive'}

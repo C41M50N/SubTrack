@@ -18,9 +18,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { toast } from '@/components/ui/use-toast';
+import { useCreateCollection } from '@/features/collections/hooks';
 import type { ModalState } from '@/lib/modal-state';
-import { api } from '@/utils/api';
 
 type Props = {
   state: ModalState;
@@ -48,25 +47,11 @@ export default function NewCollectionModal({ state }: Props) {
     },
   });
 
-  const ctx = api.useContext();
-  const {
-    mutateAsync: createCollection,
-    isLoading: isCreateCollectionLoading,
-  } = api.collections.createCollection.useMutation({
-    onSuccess() {
-      form.reset();
-      ctx.collections.getCollections.refetch();
-    },
-    onError(error) {
-      toast({
-        variant: 'error',
-        title: error.message,
-      });
-    },
-  });
+  const { createCollection, isCreateCollectionLoading } = useCreateCollection();
 
   async function onSubmit(values: z.infer<typeof FormSchema>) {
     await createCollection({ collectionTitle: values.title });
+    form.reset();
     state.setState('closed');
   }
 

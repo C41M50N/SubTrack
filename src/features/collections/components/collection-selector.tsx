@@ -18,18 +18,15 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { CollectionWithoutUserId } from '@/features/collections';
+import { useCollections } from '@/features/collections/hooks';
 import { selectedCollectionIdAtom } from '@/features/collections/stores';
 import { useModalState } from '@/lib/modal-state';
-import { api } from '@/utils/api';
 import DeleteCollectionModal from './delete-collection-modal';
 import EditCollectionModal from './edit-collection-modal';
 import NewCollectionModal from './new-collection-modal';
 
 export default function CollectionSelector() {
-  const { data: collections, isLoading } =
-    api.collections.getCollections.useQuery(undefined, {
-      staleTime: Number.POSITIVE_INFINITY,
-    });
+  const { collections, isGetCollectionsLoading } = useCollections();
 
   const [selectedCollectionId, setGlobalCollectionId] = useAtom(
     selectedCollectionIdAtom
@@ -58,7 +55,7 @@ export default function CollectionSelector() {
       {collections && (
         <Select
           defaultValue={selectedCollectionId || undefined}
-          disabled={isLoading}
+          disabled={isGetCollectionsLoading}
           onValueChange={(collectionId) => setGlobalCollectionId(collectionId)}
           value={selectedCollectionId || undefined}
         >

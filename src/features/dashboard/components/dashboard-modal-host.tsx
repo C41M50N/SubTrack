@@ -8,21 +8,16 @@ import NewSubscriptionModal from '@/features/subscriptions/components/new-subscr
 type DashboardModalHostProps = {
   categories: string[];
   collections: CollectionWithoutUserId[];
-  onManageCategoriesClose: () => void;
 };
 
 export function DashboardModalHost({
   categories,
   collections,
-  onManageCategoriesClose,
 }: DashboardModalHostProps) {
   return (
     <>
       <NewSubscriptionModal categories={categories} collections={collections} />
-      <ManageCategoriesModal
-        categories={categories}
-        onClose={onManageCategoriesClose}
-      />
+      <ManageCategoriesModal categories={categories} />
       <ExportDataModal />
       <ImportDataModal />
       <DownloadCSVModal />

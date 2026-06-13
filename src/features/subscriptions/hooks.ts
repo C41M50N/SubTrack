@@ -1,18 +1,31 @@
 import { toast } from '@/components/ui/use-toast';
 import { api } from '@/utils/api';
 
+export function useSubscriptionsFromCollection(
+  collectionId: string | null,
+  enabled = true
+) {
+  const { data: subscriptions, isInitialLoading: isSubscriptionsLoading } =
+    api.subscriptions.getSubscriptionsFromCollection.useQuery(
+      { collectionId: collectionId ?? '' },
+      { enabled: enabled && collectionId !== null }
+    );
+
+  return { subscriptions, isSubscriptionsLoading } as const;
+}
+
 export function useCreateSubscription() {
-  const ctx = api.useContext();
+  const utils = api.useUtils();
   const {
     mutateAsync: createSubscription,
     isLoading: isCreateSubscriptionLoading,
   } = api.subscriptions.createSubscription.useMutation({
-    onSuccess: (_, newSubscription) => {
+    async onSuccess(_, newSubscription) {
       toast({
         variant: 'success',
         title: `Successfully created ${newSubscription.name} subscription!`,
       });
-      ctx.subscriptions.getSubscriptionsFromCollection.invalidate();
+      await utils.subscriptions.getSubscriptionsFromCollection.invalidate();
     },
     onError: (err) => {
       toast({
@@ -27,17 +40,17 @@ export function useCreateSubscription() {
 }
 
 export function useUpdateSubscription() {
-  const ctx = api.useContext();
+  const utils = api.useUtils();
   const {
     mutateAsync: updateSubscription,
     isLoading: isUpdateSubscriptionLoading,
   } = api.subscriptions.updateSubscription.useMutation({
-    onSuccess: () => {
+    async onSuccess() {
       toast({
         variant: 'success',
         title: 'Successfully updated subscription!',
       });
-      ctx.subscriptions.getSubscriptionsFromCollection.refetch();
+      await utils.subscriptions.getSubscriptionsFromCollection.invalidate();
     },
     onError: (err) => {
       toast({
@@ -52,17 +65,17 @@ export function useUpdateSubscription() {
 }
 
 export function useDeleteSubscription() {
-  const ctx = api.useContext();
+  const utils = api.useUtils();
   const {
     mutateAsync: deleteSubscription,
     isLoading: isDeleteSubscriptionLoading,
   } = api.subscriptions.deleteSubscription.useMutation({
-    onSuccess: () => {
+    async onSuccess() {
       toast({
         variant: 'success',
         title: 'Successfully deleted subscription!',
       });
-      ctx.subscriptions.getSubscriptionsFromCollection.refetch();
+      await utils.subscriptions.getSubscriptionsFromCollection.invalidate();
     },
     onError: (err) => {
       toast({
@@ -77,17 +90,17 @@ export function useDeleteSubscription() {
 }
 
 export function useMoveSubscription() {
-  const ctx = api.useContext();
+  const utils = api.useUtils();
   const {
     mutateAsync: moveSubscription,
     isLoading: isMoveSubscriptionLoading,
   } = api.subscriptions.moveSubscription.useMutation({
-    onSuccess: () => {
+    async onSuccess() {
       toast({
         variant: 'success',
         title: 'Successfully moved subscription!',
       });
-      ctx.subscriptions.getSubscriptionsFromCollection.invalidate();
+      await utils.subscriptions.getSubscriptionsFromCollection.invalidate();
     },
     onError: (err) => {
       toast({

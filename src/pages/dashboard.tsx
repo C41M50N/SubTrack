@@ -3,6 +3,7 @@ import { useAtom } from 'jotai';
 import React from 'react';
 import { Separator } from '@/components/ui/separator';
 import { useCategories } from '@/features/categories/hooks';
+import { useCollections } from '@/features/collections/hooks';
 import { selectedCollectionIdAtom } from '@/features/collections/stores';
 import { DashboardModalHost } from '@/features/dashboard/components/dashboard-modal-host';
 import { SubscriptionInsightsPanel } from '@/features/dashboard/components/subscription-insights-panel';
@@ -11,26 +12,19 @@ import {
   ALL_MONTHS_FILTER,
   filterDashboardSubscriptions,
 } from '@/features/dashboard/filter-dashboard-subscriptions';
+import { useSubscriptionsFromCollection } from '@/features/subscriptions/hooks';
 import { useUser } from '@/features/users/hooks';
 import MainLayout from '@/layouts/main';
-import { api } from '@/utils/api';
 
 export default function DashboardPage() {
   const { user } = useUser();
   const [selectedCollectionId, setSelectedCollectionId] = useAtom(
     selectedCollectionIdAtom
   );
-  const { data: collections } = api.collections.getCollections.useQuery(
-    undefined,
-    { staleTime: Number.POSITIVE_INFINITY }
-  );
-  const { data: subscriptions, isInitialLoading: isSubscriptionsLoading } =
-    api.subscriptions.getSubscriptionsFromCollection.useQuery(
-      { collectionId: selectedCollectionId || '' },
-      { enabled: selectedCollectionId !== null }
-    );
-  const { categories, isCategoriesLoading, refetchCategories } =
-    useCategories();
+  const { collections } = useCollections();
+  const { subscriptions, isSubscriptionsLoading } =
+    useSubscriptionsFromCollection(selectedCollectionId);
+  const { categories, isCategoriesLoading } = useCategories();
 
   const [selectedMonth, setSelectedMonth] = React.useState(ALL_MONTHS_FILTER);
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -111,11 +105,7 @@ export default function DashboardPage() {
       </div>
 
       {categories && collections && (
-        <DashboardModalHost
-          categories={categories}
-          collections={collections}
-          onManageCategoriesClose={refetchCategories}
-        />
+        <DashboardModalHost categories={categories} collections={collections} />
       )}
     </MainLayout>
   );
