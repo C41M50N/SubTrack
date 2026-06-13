@@ -20,7 +20,7 @@ import { downloadFile } from '@/utils';
 import { api } from '@/utils/api';
 
 export default function DataSettingsPage({
-  exportJSON,
+  exportDataJSON,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const [overwrite, setOverwrite] = React.useState<boolean>(false);
   const [file, setFile] = React.useState<File | null>(null);
@@ -59,8 +59,8 @@ export default function DataSettingsPage({
 
   function onExportData() {
     const _file = new File(
-      [exportJSON],
-      `SubTrack Data - ${dayjs().format()}.json`,
+      [exportDataJSON],
+      `subscriptions_${dayjs().format('YYYYMMDD_X')}.subtrack.json`,
       { type: 'application/json' }
     );
     downloadFile(_file);
@@ -139,11 +139,14 @@ export default function DataSettingsPage({
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const session = await getServerAuthSession(context.req);
   const trpc = createCaller({ session, db: prisma });
-  const exportJSON = await trpc.data.createJSONExport();
+  const exportData = await trpc.data.getExportData({
+    format: 'json',
+    collectionId: null,
+  });
 
   return {
     props: {
-      exportJSON,
+      exportDataJSON: JSON.stringify(exportData, null, 2),
     },
   };
 }

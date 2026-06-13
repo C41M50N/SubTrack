@@ -11,12 +11,14 @@ export default async function getExportData(
   ctx: AuthenticatedContext,
   input: z.infer<typeof GetExportDataInput>
 ) {
-  const allCategories =
-    (
-      await ctx.db.categoryList.findMany({
-        where: { user_id: ctx.session.user.id },
-      })
-    ).at(0)?.categories ?? [];
+  const categoryList = await ctx.db.categoryList.findUnique({
+    where: { user_id: ctx.session.user.id },
+    select: { categories: true },
+  });
+
+  if (!categoryList) {
+    throw new Error('missing categoryList');
+  }
 
   const subscriptions = await ctx.db.subscription.findMany({
     where: input.collectionId
@@ -48,7 +50,7 @@ export default async function getExportData(
     }));
 
   return {
-    categories: allCategories,
+    categories: categoryList.categories,
     subscriptions: subs,
   };
 }

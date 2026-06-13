@@ -1,4 +1,3 @@
-import createJSONExport from '@/features/import-export/actions/create-json-export';
 import getExportData, {
   GetExportDataInput,
 } from '@/features/import-export/actions/get-export-data';
@@ -8,10 +7,6 @@ import importData, {
 import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
 
 export const dataRouter = createTRPCRouter({
-  createJSONExport: protectedProcedure.mutation(async ({ ctx }) => {
-    return await createJSONExport(ctx);
-  }),
-
   getExportData: protectedProcedure
     .input(GetExportDataInput)
     .mutation(async ({ ctx, input }) => {
