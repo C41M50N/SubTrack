@@ -3,7 +3,6 @@ import type { Collection } from '@prisma/client';
 import { IconDeviceFloppy } from '@tabler/icons-react';
 import { useForm } from 'react-hook-form';
 import type z from 'zod';
-import { SubscriptionFormFields } from '@/components/subscriptions/subscription-form-fields';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -17,6 +16,7 @@ import {
   CreateSubscriptionSchema,
   type Subscription,
 } from '@/features/subscriptions';
+import { SubscriptionFormFields } from '@/features/subscriptions/components/subscription-form-fields';
 import { useUpdateSubscription } from '@/features/subscriptions/hooks';
 import { fromCents } from '@/features/subscriptions/money';
 import dayjs from '@/lib/dayjs';

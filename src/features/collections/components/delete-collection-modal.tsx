@@ -1,6 +1,7 @@
 import type { Collection } from '@prisma/client';
 import { IconTrash } from '@tabler/icons-react';
 import Image from 'next/image';
+import { LoadingSpinner } from '@/components/common/loading-spinner';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -10,13 +11,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { toast } from '@/components/ui/use-toast';
 import type { ModalState } from '@/lib/modal-state';
 import { toProperCase } from '@/utils';
 import { api } from '@/utils/api';
-import { LoadingSpinner } from '../common/loading-spinner';
-import { ScrollArea } from '../ui/scroll-area';
-import { Separator } from '../ui/separator';
-import { toast } from '../ui/use-toast';
 
 type Props = {
   state: ModalState;

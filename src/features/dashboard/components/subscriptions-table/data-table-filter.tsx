@@ -41,7 +41,11 @@ export function DataTableFilter({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button className="h-10 border-dashed bg-card" size="sm" variant="outline">
+        <Button
+          className="h-10 border-dashed bg-card"
+          size="sm"
+          variant="outline"
+        >
           <ListFilterIcon
             className={cn('mr-2 size-4', selectedValueSet.size > 0 && 'mr-1')}
           />

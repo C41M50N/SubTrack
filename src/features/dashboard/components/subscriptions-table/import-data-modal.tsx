@@ -10,13 +10,15 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { useImportDataModalState } from '@/features/subscriptions/stores';
-import { api } from '@/utils/api';
 import {
   Dropzone,
   DropzoneContent,
   DropzoneEmptyState,
-} from '../ui/shadcn-io/dropzone';
+} from '@/components/ui/shadcn-io/dropzone';
+import { useImportDataModalState } from '@/features/subscriptions/stores';
+import { api } from '@/utils/api';
+
+const JSON_IMPORT_MAX_SIZE_BYTES = 1024 * 200;
 
 export function ImportDataModal() {
   const state = useImportDataModalState();
@@ -64,7 +66,7 @@ export function ImportDataModal() {
               'application/json': ['.json'],
             }}
             maxFiles={1}
-            maxSize={1024 * 200} // 200 KB
+            maxSize={JSON_IMPORT_MAX_SIZE_BYTES}
             minSize={2}
             onDrop={(_files: File[]) => setFiles(_files)}
             onError={console.error}

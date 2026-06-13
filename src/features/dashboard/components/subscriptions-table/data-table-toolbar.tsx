@@ -1,10 +1,10 @@
 import { IconCircleX, IconPlus } from '@tabler/icons-react';
 import type { Table } from '@tanstack/react-table';
+import { SearchInput } from '@/components/common/search-input';
+import { Button } from '@/components/ui/button';
+import CollectionSelector from '@/features/collections/components/collection-selector';
 import type { Subscription } from '@/features/subscriptions';
 import { useNewSubscriptionModal } from '@/features/subscriptions/stores';
-import CollectionSelector from '../collections/collection-selector';
-import { SearchInput } from '../common/search-input';
-import { Button } from '../ui/button';
 import { DataTableFilter } from './data-table-filter';
 import { MonthlyViewSelector } from './monthly-view-selector';
 import MoreOptions from './more-options';

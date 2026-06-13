@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Switch } from '@/components/ui/switch';
 import type { Subscription } from '@/features/subscriptions';
 import {
   tableSizeAtom,
@@ -20,7 +21,6 @@ import {
   useImportDataModalState,
   useManageCategoriesModalState,
 } from '@/features/subscriptions/stores';
-import { Switch } from '../ui/switch';
 
 type MoreOptionsProps = {
   table: Table<Subscription>;

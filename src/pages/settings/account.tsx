@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
-import ConfirmDeleteAccountModal from '@/components/auth/confirm-delete-account-modal';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -19,6 +18,7 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from '@/components/ui/use-toast';
 import { authClient, useSession } from '@/features/auth/auth-client';
 import { AccountDetailsSchema } from '@/features/users';
+import ConfirmDeleteAccountModal from '@/features/users/components/confirm-delete-account-modal';
 import MainLayout from '@/layouts/main';
 import SettingsLayout from '@/layouts/settings';
 import { useModalState } from '@/lib/modal-state';

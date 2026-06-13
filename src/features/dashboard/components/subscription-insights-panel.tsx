@@ -1,5 +1,3 @@
-import SkeletonStatisticCard from '@/components/subscriptions/skeleton-statistic-card';
-import StatisticCard from '@/components/subscriptions/statistic-card';
 import {
   Accordion,
   AccordionContent,
@@ -9,6 +7,8 @@ import {
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { Subscription } from '@/features/subscriptions';
+import SkeletonStatisticCard from '@/features/subscriptions/components/skeleton-statistic-card';
+import StatisticCard from '@/features/subscriptions/components/statistic-card';
 import {
   getNextNMonths,
   getSubscriptionsInMonth,

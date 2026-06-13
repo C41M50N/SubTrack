@@ -1,7 +1,7 @@
-import { SubscriptionInsightsPanel } from '@/components/dashboard/subscription-insights-panel';
-import { SubscriptionsTableSection } from '@/components/dashboard/subscriptions-table-section';
-import { DashboardModalHost } from '@/components/subscriptions-table/dashboard-modal-host';
 import { Separator } from '@/components/ui/separator';
+import { DashboardModalHost } from '@/features/dashboard/components/dashboard-modal-host';
+import { SubscriptionInsightsPanel } from '@/features/dashboard/components/subscription-insights-panel';
+import { SubscriptionsTableSection } from '@/features/dashboard/components/subscriptions-table-section';
 import { useDashboardSubscriptionsView } from '@/features/dashboard/use-dashboard-subscriptions-view';
 import MainLayout from '@/layouts/main';
 
@@ -51,7 +51,9 @@ export default function DashboardPage() {
             searchQuery={searchQuery}
             selectedCategories={selectedCategories}
             selectedMonth={selectedMonth}
-            showTable={Boolean(user && subscriptions && !isSubscriptionsLoading)}
+            showTable={Boolean(
+              user && subscriptions && !isSubscriptionsLoading
+            )}
           />
         </div>
 

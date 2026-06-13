@@ -4,7 +4,6 @@ import { useAtom } from 'jotai';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import type z from 'zod';
-import { SubscriptionFormFields } from '@/components/subscriptions/subscription-form-fields';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -16,6 +15,7 @@ import {
 import { Form } from '@/components/ui/form';
 import { selectedCollectionIdAtom } from '@/features/collections/stores';
 import { CreateSubscriptionSchema } from '@/features/subscriptions';
+import { SubscriptionFormFields } from '@/features/subscriptions/components/subscription-form-fields';
 import { useCreateSubscription } from '@/features/subscriptions/hooks';
 import { useNewSubscriptionModal } from '@/features/subscriptions/stores';
 

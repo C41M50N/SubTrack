@@ -9,9 +9,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { toast } from '@/components/ui/use-toast';
 import type { ModalState } from '@/lib/modal-state';
 import { api } from '@/utils/api';
-import { toast } from '../ui/use-toast';
 
 type ConfirmDeleteAccountModalProps = {
   state: ModalState;

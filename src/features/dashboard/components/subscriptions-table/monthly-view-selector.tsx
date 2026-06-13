@@ -1,6 +1,5 @@
 import { CalendarDaysIcon } from 'lucide-react';
-import { getNextNMonths } from '@/features/subscriptions/filters';
-import { ScrollArea } from '../ui/scroll-area';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Select,
   SelectContent,
@@ -8,7 +7,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select';
+} from '@/components/ui/select';
+import { getNextNMonths } from '@/features/subscriptions/filters';
 
 type MonthlyViewSelectorProps = {
   selectedOption: string;

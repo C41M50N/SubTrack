@@ -1,7 +1,7 @@
 import type { ColumnDef, RowSelectionState } from '@tanstack/react-table';
 import { LoadingSpinner } from '@/components/common/loading-spinner';
-import DataTable from '@/components/subscriptions-table/data-table';
 import { Skeleton } from '@/components/ui/skeleton';
+import DataTable from '@/features/dashboard/components/subscriptions-table/data-table';
 import type { Subscription } from '@/features/subscriptions';
 
 const TABLE_SKELETON_ROW_KEYS = [
