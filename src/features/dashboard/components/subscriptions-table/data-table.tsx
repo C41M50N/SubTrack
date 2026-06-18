@@ -92,7 +92,7 @@ export default function DataTable({
         table={table}
       />
 
-      <div className="overflow-hidden rounded-lg border border-border/90 bg-card shadow-sm">
+      <div className="overflow-hidden rounded-lg border border-border/90 bg-card shadow-xs">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
