@@ -1,4 +1,4 @@
-import { TodoistApi } from '@doist/todoist-api-typescript';
+import { TodoistApi } from '@doist/todoist-sdk';
 import dayjs from 'dayjs';
 import { env } from '@/env.mjs';
 

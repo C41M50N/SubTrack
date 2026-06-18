@@ -1,6 +1,7 @@
 import { Analytics } from '@vercel/analytics/react';
 import type { AppType } from 'next/app';
 import { Geist, Geist_Mono } from 'next/font/google';
+import { useEffect } from 'react';
 
 import { api } from '@/utils/api';
 
@@ -19,10 +20,21 @@ const geistMono = Geist_Mono({
   display: 'swap',
 });
 
+const fontVariableClassNames = [geistSans.variable, geistMono.variable];
+
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? '';
 const ogImage = `${baseUrl}/dashboard.png`;
 
 const MyApp: AppType = ({ Component, pageProps: { ...pageProps } }) => {
+  // Radix portals mount under body, so expose the Next font variables there too.
+  useEffect(() => {
+    document.body.classList.add(...fontVariableClassNames);
+
+    return () => {
+      document.body.classList.remove(...fontVariableClassNames);
+    };
+  }, []);
+
   const keywords = [
     'manage subscriptions',
     'subscription manager',
