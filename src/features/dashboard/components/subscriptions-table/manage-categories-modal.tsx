@@ -1,5 +1,6 @@
 import { XIcon } from 'lucide-react';
 import React from 'react';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -34,7 +35,7 @@ function ManageCategoriesDialogContent({
 }: ManageCategoriesDialogContentProps) {
   const initialCategoriesRef = React.useRef(categories);
   const [draftCategories, setDraftCategories] = React.useState<string[]>(
-    initialCategoriesRef.current
+    initialCategoriesRef.current,
   );
   const [inputValue, setInputValue] = React.useState('');
 
@@ -49,7 +50,7 @@ function ManageCategoriesDialogContent({
 
   function removeCategory(category: string) {
     setDraftCategories((currentDraftCategories) =>
-      currentDraftCategories.filter((cat) => cat !== category)
+      currentDraftCategories.filter((cat) => cat !== category),
     );
   }
 

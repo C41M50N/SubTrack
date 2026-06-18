@@ -1,4 +1,3 @@
-
 SubTrack is a subscription management tool that helps users keep track of their subscriptions, manage billing, and analyze spending.
 
 ## Product Details
@@ -8,7 +7,6 @@ SubTrack offers a range of features to help users manage their subscriptions eff
 - **Subscription Tracking**: Keep track of all your subscriptions in one place.
 - **Billing Management**: Manage billing cycles and payment methods easily.
 - **Spending Analysis**: Gain insights into your spending habits and identify areas for savings.
-
 
 ## Technical Details
 
@@ -22,10 +20,13 @@ SubTrack is built using modern web technologies, ensuring a responsive and user-
 - **Tailwind CSS**: Styling is managed with Tailwind CSS, enabling rapid UI development with utility-first CSS classes.
 
 ### Database
+
 SubTrack uses a PostgreSQL database to store user subscriptions, billing information, and usage data. The database is designed for scalability and performance, ensuring quick access to subscription data and efficient billing processes.
 
 ### API
+
 SubTrack provides a RESTful API for integrating with other applications and services. The API allows for programmatic access to subscription data, making it easy to build custom solutions on top of the SubTrack platform.
 
 ### Authentication
+
 SubTrack uses JWT (JSON Web Tokens) for authentication and authorization. Users can sign up and log in to their accounts securely, and the API enforces access controls based on user roles and permissions.

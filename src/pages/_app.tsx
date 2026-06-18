@@ -1,12 +1,11 @@
 import { Analytics } from '@vercel/analytics/react';
 import type { AppType } from 'next/app';
 import { Geist, Geist_Mono } from 'next/font/google';
+import Head from 'next/head';
 import { useEffect } from 'react';
 
-import { api } from '@/utils/api';
-
 import '@/styles/globals.css';
-import Head from 'next/head';
+import { api } from '@/utils/api';
 
 const geistSans = Geist({
   subsets: ['latin'],

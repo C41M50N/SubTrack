@@ -1,5 +1,6 @@
 import { IconArrowsExchange } from '@tabler/icons-react';
 import React from 'react';
+
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -37,13 +38,13 @@ export default function MoveSubscriptionModal({
   const destinationCollections = React.useMemo(
     () =>
       collections.filter(
-        (collection) => collection.id !== subscription.collection_id
+        (collection) => collection.id !== subscription.collection_id,
       ),
-    [collections, subscription.collection_id]
+    [collections, subscription.collection_id],
   );
 
   const [destinationCollectionId, setDestinationCollectionId] = React.useState(
-    destinationCollections[0]?.id ?? ''
+    destinationCollections[0]?.id ?? '',
   );
 
   React.useEffect(() => {

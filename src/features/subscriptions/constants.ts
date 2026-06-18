@@ -1,11 +1,4 @@
-export const FREQUENCIES = [
-  'weekly',
-  'bi-weekly',
-  'monthly',
-  'bi-monthly',
-  'yearly',
-  'bi-yearly',
-] as const;
+export const FREQUENCIES = ['weekly', 'bi-weekly', 'monthly', 'bi-monthly', 'yearly', 'bi-yearly'] as const;
 
 export const ICONS = [
   'default',

@@ -1,4 +1,5 @@
 import type { Dayjs, ManipulateType } from 'dayjs';
+
 import type { SubscriptionFrequency } from './constants';
 
 type FrequencyBillingConfig = {
@@ -8,10 +9,7 @@ type FrequencyBillingConfig = {
   compactDisplayText: string;
 };
 
-export const FREQUENCY_BILLING_CONFIG: Record<
-  SubscriptionFrequency,
-  FrequencyBillingConfig
-> = {
+export const FREQUENCY_BILLING_CONFIG: Record<SubscriptionFrequency, FrequencyBillingConfig> = {
   weekly: {
     stepAmount: 1,
     stepUnit: 'week',
@@ -50,11 +48,7 @@ export const FREQUENCY_BILLING_CONFIG: Record<
   },
 };
 
-export function stepInvoiceDate(
-  dir: 'fwd' | 'bwd',
-  curr: Dayjs,
-  frequency: SubscriptionFrequency
-): Dayjs {
+export function stepInvoiceDate(dir: 'fwd' | 'bwd', curr: Dayjs, frequency: SubscriptionFrequency): Dayjs {
   const { stepAmount, stepUnit } = FREQUENCY_BILLING_CONFIG[frequency];
 
   if (dir === 'fwd') {
@@ -63,11 +57,7 @@ export function stepInvoiceDate(
   return curr.subtract(stepAmount, stepUnit);
 }
 
-export function getNextInvoiceDate(
-  current: Dayjs,
-  frequency: SubscriptionFrequency,
-  now: Dayjs
-): Dayjs {
+export function getNextInvoiceDate(current: Dayjs, frequency: SubscriptionFrequency, now: Dayjs): Dayjs {
   let nextInvoiceDate = stepInvoiceDate('fwd', current, frequency);
 
   while (nextInvoiceDate.isBefore(now)) {
@@ -77,10 +67,7 @@ export function getNextInvoiceDate(
   return nextInvoiceDate;
 }
 
-export function frequencyToDisplayText(
-  frequency: SubscriptionFrequency,
-  compact = false
-): string {
+export function frequencyToDisplayText(frequency: SubscriptionFrequency, compact = false): string {
   const config = FREQUENCY_BILLING_CONFIG[frequency];
   return compact ? config.compactDisplayText : config.displayText;
 }

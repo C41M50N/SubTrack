@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import type { GetServerSidePropsContext } from 'next/types';
+
 import { Button } from '@/components/ui/button';
 import {
   Card,

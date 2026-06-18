@@ -1,4 +1,5 @@
 import { z } from 'zod';
+
 import type { AuthenticatedContext } from '@/server/api/trpc';
 
 export const DeleteSubscriptionProps = z.object({
@@ -7,7 +8,7 @@ export const DeleteSubscriptionProps = z.object({
 
 export default async function deleteSubscription(
   ctx: AuthenticatedContext,
-  input: z.infer<typeof DeleteSubscriptionProps>
+  input: z.infer<typeof DeleteSubscriptionProps>,
 ) {
   await ctx.db.subscription.delete({
     where: {

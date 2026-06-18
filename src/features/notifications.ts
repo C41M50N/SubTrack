@@ -1,7 +1,8 @@
-/** biome-ignore-all lint/style/noNonNullAssertion: renewed subscriptions always include last_invoice */
 import dayjs from 'dayjs';
 import { WebhookClient } from 'discord.js';
+
 import { env } from '@/env.mjs';
+
 import type { Subscription } from './subscriptions';
 import { frequencyToDisplayText } from './subscriptions/billing';
 import type { SubscriptionFrequency } from './subscriptions/constants';
@@ -16,18 +17,12 @@ class DiscordNotifications {
     this.client = new WebhookClient({ url: webhookUrl });
   }
 
-  async sendMonthlyReviewNotification(
-    renewingSubs: Subscription[],
-    renewedSubs: Subscription[]
-  ): Promise<void> {
+  async sendMonthlyReviewNotification(renewingSubs: Subscription[], renewedSubs: Subscription[]): Promise<void> {
     let message = `# ${dayjs().format('MMMM')} Subscriptions Review\n`;
 
     if (renewingSubs.length > 0) {
       message += '## Subscriptions Renewing This Month\n';
-      const totalAmount = renewingSubs.reduce(
-        (sum, sub) => sum + sub.amount,
-        0
-      );
+      const totalAmount = renewingSubs.reduce((sum, sub) => sum + sub.amount, 0);
       message += `**${toMoneyString(totalAmount)} from ${renewingSubs.length} subscriptions.**\n`;
       message += `${renewingSubs.map((sub) => `- ${sub.name} renewing on <t:${Math.floor(sub.next_invoice.getTime() / SECONDS_PER_MILLISECOND)}:R> (${toMoneyString(sub.amount)}/${frequencyToDisplayText(sub.frequency as SubscriptionFrequency)})`).join('\n')}\n`;
     }

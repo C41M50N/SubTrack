@@ -1,11 +1,7 @@
 import type { Subscription as SubscriptionPrisma } from '@prisma/client';
 import { z } from 'zod';
-import {
-  FREQUENCIES,
-  ICONS,
-  type SubscriptionFrequency,
-  type SubscriptionIcon,
-} from './constants';
+
+import { FREQUENCIES, ICONS, type SubscriptionFrequency, type SubscriptionIcon } from './constants';
 
 const SUBSCRIPTION_NAME_MIN_LENGTH = 2;
 const SUBSCRIPTION_NAME_MAX_LENGTH = 30;

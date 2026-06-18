@@ -1,5 +1,7 @@
 import type { z } from 'zod';
+
 import type { AuthenticatedContext } from '@/server/api/trpc';
+
 import type { CreateSubscriptionSchema } from '..';
 import { toCents } from '../money';
 
@@ -7,7 +9,7 @@ const MAX_SUBSCRIPTIONS = 300;
 
 export default async function createSubscription(
   ctx: AuthenticatedContext,
-  input: z.infer<typeof CreateSubscriptionSchema>
+  input: z.infer<typeof CreateSubscriptionSchema>,
 ) {
   const collection = await ctx.db.collection.findFirst({
     where: {
@@ -30,7 +32,7 @@ export default async function createSubscription(
 
   if (numOfSubscriptions + 1 > MAX_SUBSCRIPTIONS) {
     throw new Error(
-      'You have reached your subscription limit for this collection. You can have at most 300 subscriptions at a time in a collection.'
+      'You have reached your subscription limit for this collection. You can have at most 300 subscriptions at a time in a collection.',
     );
   }
 

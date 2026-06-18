@@ -19,9 +19,7 @@ type ModalStateStoreState = {
   set: (state: ModalState['state']) => void;
 };
 
-export function createModalStateStore({
-  defaultState = 'closed',
-}: CreateModalStateStoreParams) {
+export function createModalStateStore({ defaultState = 'closed' }: CreateModalStateStoreParams) {
   return create<ModalStateStoreState>((set) => ({
     state: defaultState,
     set(newState) {

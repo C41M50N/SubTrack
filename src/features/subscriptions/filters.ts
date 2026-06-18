@@ -1,5 +1,7 @@
 import type { Dayjs } from 'dayjs';
+
 import dayjs from '@/lib/dayjs';
+
 import { stepInvoiceDate } from './billing';
 import type { SubscriptionFrequency } from './constants';
 
@@ -19,21 +21,15 @@ export function getNextNMonths(count: number): Dayjs[] {
 export function getSubscriptionsInMonth<T extends ScheduledSubscription>(
   subscriptions: T[],
   month: number,
-  year: number
+  year: number,
 ): T[] {
   const start = dayjs().set('month', month).set('year', year).startOf('month');
   const end = start.endOf('month');
 
-  return subscriptions.filter((subscription) =>
-    subscriptionRenewsInPeriod(subscription, start, end)
-  );
+  return subscriptions.filter((subscription) => subscriptionRenewsInPeriod(subscription, start, end));
 }
 
-function subscriptionRenewsInPeriod(
-  subscription: ScheduledSubscription,
-  start: Dayjs,
-  end: Dayjs
-): boolean {
+function subscriptionRenewsInPeriod(subscription: ScheduledSubscription, start: Dayjs, end: Dayjs): boolean {
   let invoiceDate = dayjs(subscription.next_invoice);
   while (!invoiceDate.isBefore(start)) {
     invoiceDate = stepInvoiceDate('bwd', invoiceDate, subscription.frequency);

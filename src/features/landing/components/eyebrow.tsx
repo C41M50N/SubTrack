@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+
 import { cn } from '@/utils';
 
 type EyebrowProps = {
@@ -17,7 +18,7 @@ export function Eyebrow({ children, className, tone = 'light' }: EyebrowProps) {
       className={cn(
         'inline-flex items-center gap-2 font-medium text-xs uppercase tracking-[0.2em]',
         tone === 'light' ? 'text-brand-600' : 'text-brand-200',
-        className
+        className,
       )}
     >
       {children}

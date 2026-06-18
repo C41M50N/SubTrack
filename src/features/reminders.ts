@@ -1,5 +1,6 @@
 import { TodoistApi } from '@doist/todoist-sdk';
 import dayjs from 'dayjs';
+
 import { env } from '@/env.mjs';
 
 class TodoistReminders {
@@ -27,7 +28,4 @@ class TodoistReminders {
   }
 }
 
-export const reminders = new TodoistReminders(
-  env.TODOIST_API_KEY,
-  env.TODOIST_PROJECT_ID
-);
+export const reminders = new TodoistReminders(env.TODOIST_API_KEY, env.TODOIST_PROJECT_ID);

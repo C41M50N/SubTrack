@@ -14,6 +14,5 @@ export const PasswordSchema = z
     message: 'password must include at least one number',
   })
   .refine((password) => /[!@#$%^&*]/.test(password), {
-    message:
-      'password must include at least one of the following special characters: ! @ # $ % ^ & *',
+    message: 'password must include at least one of the following special characters: ! @ # $ % ^ & *',
   });

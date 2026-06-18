@@ -6,6 +6,7 @@ import Image from 'next/image';
 import type { ReactNode } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import type z from 'zod';
+
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -102,7 +103,7 @@ export function SubscriptionFormFields({
                   <Button
                     className={cn(
                       'w-full justify-between',
-                      !field.value && 'text-muted-foreground'
+                      !field.value && 'text-muted-foreground',
                     )}
                     role="combobox"
                     variant="outline"
@@ -134,7 +135,7 @@ export function SubscriptionFormFields({
                         <Check
                           className={cn(
                             'mr-2 h-4 w-4',
-                            icon === field.value ? 'opacity-100' : 'opacity-0'
+                            icon === field.value ? 'opacity-100' : 'opacity-0',
                           )}
                         />
                         <span className="flex flex-row items-center gap-2">
@@ -256,7 +257,7 @@ export function SubscriptionFormFields({
                   <Button
                     className={cn(
                       'w-full gap-2 pl-3 text-left font-normal',
-                      !field.value && 'text-muted-foreground'
+                      !field.value && 'text-muted-foreground',
                     )}
                     variant="outline"
                   >

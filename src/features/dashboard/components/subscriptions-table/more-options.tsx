@@ -2,6 +2,7 @@
 import type { Table } from '@tanstack/react-table';
 import { useAtom } from 'jotai';
 import { DownloadIcon, ImportIcon, SettingsIcon } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -48,7 +49,7 @@ export default function MoreOptions(props: MoreOptionsProps) {
             (column) =>
               typeof column.accessorFn !== 'undefined' &&
               column.getCanHide() &&
-              column.id !== 'id'
+              column.id !== 'id',
           )
           .map((column) => {
             return (

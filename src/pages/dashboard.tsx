@@ -1,6 +1,7 @@
 import type { RowSelectionState } from '@tanstack/react-table';
 import { useAtom } from 'jotai';
 import React from 'react';
+
 import { Separator } from '@/components/ui/separator';
 import { useCategories } from '@/features/categories/hooks';
 import { useCollections } from '@/features/collections/hooks';
@@ -19,7 +20,7 @@ import MainLayout from '@/layouts/main';
 export default function DashboardPage() {
   const { user } = useUser();
   const [selectedCollectionId, setSelectedCollectionId] = useAtom(
-    selectedCollectionIdAtom
+    selectedCollectionIdAtom,
   );
   const { collections } = useCollections();
   const { subscriptions, isSubscriptionsLoading } =
@@ -29,7 +30,7 @@ export default function DashboardPage() {
   const [selectedMonth, setSelectedMonth] = React.useState(ALL_MONTHS_FILTER);
   const [searchQuery, setSearchQuery] = React.useState('');
   const [selectedCategories, setSelectedCategories] = React.useState<string[]>(
-    []
+    [],
   );
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
 
@@ -40,7 +41,7 @@ export default function DashboardPage() {
         selectedCategories,
         selectedMonth,
       }),
-    [searchQuery, selectedCategories, selectedMonth, subscriptions]
+    [searchQuery, selectedCategories, selectedMonth, subscriptions],
   );
 
   React.useEffect(() => {
@@ -52,9 +53,9 @@ export default function DashboardPage() {
   const selectedVisibleSubscriptions = React.useMemo(
     () =>
       visibleSubscriptions.filter(
-        (subscription) => rowSelection[subscription.id] === true
+        (subscription) => rowSelection[subscription.id] === true,
       ),
-    [rowSelection, visibleSubscriptions]
+    [rowSelection, visibleSubscriptions],
   );
 
   const subscriptionsForInsights =
@@ -92,7 +93,7 @@ export default function DashboardPage() {
             selectedCategories={selectedCategories}
             selectedMonth={selectedMonth}
             showTable={Boolean(
-              user && subscriptions && !isSubscriptionsLoading
+              user && subscriptions && !isSubscriptionsLoading,
             )}
           />
         </div>

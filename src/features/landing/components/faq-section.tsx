@@ -6,6 +6,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+
 import { AnimatedSection } from './animated-section';
 import { Eyebrow } from './eyebrow';
 

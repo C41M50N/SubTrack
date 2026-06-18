@@ -15,7 +15,9 @@ import type { Session } from 'better-auth/types';
 import type { GetServerSidePropsContext } from 'next';
 import superjson from 'superjson';
 import { ZodError } from 'zod';
+
 import { prisma } from '@/server/db';
+
 import { auth } from '../auth';
 
 /**
@@ -44,7 +46,7 @@ function createInnerTRPCContext(opts: CreateContextOptions) {
 }
 
 export async function getServerAuthSession(
-  req: CreateNextContextOptions['req'] | GetServerSidePropsContext['req']
+  req: CreateNextContextOptions['req'] | GetServerSidePropsContext['req'],
 ): Promise<AuthenticatedSession | null> {
   const session = await auth.api.getSession({
     headers: fromNodeHeaders(req.headers),
@@ -79,7 +81,7 @@ export type UnauthenticatedContext = {
 };
 
 export async function createTRPCContext(
-  opts: CreateNextContextOptions
+  opts: CreateNextContextOptions,
 ): Promise<AuthenticatedContext | UnauthenticatedContext> {
   const session = await getServerAuthSession(opts.req);
   return createInnerTRPCContext({
@@ -105,8 +107,7 @@ const t = initTRPC.context<Context>().create({
       ...shape,
       data: {
         ...shape.data,
-        zodError:
-          error.cause instanceof ZodError ? error.cause.flatten() : null,
+        zodError: error.cause instanceof ZodError ? error.cause.flatten() : null,
       },
     };
   },

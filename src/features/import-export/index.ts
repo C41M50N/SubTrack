@@ -1,4 +1,5 @@
 import { z } from 'zod';
+
 import { FREQUENCIES, ICONS } from '../subscriptions/constants';
 
 const DATE_PART_COUNT = 3;
@@ -48,19 +49,17 @@ export const DataSchema = z
         icon_ref: z.enum(ICONS),
         send_alert: z.boolean(),
         collection: z.string(),
-      })
+      }),
     ),
   })
   .refine(
     (data) => {
       // Check that all categories exist
-      return data.subscriptions.every((subscription) =>
-        data.categories.includes(subscription.category)
-      );
+      return data.subscriptions.every((subscription) => data.categories.includes(subscription.category));
     },
     {
       message: 'All subscription categories must exist in the categories array',
-    }
+    },
   )
   .refine(
     (data) => {
@@ -75,12 +74,10 @@ export const DataSchema = z
           subs.push(subscription.name);
           return acc;
         },
-        {} as Record<string, string[]>
+        {} as Record<string, string[]>,
       );
 
-      return Object.values(collectionGroups).every(
-        (names) => names.length === new Set(names).size
-      );
+      return Object.values(collectionGroups).every((names) => names.length === new Set(names).size);
     },
-    { message: 'Subscription names must be unique across all collections' }
+    { message: 'Subscription names must be unique across all collections' },
   );

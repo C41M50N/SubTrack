@@ -1,7 +1,9 @@
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
+
 import { env } from '@/env.mjs';
 import initializeUserData from '@/features/users/actions/initialize-user-data';
+
 import { prisma } from './db';
 
 export const auth = betterAuth({

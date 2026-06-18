@@ -5,6 +5,7 @@ import type {
 } from 'next';
 import type { ChangeEvent } from 'react';
 import React from 'react';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -46,7 +47,7 @@ export default function DataSettingsPage({
     const _file = new File(
       [exportDataJSON],
       `subscriptions_${dayjs().format('YYYYMMDD_X')}.subtrack.json`,
-      { type: 'application/json' }
+      { type: 'application/json' },
     );
     downloadFile(_file);
   }

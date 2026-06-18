@@ -1,6 +1,7 @@
 import * as SwitchPrimitives from '@radix-ui/react-switch';
 import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
+
 import { cn } from '@/utils';
 
 const switchVariants = cva(
@@ -22,11 +23,12 @@ const switchVariants = cva(
       variant: 'default',
       size: 'default',
     },
-  }
+  },
 );
 
 export interface SwitchProps
-  extends React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>,
+  extends
+    React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>,
     VariantProps<typeof switchVariants> {}
 
 const Switch = React.forwardRef<
@@ -48,7 +50,7 @@ const Switch = React.forwardRef<
         className={cn(
           'data-[state=unchecked]:-translate-x-1 pointer-events-none block size-5 rounded-full bg-background shadow-lg ring-0 transition-transform',
           notchSize,
-          notchPosition
+          notchPosition,
         )}
       />
     </SwitchPrimitives.Root>
