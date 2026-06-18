@@ -80,5 +80,12 @@
   },
   "ct3aMetadata": {
     "initVersion": "7.19.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "@discordjs/ws>@discordjs/rest": "2.6.1",
+      "better-auth>vitest": "4.1.8",
+      "next>postcss": "8.5.15"
+    }
   }
 }
