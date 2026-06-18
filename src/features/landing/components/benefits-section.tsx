@@ -60,7 +60,7 @@ export function BenefitsSection() {
         <AnimatedStaggerContainer className="mt-12 grid gap-6 md:grid-cols-3">
           {benefits.map((benefit) => (
             <AnimatedStaggerItem key={benefit.title}>
-              <div className="group hover:-translate-y-1 h-full rounded-xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:bg-white/[0.07]">
+              <div className="group hover:-translate-y-1 h-full rounded-xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-xs transition-all duration-300 hover:border-white/20 hover:bg-white/[0.07]">
                 <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-white/10 text-brand-200 ring-1 ring-white/10 transition-colors duration-300 group-hover:bg-white/15">
                   <benefit.icon className="h-5 w-5" />
                 </div>

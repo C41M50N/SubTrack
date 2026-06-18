@@ -41,7 +41,7 @@ export function AccessSection() {
                   className="flex items-start gap-3 text-gray-700"
                   key={point}
                 >
-                  <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-600 ring-1 ring-brand-100">
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-600 ring-1 ring-brand-100">
                     <IconCheck className="h-3.5 w-3.5" stroke={2.5} />
                   </span>
                   <span>{point}</span>

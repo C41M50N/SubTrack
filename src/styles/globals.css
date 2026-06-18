@@ -1,69 +1,162 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@import "tw-animate-css";
 
-@layer base {
-  :root {
-    --background: 214 32% 96%;
-    --foreground: 222 47% 11%;
+@custom-variant dark (&:where(.dark, .dark *));
 
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+@theme inline {
+  --font-sans: var(--font-geist-sans, ui-sans-serif), ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-geist-mono, ui-monospace), ui-monospace,
+    "SFMono-Regular", Menlo, monospace;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
 
-    --primary: 220.9 39.3% 11%;
-    --primary-foreground: 210 20% 98%;
+  --color-brand: #516282;
+  --color-brand-foreground: #ffffff;
+  --color-brand-50: #f4f6fa;
+  --color-brand-100: #e7ebf2;
+  --color-brand-200: #cfd7e4;
+  --color-brand-300: #aab8cf;
+  --color-brand-400: #7d8fb0;
+  --color-brand-500: #5d6f92;
+  --color-brand-600: #516282;
+  --color-brand-700: #43526c;
+  --color-brand-800: #39455a;
+  --color-brand-900: #323b4d;
 
-    --secondary: 214 26% 92%;
-    --secondary-foreground: 222 47% 11%;
+  --color-ink: #0c1322;
+  --color-ink-50: #11192b;
+  --color-ink-100: #161f34;
+  --color-ink-200: #1d2840;
 
-    --muted: 210 24% 97%;
-    --muted-foreground: 215 16% 38%;
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
 
-    --accent: 214 36% 93%;
-    --accent-foreground: 222 47% 11%;
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 20% 98%;
+  --shadow-brand-xs: 0 1px 2px 0 rgb(28 40 64 / 0.06);
+  --shadow-brand-sm: 0 1px 2px 0 rgb(28 40 64 / 0.06),
+    0 1px 3px 0 rgb(28 40 64 / 0.08);
+  --shadow-brand: 0 10px 30px -12px rgb(28 40 64 / 0.22),
+    0 2px 8px -4px rgb(28 40 64 / 0.12);
+  --shadow-brand-lg: 0 30px 60px -24px rgb(28 40 64 / 0.32),
+    0 8px 24px -12px rgb(28 40 64 / 0.18);
 
-    --border: 215 24% 84%;
-    --input: 214 24% 88%;
-    --ring: 215 32% 42%;
+  --animate-accordion-down: accordion-down 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-accordion-up: accordion-up 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 
-    --radius: 0.5rem;
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
   }
 
-  .dark {
-    --background: 224 71.4% 4.1%;
-    --foreground: 210 20% 98%;
-
-    --card: 224 71.4% 4.1%;
-    --card-foreground: 210 20% 98%;
-
-    --popover: 224 71.4% 4.1%;
-    --popover-foreground: 210 20% 98%;
-
-    --primary: 210 20% 98%;
-    --primary-foreground: 220.9 39.3% 11%;
-
-    --secondary: 215 27.9% 16.9%;
-    --secondary-foreground: 210 20% 98%;
-
-    --muted: 215 27.9% 16.9%;
-    --muted-foreground: 217.9 10.6% 64.9%;
-
-    --accent: 215 27.9% 16.9%;
-    --accent-foreground: 210 20% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 20% 98%;
-
-    --border: 215 27.9% 16.9%;
-    --input: 215 27.9% 16.9%;
-    --ring: 216 12.2% 83.9%;
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
   }
+}
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: 2rem;
+
+  @media (width >= 1400px) {
+    max-width: 1400px;
+  }
+}
+
+@utility grain-overlay {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+:root {
+  --background: hsl(214 32% 96%);
+  --foreground: hsl(222 47% 11%);
+
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(222 47% 11%);
+
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(222 47% 11%);
+
+  --primary: hsl(220.9 39.3% 11%);
+  --primary-foreground: hsl(210 20% 98%);
+
+  --secondary: hsl(214 26% 92%);
+  --secondary-foreground: hsl(222 47% 11%);
+
+  --muted: hsl(210 24% 97%);
+  --muted-foreground: hsl(215 16% 38%);
+
+  --accent: hsl(214 36% 93%);
+  --accent-foreground: hsl(222 47% 11%);
+
+  --destructive: hsl(0 84.2% 60.2%);
+  --destructive-foreground: hsl(210 20% 98%);
+
+  --border: hsl(215 24% 84%);
+  --input: hsl(214 24% 88%);
+  --ring: hsl(215 32% 42%);
+
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: hsl(224 71.4% 4.1%);
+  --foreground: hsl(210 20% 98%);
+
+  --card: hsl(224 71.4% 4.1%);
+  --card-foreground: hsl(210 20% 98%);
+
+  --popover: hsl(224 71.4% 4.1%);
+  --popover-foreground: hsl(210 20% 98%);
+
+  --primary: hsl(210 20% 98%);
+  --primary-foreground: hsl(220.9 39.3% 11%);
+
+  --secondary: hsl(215 27.9% 16.9%);
+  --secondary-foreground: hsl(210 20% 98%);
+
+  --muted: hsl(215 27.9% 16.9%);
+  --muted-foreground: hsl(217.9 10.6% 64.9%);
+
+  --accent: hsl(215 27.9% 16.9%);
+  --accent-foreground: hsl(210 20% 98%);
+
+  --destructive: hsl(0 62.8% 30.6%);
+  --destructive-foreground: hsl(210 20% 98%);
+
+  --border: hsl(215 27.9% 16.9%);
+  --input: hsl(215 27.9% 16.9%);
+  --ring: hsl(216 12.2% 83.9%);
 }
 
 @layer base {
@@ -98,14 +191,6 @@
   /* Tabular figures for numeric/data contexts. */
   .tabular-nums {
     font-variant-numeric: tabular-nums;
-  }
-}
-
-@layer utilities {
-  /* Subtle film grain to break up flat surfaces. Overlay on a relative parent. */
-  .grain-overlay {
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    background-size: 180px 180px;
   }
 }
 

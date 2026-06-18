@@ -83,7 +83,7 @@ export function HeroSection() {
           />
 
           {/* Outer tray + inner screen (nested "device" frame). */}
-          <div className="mx-auto max-w-5xl rounded-2xl border border-gray-200/70 bg-gray-50/70 p-1.5 shadow-brand-lg backdrop-blur-sm sm:p-2">
+          <div className="mx-auto max-w-5xl rounded-2xl border border-gray-200/70 bg-gray-50/70 p-1.5 shadow-brand-lg backdrop-blur-xs sm:p-2">
             <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
               <div className="flex h-10 items-center gap-3 border-gray-100 border-b bg-gray-50/80 px-4">
                 <div className="flex gap-1.5">

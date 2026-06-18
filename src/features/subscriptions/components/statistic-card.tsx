@@ -11,7 +11,7 @@ export default function StatisticCard({
   description,
 }: StatisticCardProps) {
   return (
-    <Card className="bg-card shadow-sm">
+    <Card className="bg-card shadow-xs">
       <CardContent className="py-2">
         <div className="font-bold text-2xl">≈ {toMoneyString(value)}</div>
         <p className="text-muted-foreground text-sm">{description}</p>
