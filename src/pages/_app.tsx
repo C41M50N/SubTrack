@@ -1,10 +1,26 @@
 import { Analytics } from '@vercel/analytics/react';
 import type { AppType } from 'next/app';
+import { Geist, Geist_Mono } from 'next/font/google';
 
 import { api } from '@/utils/api';
 
 import '@/styles/globals.css';
 import Head from 'next/head';
+
+const geistSans = Geist({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+});
+
+const geistMono = Geist_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+  display: 'swap',
+});
+
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? '';
+const ogImage = `${baseUrl}/dashboard.png`;
 
 const MyApp: AppType = ({ Component, pageProps: { ...pageProps } }) => {
   const keywords = [
@@ -25,8 +41,43 @@ const MyApp: AppType = ({ Component, pageProps: { ...pageProps } }) => {
     <>
       <Head>
         <title>SubTrack | A Subscriptions Tracking Dashboard</title>
-        <meta content="A Subscriptions Tracking Dashboard" name="description" />
+        <meta
+          content="Track recurring costs, renewal dates, and total subscription spend in one clean dashboard — no bank linking required."
+          name="description"
+        />
         <meta content={keywords.join(', ')} key="keywords" name="keywords" />
+        <meta content="#ffffff" name="theme-color" />
+        <meta content="light" name="color-scheme" />
+
+        {/* Open Graph */}
+        <meta content="website" property="og:type" />
+        <meta content="SubTrack" property="og:site_name" />
+        <meta
+          content="SubTrack — subscription tracking, without bank linking"
+          property="og:title"
+        />
+        <meta
+          content="A clean dashboard for recurring costs, renewal dates, categories, and exports. Open source and manually controlled."
+          property="og:description"
+        />
+        <meta content={ogImage} property="og:image" />
+        <meta
+          content="SubTrack dashboard showing a subscription table and spending insights"
+          property="og:image:alt"
+        />
+
+        {/* Twitter */}
+        <meta content="summary_large_image" name="twitter:card" />
+        <meta
+          content="SubTrack — subscription tracking, without bank linking"
+          name="twitter:title"
+        />
+        <meta
+          content="A clean dashboard for recurring costs, renewal dates, categories, and exports. Open source and manually controlled."
+          name="twitter:description"
+        />
+        <meta content={ogImage} name="twitter:image" />
+
         <link
           href="/apple-touch-icon.png"
           rel="apple-touch-icon"
@@ -46,7 +97,9 @@ const MyApp: AppType = ({ Component, pageProps: { ...pageProps } }) => {
         />
         <link href="/site.webmanifest" rel="manifest" />
       </Head>
-      <Component {...pageProps} />
+      <div className={`${geistSans.variable} ${geistMono.variable} font-sans`}>
+        <Component {...pageProps} />
+      </div>
       <Analytics />
     </>
   );
