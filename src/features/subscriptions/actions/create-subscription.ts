@@ -9,6 +9,18 @@ export default async function createSubscription(
   ctx: AuthenticatedContext,
   input: z.infer<typeof CreateSubscriptionSchema>
 ) {
+  const collection = await ctx.db.collection.findFirst({
+    where: {
+      id: input.collection_id,
+      user_id: ctx.session.user.id,
+    },
+    select: { id: true },
+  });
+
+  if (!collection) {
+    throw new Error('Collection not found.');
+  }
+
   const numOfSubscriptions = await ctx.db.subscription.count({
     where: {
       user_id: ctx.session.user.id,
