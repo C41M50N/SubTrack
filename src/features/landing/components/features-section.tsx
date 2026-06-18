@@ -11,6 +11,7 @@ import {
 import Image from 'next/image';
 import { cn } from '@/utils';
 import { AnimatedSection } from './animated-section';
+import { Eyebrow } from './eyebrow';
 
 const features = [
   {
@@ -62,10 +63,11 @@ export function FeaturesSection() {
     <section className="py-16 md:py-24" id="features">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <AnimatedSection className="mx-auto max-w-2xl text-center">
-          <h2 className="font-bold text-3xl text-gray-950 tracking-tight sm:text-4xl">
+          <Eyebrow>Features</Eyebrow>
+          <h2 className="mt-4 text-balance font-bold text-3xl text-gray-950 tracking-tight sm:text-4xl">
             Built around the subscription workflow
           </h2>
-          <p className="mt-4 text-gray-600 text-lg leading-8">
+          <p className="mt-4 text-pretty text-gray-600 text-lg leading-8">
             The app stays focused on the core loop: add what you pay for,
             organize it, understand the total, and keep your data portable.
           </p>
@@ -81,21 +83,21 @@ export function FeaturesSection() {
                 )}
               >
                 <div>
-                  <div className="flex h-11 w-11 items-center justify-center rounded-md border border-gray-200 bg-white">
-                    <feature.icon className="h-5 w-5 text-[#516282]" />
+                  <div className="flex h-11 w-11 items-center justify-center rounded-lg border border-brand-100 bg-brand-50 text-brand-600">
+                    <feature.icon className="h-5 w-5" />
                   </div>
-                  <h3 className="mt-5 font-semibold text-2xl text-gray-950">
+                  <h3 className="mt-5 text-balance font-semibold text-2xl text-gray-950 tracking-tight">
                     {feature.title}
                   </h3>
-                  <p className="mt-3 max-w-xl text-gray-600 text-lg leading-8">
+                  <p className="mt-3 max-w-xl text-pretty text-gray-600 text-lg leading-8">
                     {feature.description}
                   </p>
                 </div>
 
-                <div className="overflow-hidden rounded-lg border border-gray-200 bg-gray-50 p-4 sm:p-6 lg:p-8">
+                <div className="group rounded-2xl border border-gray-200/70 bg-gray-50/80 p-2 shadow-brand transition-all duration-300 hover:shadow-brand-lg sm:p-3">
                   <Image
-                    alt={feature.title}
-                    className="w-full rounded-md border border-gray-200 bg-white"
+                    alt={`${feature.title} — SubTrack interface`}
+                    className="w-full rounded-xl border border-gray-200 bg-white transition-transform duration-500 group-hover:scale-[1.01]"
                     height={400}
                     src={feature.image}
                     width={600}

@@ -10,8 +10,11 @@ import { ProblemSection } from '@/features/landing/components/problem-section';
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-white">
-      <div className="-z-10 fixed inset-0 h-full w-full bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]" />
+    <div className="min-h-dvh bg-white">
+      <div
+        aria-hidden="true"
+        className="-z-10 pointer-events-none fixed inset-0 h-full w-full bg-[linear-gradient(to_right,#5162820f_1px,transparent_1px),linear-gradient(to_bottom,#5162820f_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_75%_55%_at_50%_0%,#000,transparent)]"
+      />
 
       <Header />
 

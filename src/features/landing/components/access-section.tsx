@@ -4,6 +4,7 @@ import { IconBrandGithub, IconCheck } from '@tabler/icons-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { AnimatedSection } from './animated-section';
+import { Eyebrow } from './eyebrow';
 import { LandingPrimaryAction } from './landing-action';
 
 const accessPoints = [
@@ -21,10 +22,11 @@ export function AccessSection() {
     >
       <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 md:grid-cols-[1fr_0.85fr] lg:px-8">
         <AnimatedSection>
-          <h2 className="font-bold text-3xl text-gray-950 tracking-tight sm:text-4xl">
+          <Eyebrow>Get started</Eyebrow>
+          <h2 className="mt-4 text-balance font-bold text-3xl text-gray-950 tracking-tight sm:text-4xl">
             Start with the app, or inspect the code first
           </h2>
-          <p className="mt-4 max-w-2xl text-gray-600 text-lg leading-8">
+          <p className="mt-4 max-w-2xl text-pretty text-gray-600 text-lg leading-8">
             SubTrack is a portfolio-grade product and an open-source project.
             The hosted app keeps the workflow fast, while GitHub keeps the
             implementation visible.
@@ -32,11 +34,16 @@ export function AccessSection() {
         </AnimatedSection>
 
         <AnimatedSection delay={0.08}>
-          <div className="rounded-lg border border-gray-200 bg-white p-6">
+          <div className="rounded-2xl border border-gray-200/80 bg-white p-6 shadow-brand-sm sm:p-8">
             <ul className="space-y-4">
               {accessPoints.map((point) => (
-                <li className="flex gap-3 text-gray-700" key={point}>
-                  <IconCheck className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-600" />
+                <li
+                  className="flex items-start gap-3 text-gray-700"
+                  key={point}
+                >
+                  <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-600 ring-1 ring-brand-100">
+                    <IconCheck className="h-3.5 w-3.5" stroke={2.5} />
+                  </span>
                   <span>{point}</span>
                 </li>
               ))}

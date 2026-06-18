@@ -42,7 +42,7 @@ export function Footer() {
             <div className="mt-4 flex gap-2">
               <Link
                 aria-label="SubTrack on GitHub"
-                className="rounded-md p-2 text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-800"
+                className="rounded-md p-2 text-gray-500 transition-colors hover:bg-brand-50 hover:text-brand-700"
                 href="https://github.com/C41M50N/SubTrack"
                 rel="noreferrer"
                 target="_blank"
@@ -58,7 +58,7 @@ export function Footer() {
               {footerLinks.product.map((link) => (
                 <li key={link.href}>
                   <Link
-                    className="text-gray-600 text-sm transition-colors hover:text-gray-950"
+                    className="text-gray-600 text-sm transition-colors hover:text-brand-700"
                     href={link.href}
                   >
                     {link.label}
@@ -74,7 +74,7 @@ export function Footer() {
               {footerLinks.resources.map((link) => (
                 <li key={link.href}>
                   <Link
-                    className="text-gray-600 text-sm transition-colors hover:text-gray-950"
+                    className="text-gray-600 text-sm transition-colors hover:text-brand-700"
                     href={link.href}
                     rel={link.external ? 'noreferrer' : undefined}
                     target={link.external ? '_blank' : undefined}
