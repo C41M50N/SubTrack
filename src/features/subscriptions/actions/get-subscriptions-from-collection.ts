@@ -1,4 +1,5 @@
 import { z } from 'zod';
+
 import type { Subscription } from '@/features/subscriptions';
 import type { AuthenticatedContext } from '@/server/api/trpc';
 
@@ -8,7 +9,7 @@ export const GetSubscriptionsFromCollectionProps = z.object({
 
 export default async function getSubscriptionsFromCollection(
   ctx: AuthenticatedContext,
-  input: z.infer<typeof GetSubscriptionsFromCollectionProps>
+  input: z.infer<typeof GetSubscriptionsFromCollectionProps>,
 ) {
   const subs = await ctx.db.subscription.findMany({
     where: {

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
+
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -93,7 +94,7 @@ export default function AccountSettingsPage() {
             <form
               className="space-y-1"
               onSubmit={form.handleSubmit((values) =>
-                updateAccountDetails(values)
+                updateAccountDetails(values),
               )}
             >
               <Label className="font-semibold text-base">Account Details</Label>

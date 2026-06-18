@@ -5,11 +5,9 @@ import updateUserDetails from '@/features/users/actions/update-user-details';
 import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
 
 export const usersRouter = createTRPCRouter({
-  updateAccountDetails: protectedProcedure
-    .input(AccountDetailsSchema)
-    .mutation(async ({ ctx, input }) => {
-      return await updateUserDetails(ctx, input);
-    }),
+  updateAccountDetails: protectedProcedure.input(AccountDetailsSchema).mutation(async ({ ctx, input }) => {
+    return await updateUserDetails(ctx, input);
+  }),
 
   getCurrentUser: protectedProcedure.query(({ ctx }) => {
     return getCurrentUser(ctx);

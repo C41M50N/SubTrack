@@ -1,19 +1,14 @@
 import dayjs from 'dayjs';
 import type { NextApiRequest, NextApiResponse } from 'next';
+
 import { notifications } from '@/features/notifications';
 import type { Subscription } from '@/features/subscriptions';
 import { prisma } from '@/server/db';
 import { groupBy } from '@/utils/group-by';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const authHeader = req.headers.authorization;
-  if (
-    !process.env.CRON_SECRET ||
-    authHeader !== `Bearer ${process.env.CRON_SECRET}`
-  ) {
+  if (!process.env.CRON_SECRET || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return res.status(401).json({ success: false });
   }
 
@@ -45,14 +40,8 @@ export default async function handler(
     },
   })) as Subscription[];
 
-  const groupRenewingSoonSubscriptions = groupBy(
-    renewingSoonSubscriptions,
-    (sub) => sub.user_id
-  );
-  const groupRenewedRecentlySubscriptions = groupBy(
-    renewedRecentlySubscriptions,
-    (sub) => sub.user_id
-  );
+  const groupRenewingSoonSubscriptions = groupBy(renewingSoonSubscriptions, (sub) => sub.user_id);
+  const groupRenewedRecentlySubscriptions = groupBy(renewedRecentlySubscriptions, (sub) => sub.user_id);
 
   console.info(groupRenewedRecentlySubscriptions);
   console.info(groupRenewingSoonSubscriptions);
@@ -69,10 +58,7 @@ export default async function handler(
       return;
     }
 
-    await notifications.sendMonthlyReviewNotification(
-      renewingSoonSubs,
-      renewedRecentlySubs
-    );
+    await notifications.sendMonthlyReviewNotification(renewingSoonSubs, renewedRecentlySubs);
 
     const user = await prisma.user.findUniqueOrThrow({
       where: { id: userId },

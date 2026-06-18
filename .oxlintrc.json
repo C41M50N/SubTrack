@@ -1,0 +1,12 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "react", "react-perf"],
+  "categories": {
+    "correctness": "error"
+  },
+  "ignorePatterns": ["tsconfig.json", "src/routeTree.gen.ts", "drizzle/meta/**"],
+  "rules": {},
+  "env": {
+    "builtin": true
+  }
+}

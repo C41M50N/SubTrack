@@ -1,4 +1,5 @@
 import { z } from 'zod';
+
 import dayjs from '@/lib/dayjs';
 import type { AuthenticatedContext } from '@/server/api/trpc';
 
@@ -7,10 +8,7 @@ export const GetExportDataInput = z.object({
   collectionId: z.string().nullable(),
 });
 
-export default async function getExportData(
-  ctx: AuthenticatedContext,
-  input: z.infer<typeof GetExportDataInput>
-) {
+export default async function getExportData(ctx: AuthenticatedContext, input: z.infer<typeof GetExportDataInput>) {
   const categoryList = await ctx.db.categoryList.findUnique({
     where: { user_id: ctx.session.user.id },
     select: { categories: true },
@@ -38,15 +36,12 @@ export default async function getExportData(
 
   const nullValue = input.format === 'json' ? null : '';
   const subs = subscriptions
-    .map(({ id, user_id, collection_id, ...rest }) => rest)
+    .map(({ id: _id, user_id: _user_id, collection_id: _collection_id, ...rest }) => rest)
     .map(({ collection, next_invoice, last_invoice, ...rest }) => ({
       ...rest,
       collection: collection.title,
       next_invoice: dayjs(next_invoice).format('MM/DD/YYYY'),
-      last_invoice:
-        last_invoice !== null
-          ? dayjs(last_invoice).format('MM/DD/YYYY')
-          : nullValue,
+      last_invoice: last_invoice !== null ? dayjs(last_invoice).format('MM/DD/YYYY') : nullValue,
     }));
 
   return {

@@ -10,6 +10,7 @@ import {
 } from '@tanstack/react-table';
 import { useAtom } from 'jotai';
 import React from 'react';
+
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -22,6 +23,7 @@ import {
 import type { Subscription } from '@/features/subscriptions';
 import { tableSizeAtom } from '@/features/subscriptions/stores';
 import { cn } from '@/utils';
+
 import DataTableToolbar from './data-table-toolbar';
 
 type DataTableProps = {
@@ -104,7 +106,7 @@ export default function DataTable({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   );
@@ -122,13 +124,13 @@ export default function DataTable({
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       className={cn(
-                        tableSize === 'compact' && 'py-1 pr-1 pl-4'
+                        tableSize === 'compact' && 'py-1 pr-1 pl-4',
                       )}
                       key={cell.id}
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}

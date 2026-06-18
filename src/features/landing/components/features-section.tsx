@@ -9,7 +9,9 @@ import {
   IconTable,
 } from '@tabler/icons-react';
 import Image from 'next/image';
+
 import { cn } from '@/utils';
+
 import { AnimatedSection } from './animated-section';
 import { Eyebrow } from './eyebrow';
 
@@ -79,7 +81,7 @@ export function FeaturesSection() {
               <div
                 className={cn(
                   'grid items-center gap-8 lg:grid-cols-2 lg:gap-14',
-                  index % 2 === 1 && 'lg:[&>*:first-child]:order-2'
+                  index % 2 === 1 && 'lg:[&>*:first-child]:order-2',
                 )}
               >
                 <div>

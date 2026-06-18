@@ -8,19 +8,14 @@ export const env = createEnv({
    */
   server: {
     DATABASE_URL: z.string().url(),
-    NODE_ENV: z
-      .enum(['development', 'test', 'production'])
-      .default('development'),
+    NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
     // Add `.min(1) on ID and SECRET if you want to make sure they're not empty
     GOOGLE_CLIENT_ID: z.string(),
     GOOGLE_CLIENT_SECRET: z.string(),
     CRON_SECRET: z.string(),
     TODOIST_API_KEY: z.string(),
     TODOIST_PROJECT_ID: z.string(),
-    DISCORD_WEBHOOK_URL: z
-      .string()
-      .url()
-      .startsWith('https://discord.com/api/webhooks/'),
+    DISCORD_WEBHOOK_URL: z.string().url().startsWith('https://discord.com/api/webhooks/'),
   },
 
   /**

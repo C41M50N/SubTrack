@@ -24,14 +24,7 @@ export function toProperCase(str: string): string {
   } else {
     parts = [result, ' '];
   }
-  return parts
-    .reduce(
-      (a, b) =>
-        `${
-          a.at(0)?.toUpperCase() + a.slice(1)
-        } ${b.at(0)?.toUpperCase()}${b.slice(1)}`
-    )
-    .trim();
+  return parts.reduce((a, b) => `${a.at(0)?.toUpperCase() + a.slice(1)} ${b.at(0)?.toUpperCase()}${b.slice(1)}`).trim();
 }
 
 export function downloadFile(file: File) {
@@ -53,18 +46,16 @@ export function downloadFile(file: File) {
 }
 
 export function parseJSON<T>(json: string, schema: z.Schema<T>) {
-  const stringToJSONSchema = z
-    .string()
-    .transform((str, ctx): z.infer<typeof schema> => {
-      try {
-        const obj = JSON.parse(str);
-        return schema.parse(obj);
-      } catch (_e) {
-        console.error(_e);
-        ctx.addIssue({ code: 'custom', message: 'Invalid JSON format' });
-        return z.NEVER;
-      }
-    });
+  const stringToJSONSchema = z.string().transform((str, ctx): z.infer<typeof schema> => {
+    try {
+      const obj = JSON.parse(str);
+      return schema.parse(obj);
+    } catch (_e) {
+      console.error(_e);
+      ctx.addIssue({ code: 'custom', message: 'Invalid JSON format' });
+      return z.NEVER;
+    }
+  });
 
   return stringToJSONSchema.parse(json);
 }

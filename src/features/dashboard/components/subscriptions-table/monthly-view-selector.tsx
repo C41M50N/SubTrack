@@ -1,4 +1,5 @@
 import { CalendarDaysIcon } from 'lucide-react';
+
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Select,
@@ -24,7 +25,7 @@ export function MonthlyViewSelector({
   const options = [
     'ALL',
     ...getNextNMonths(MONTH_SELECTOR_MONTH_COUNT).map((d) =>
-      d.format('MMM YYYY').toUpperCase()
+      d.format('MMM YYYY').toUpperCase(),
     ),
   ];
 

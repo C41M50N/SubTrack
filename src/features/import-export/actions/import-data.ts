@@ -1,6 +1,8 @@
 import { z } from 'zod';
+
 import type { AuthenticatedContext } from '@/server/api/trpc';
 import { parseJSON } from '@/utils';
+
 import { DataSchema } from '..';
 
 export const ImportDataProps = z.object({
@@ -21,7 +23,7 @@ function createSubscriptionsData(
     collection: string;
   }>,
   userId: string,
-  collectionId: string
+  collectionId: string,
 ) {
   return subscriptions.map((sub) => {
     const { collection: _, ...subscriptionData } = sub;
@@ -33,10 +35,7 @@ function createSubscriptionsData(
   });
 }
 
-export default async function importData(
-  ctx: AuthenticatedContext,
-  input: z.infer<typeof ImportDataProps>
-) {
+export default async function importData(ctx: AuthenticatedContext, input: z.infer<typeof ImportDataProps>) {
   const data = parseJSON(input.json, DataSchema);
 
   // handle categories
@@ -52,10 +51,7 @@ export default async function importData(
       throw new Error('missing categoryList');
     }
 
-    const allCategories = new Set([
-      ...categoryList.categories,
-      ...data.categories,
-    ]);
+    const allCategories = new Set([...categoryList.categories, ...data.categories]);
     categoriesToSave = Array.from(allCategories);
   }
 
@@ -70,9 +66,7 @@ export default async function importData(
     select: { id: true, title: true },
   });
 
-  const existingCollectionMap = new Map(
-    existingCollections.map((col) => [col.title, col.id])
-  );
+  const existingCollectionMap = new Map(existingCollections.map((col) => [col.title, col.id]));
 
   // Group subscriptions by collection
   const subscriptionsByCollection = data.subscriptions.reduce(
@@ -81,12 +75,10 @@ export default async function importData(
       acc[subscription.collection] = [...existing, subscription];
       return acc;
     },
-    {} as Record<string, typeof data.subscriptions>
+    {} as Record<string, typeof data.subscriptions>,
   );
 
-  for (const [collectionTitle, subscriptions] of Object.entries(
-    subscriptionsByCollection
-  )) {
+  for (const [collectionTitle, subscriptions] of Object.entries(subscriptionsByCollection)) {
     const existingCollectionId = existingCollectionMap.get(collectionTitle);
 
     if (existingCollectionId) {
@@ -100,20 +92,12 @@ export default async function importData(
             },
           }),
           ctx.db.subscription.createMany({
-            data: createSubscriptionsData(
-              subscriptions,
-              ctx.session.user.id,
-              existingCollectionId
-            ),
+            data: createSubscriptionsData(subscriptions, ctx.session.user.id, existingCollectionId),
           }),
         ]);
       } else {
         await ctx.db.subscription.createMany({
-          data: createSubscriptionsData(
-            subscriptions,
-            ctx.session.user.id,
-            existingCollectionId
-          ),
+          data: createSubscriptionsData(subscriptions, ctx.session.user.id, existingCollectionId),
         });
       }
     } else {
@@ -126,11 +110,7 @@ export default async function importData(
       });
 
       await ctx.db.subscription.createMany({
-        data: createSubscriptionsData(
-          subscriptions,
-          ctx.session.user.id,
-          newCollectionId
-        ),
+        data: createSubscriptionsData(subscriptions, ctx.session.user.id, newCollectionId),
       });
     }
   }

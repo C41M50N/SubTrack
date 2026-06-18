@@ -1,6 +1,7 @@
 import type { Collection } from '@prisma/client';
 import { IconTrash } from '@tabler/icons-react';
 import Image from 'next/image';
+
 import { LoadingSpinner } from '@/components/common/loading-spinner';
 import { Button } from '@/components/ui/button';
 import {

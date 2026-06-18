@@ -1,8 +1,8 @@
 import { SearchIcon } from 'lucide-react';
+
 import { Input } from '../ui/input';
 
-export interface InputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   variant?: 'sm' | 'normal';
 }
 

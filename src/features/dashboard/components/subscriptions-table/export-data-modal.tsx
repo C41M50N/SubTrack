@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import React from 'react';
+
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -27,7 +28,7 @@ export function ExportDataModal() {
     const file = new File(
       [JSON.stringify(data, null, 2)],
       `subscriptions_${dayjs().format('YYYYMMDD_X')}.subtrack.json`,
-      { type: 'application/json' }
+      { type: 'application/json' },
     );
     downloadFile(file);
     setLoading(false);

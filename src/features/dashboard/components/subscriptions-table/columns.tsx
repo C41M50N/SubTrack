@@ -9,6 +9,7 @@ import type { Column, ColumnDef } from '@tanstack/react-table';
 import { useAtom } from 'jotai';
 import { ArrowDownIcon, ArrowUpDownIcon, ArrowUpIcon } from 'lucide-react';
 import Image from 'next/image';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -91,7 +92,7 @@ function SubscriptionNameCell({
       <div
         className={cn(
           'font-medium',
-          tableSize === 'compact' ? 'text-base' : 'text-lg'
+          tableSize === 'compact' ? 'text-base' : 'text-lg',
         )}
       >
         {subscription.name}

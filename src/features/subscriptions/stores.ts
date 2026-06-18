@@ -1,12 +1,10 @@
 import { atomWithStorage, createJSONStorage } from 'jotai/utils';
+
 import { createModalStateStore } from '@/lib/modal-state';
 
-export const tableSizeAtom = atomWithStorage<'default' | 'compact'>(
-  'table-size',
-  'default',
-  createJSONStorage(),
-  { getOnInit: true }
-);
+export const tableSizeAtom = atomWithStorage<'default' | 'compact'>('table-size', 'default', createJSONStorage(), {
+  getOnInit: true,
+});
 
 export const useNewSubscriptionModal = createModalStateStore({
   defaultState: 'closed',

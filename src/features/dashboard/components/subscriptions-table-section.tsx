@@ -1,5 +1,6 @@
 import type { RowSelectionState } from '@tanstack/react-table';
 import React from 'react';
+
 import { LoadingSpinner } from '@/components/common/loading-spinner';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { CollectionWithoutUserId } from '@/features/collections';
@@ -54,7 +55,7 @@ export function SubscriptionsTableSection({
 }: SubscriptionsTableSectionProps) {
   const columns = React.useMemo(
     () => createSubscriptionColumns({ categories, collections }),
-    [categories, collections]
+    [categories, collections],
   );
 
   if (isSubscriptionsLoading) {

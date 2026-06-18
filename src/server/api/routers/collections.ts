@@ -14,21 +14,15 @@ export const collectionsRouter = createTRPCRouter({
     return await getCollections(ctx);
   }),
 
-  createCollection: protectedProcedure
-    .input(CreateCollectionInput)
-    .mutation(async ({ ctx, input }) => {
-      return await createCollection(ctx, input);
-    }),
+  createCollection: protectedProcedure.input(CreateCollectionInput).mutation(async ({ ctx, input }) => {
+    return await createCollection(ctx, input);
+  }),
 
-  editCollectionTitle: protectedProcedure
-    .input(EditCollectionTitleInput)
-    .mutation(async ({ ctx, input }) => {
-      return await editCollectionTitle(ctx, input);
-    }),
+  editCollectionTitle: protectedProcedure.input(EditCollectionTitleInput).mutation(async ({ ctx, input }) => {
+    return await editCollectionTitle(ctx, input);
+  }),
 
-  deleteCollection: protectedProcedure
-    .input(DeleteCollectionInput)
-    .mutation(async ({ ctx, input }) => {
-      return await deleteCollection(ctx, input);
-    }),
+  deleteCollection: protectedProcedure.input(DeleteCollectionInput).mutation(async ({ ctx, input }) => {
+    return await deleteCollection(ctx, input);
+  }),
 });

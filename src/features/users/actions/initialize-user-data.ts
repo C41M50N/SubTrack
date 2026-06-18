@@ -1,13 +1,12 @@
 import type { User } from '@prisma/client';
+
 import { prisma } from '@/server/db';
 
 type InitializeUserDataProps = {
   userId: User['id'];
 };
 
-export default async function initializeUserData(
-  input: InitializeUserDataProps
-) {
+export default async function initializeUserData(input: InitializeUserDataProps) {
   // create default categories
   await prisma.categoryList.create({
     data: {

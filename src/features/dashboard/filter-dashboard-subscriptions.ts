@@ -12,28 +12,20 @@ type DashboardSubscriptionFilters = {
 
 export function filterDashboardSubscriptions(
   subscriptions: Subscription[],
-  filters: DashboardSubscriptionFilters
+  filters: DashboardSubscriptionFilters,
 ): Subscription[] {
   const normalizedSearchQuery = filters.searchQuery.trim().toLowerCase();
   const selectedMonthDate =
-    filters.selectedMonth === ALL_MONTHS_FILTER
-      ? null
-      : dayjs(filters.selectedMonth, 'MMM YYYY');
+    filters.selectedMonth === ALL_MONTHS_FILTER ? null : dayjs(filters.selectedMonth, 'MMM YYYY');
 
   return subscriptions.filter((subscription) => {
     const matchesSearch =
-      normalizedSearchQuery.length === 0 ||
-      subscription.name.toLowerCase().includes(normalizedSearchQuery);
+      normalizedSearchQuery.length === 0 || subscription.name.toLowerCase().includes(normalizedSearchQuery);
     const matchesCategory =
-      filters.selectedCategories.length === 0 ||
-      filters.selectedCategories.includes(subscription.category);
+      filters.selectedCategories.length === 0 || filters.selectedCategories.includes(subscription.category);
     const matchesMonth =
       selectedMonthDate === null ||
-      getSubscriptionsInMonth(
-        [subscription],
-        selectedMonthDate.month(),
-        selectedMonthDate.year()
-      ).length > 0;
+      getSubscriptionsInMonth([subscription], selectedMonthDate.month(), selectedMonthDate.year()).length > 0;
 
     return matchesSearch && matchesCategory && matchesMonth;
   });

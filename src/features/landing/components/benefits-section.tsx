@@ -5,6 +5,7 @@ import {
   IconDownload,
   IconShieldLock,
 } from '@tabler/icons-react';
+
 import {
   AnimatedSection,
   AnimatedStaggerContainer,

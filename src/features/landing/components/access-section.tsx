@@ -2,7 +2,9 @@
 
 import { IconBrandGithub, IconCheck } from '@tabler/icons-react';
 import Link from 'next/link';
+
 import { Button } from '@/components/ui/button';
+
 import { AnimatedSection } from './animated-section';
 import { Eyebrow } from './eyebrow';
 import { LandingPrimaryAction } from './landing-action';

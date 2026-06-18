@@ -2,6 +2,7 @@
 
 import { IconArrowRight, IconDashboard } from '@tabler/icons-react';
 import Link from 'next/link';
+
 import { Button, type ButtonProps } from '@/components/ui/button';
 import { useSession } from '@/features/auth/auth-client';
 

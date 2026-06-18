@@ -4,6 +4,7 @@ import { IconMenu2, IconX } from '@tabler/icons-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
+
 import { Button } from '@/components/ui/button';
 import { useSession } from '@/features/auth/auth-client';
 import { cn } from '@/utils';
@@ -90,7 +91,7 @@ export function Header() {
       <div
         className={cn(
           'border-gray-200 border-b bg-white md:hidden',
-          mobileMenuOpen ? 'block' : 'hidden'
+          mobileMenuOpen ? 'block' : 'hidden',
         )}
       >
         <div className="space-y-1 px-4 py-3">

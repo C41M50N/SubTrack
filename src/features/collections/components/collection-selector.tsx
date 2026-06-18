@@ -6,6 +6,7 @@ import {
   Trash2Icon,
 } from 'lucide-react';
 import React from 'react';
+
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -21,6 +22,7 @@ import type { CollectionWithoutUserId } from '@/features/collections';
 import { useCollections } from '@/features/collections/hooks';
 import { selectedCollectionIdAtom } from '@/features/collections/stores';
 import { useModalState } from '@/lib/modal-state';
+
 import DeleteCollectionModal from './delete-collection-modal';
 import EditCollectionModal from './edit-collection-modal';
 import NewCollectionModal from './new-collection-modal';
@@ -29,7 +31,7 @@ export default function CollectionSelector() {
   const { collections, isGetCollectionsLoading } = useCollections();
 
   const [selectedCollectionId, setGlobalCollectionId] = useAtom(
-    selectedCollectionIdAtom
+    selectedCollectionIdAtom,
   );
 
   const newCollectionModalState = useModalState();

@@ -1,0 +1,21 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "ignorePatterns": ["tsconfig.json", "src/routeTree.gen.ts", "drizzle/meta/**"],
+  "printWidth": 120,
+  "tabWidth": 2,
+  "useTabs": false,
+  "semi": true,
+  "singleQuote": true,
+  "trailingComma": "all",
+  "sortImports": true,
+  "sortPackageJson": true,
+  "overrides": [
+    // set printWidth to 80 for React files
+    {
+      "files": ["**/*.tsx"],
+      "options": {
+        "printWidth": 80
+      }
+    }
+  ]
+}

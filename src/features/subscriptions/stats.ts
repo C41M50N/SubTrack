@@ -18,10 +18,7 @@ const MONTHS_PER_YEAR = 12.0;
 const BI_FREQUENCY_DIVISOR = 2.0;
 const ZERO_COST = 0.0;
 
-const frequencyCostMultipliers: Record<
-  SubscriptionFrequency,
-  Record<CostPeriod, number>
-> = {
+const frequencyCostMultipliers: Record<SubscriptionFrequency, Record<CostPeriod, number>> = {
   weekly: {
     week: 1,
     month: WEEKS_PER_MONTH,
@@ -54,33 +51,23 @@ const frequencyCostMultipliers: Record<
   },
 };
 
-function getSubscriptionsCostForPeriod(
-  subscriptions: SubscriptionCostInput[],
-  period: CostPeriod
-): number {
+function getSubscriptionsCostForPeriod(subscriptions: SubscriptionCostInput[], period: CostPeriod): number {
   return subscriptions.reduce((total, subscription) => {
-    return (
-      total +
-      subscription.amount *
-        frequencyCostMultipliers[subscription.frequency][period]
-    );
+    return total + subscription.amount * frequencyCostMultipliers[subscription.frequency][period];
   }, ZERO_COST);
 }
 
 export const Statistics: StatisticItem[] = [
   {
     description: 'cost per week',
-    getResult: (subscriptions) =>
-      getSubscriptionsCostForPeriod(subscriptions, 'week'),
+    getResult: (subscriptions) => getSubscriptionsCostForPeriod(subscriptions, 'week'),
   },
   {
     description: 'cost per month',
-    getResult: (subscriptions) =>
-      getSubscriptionsCostForPeriod(subscriptions, 'month'),
+    getResult: (subscriptions) => getSubscriptionsCostForPeriod(subscriptions, 'month'),
   },
   {
     description: 'cost per year',
-    getResult: (subscriptions) =>
-      getSubscriptionsCostForPeriod(subscriptions, 'year'),
+    getResult: (subscriptions) => getSubscriptionsCostForPeriod(subscriptions, 'year'),
   },
 ];

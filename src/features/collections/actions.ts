@@ -1,4 +1,5 @@
 import { z } from 'zod';
+
 import type { AuthenticatedContext } from '@/server/api/trpc';
 
 const MAX_COLLECTIONS = 50;
@@ -24,18 +25,13 @@ export async function getCollections(ctx: AuthenticatedContext) {
   });
 }
 
-export async function createCollection(
-  ctx: AuthenticatedContext,
-  input: z.infer<typeof CreateCollectionInput>
-) {
+export async function createCollection(ctx: AuthenticatedContext, input: z.infer<typeof CreateCollectionInput>) {
   const currentNumCollections = await ctx.db.collection.count({
     where: { user_id: ctx.session.user.id },
   });
 
   if (currentNumCollections >= MAX_COLLECTIONS) {
-    throw new Error(
-      'You have reached your collections limit. You can have at most 50 collections at a time.'
-    );
+    throw new Error('You have reached your collections limit. You can have at most 50 collections at a time.');
   }
 
   await ctx.db.collection.create({
@@ -46,10 +42,7 @@ export async function createCollection(
   });
 }
 
-export async function editCollectionTitle(
-  ctx: AuthenticatedContext,
-  input: z.infer<typeof EditCollectionTitleInput>
-) {
+export async function editCollectionTitle(ctx: AuthenticatedContext, input: z.infer<typeof EditCollectionTitleInput>) {
   await ctx.db.collection.update({
     where: {
       id: input.collection_id,
@@ -61,10 +54,7 @@ export async function editCollectionTitle(
   });
 }
 
-export async function deleteCollection(
-  ctx: AuthenticatedContext,
-  input: z.infer<typeof DeleteCollectionInput>
-) {
+export async function deleteCollection(ctx: AuthenticatedContext, input: z.infer<typeof DeleteCollectionInput>) {
   const count = await ctx.db.collection.count({
     where: { user_id: ctx.session.user.id },
   });

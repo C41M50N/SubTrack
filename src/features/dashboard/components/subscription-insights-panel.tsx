@@ -30,7 +30,7 @@ export function SubscriptionInsightsPanel({
   subscriptionsForInsights,
 }: SubscriptionInsightsPanelProps) {
   const loadingBreakdownKeys = getNextNMonths(
-    MONTHLY_BREAKDOWN_MONTH_COUNT
+    MONTHLY_BREAKDOWN_MONTH_COUNT,
   ).map((monthData) => monthData.format('MMMM-YYYY'));
 
   return (
@@ -92,14 +92,14 @@ export function SubscriptionInsightsPanel({
                                 getSubscriptionsInMonth(
                                   subscriptionsForInsights,
                                   month,
-                                  year
-                                ).reduce((acc, sub) => acc + sub.amount, 0)
+                                  year,
+                                ).reduce((acc, sub) => acc + sub.amount, 0),
                               )}
                             </span>
                           </div>
                         </div>
                       );
-                    }
+                    },
                   )}
                 </AccordionContent>
               )}

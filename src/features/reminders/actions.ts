@@ -1,4 +1,5 @@
 import { z } from 'zod';
+
 import { reminders } from '../reminders';
 
 export const CreateTodoistReminderInput = z.object({
@@ -6,8 +7,6 @@ export const CreateTodoistReminderInput = z.object({
   reminder_date: z.date(),
 });
 
-export async function createTodoistReminder(
-  input: z.infer<typeof CreateTodoistReminderInput>
-) {
+export async function createTodoistReminder(input: z.infer<typeof CreateTodoistReminderInput>) {
   await reminders.createReminder(input.title, input.reminder_date);
 }
