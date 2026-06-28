@@ -1,5 +1,3 @@
-import type * as LabelPrimitive from '@radix-ui/react-label';
-import { Slot } from '@radix-ui/react-slot';
 import * as React from 'react';
 import {
   Controller,
@@ -85,8 +83,8 @@ const FormItem = React.forwardRef<
 FormItem.displayName = 'FormItem';
 
 const FormLabel = React.forwardRef<
-  React.ElementRef<typeof LabelPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>
+  HTMLLabelElement,
+  React.ComponentPropsWithoutRef<typeof Label>
 >(({ className, ...props }, ref) => {
   const { error, formItemId } = useFormField();
 
@@ -101,25 +99,59 @@ const FormLabel = React.forwardRef<
 });
 FormLabel.displayName = 'FormLabel';
 
-const FormControl = React.forwardRef<
-  React.ElementRef<typeof Slot>,
-  React.ComponentPropsWithoutRef<typeof Slot>
->(({ ...props }, ref) => {
-  const { error, formItemId, formDescriptionId, formMessageId } =
-    useFormField();
+type FormControlProps = React.HTMLAttributes<HTMLElement> & {
+  children: React.ReactElement<Record<string, unknown>>;
+};
 
-  return (
-    <Slot
-      aria-describedby={
-        error ? `${formDescriptionId} ${formMessageId}` : `${formDescriptionId}`
+function setRef<T>(ref: React.Ref<T> | undefined, value: T | null) {
+  if (!ref) {
+    return;
+  }
+
+  if (typeof ref === 'function') {
+    ref(value);
+    return;
+  }
+
+  (ref as React.MutableRefObject<T | null>).current = value;
+}
+
+function composeRefs<T>(
+  ...refs: Array<React.Ref<T> | undefined>
+): React.RefCallback<T> {
+  return (value) => {
+    for (const ref of refs) {
+      setRef(ref, value);
+    }
+  };
+}
+
+const FormControl = React.forwardRef<HTMLElement, FormControlProps>(
+  ({ children, ...props }, ref) => {
+    const { error, formItemId, formDescriptionId, formMessageId } =
+      useFormField();
+
+    if (!React.isValidElement(children)) {
+      return null;
+    }
+
+    const childRef = (
+      children as React.ReactElement<Record<string, unknown>> & {
+        ref?: React.Ref<HTMLElement>;
       }
-      aria-invalid={!!error}
-      id={formItemId}
-      ref={ref}
-      {...props}
-    />
-  );
-});
+    ).ref;
+
+    return React.cloneElement(children, {
+      'aria-describedby': error
+        ? `${formDescriptionId} ${formMessageId}`
+        : `${formDescriptionId}`,
+      'aria-invalid': !!error,
+      id: formItemId,
+      ...props,
+      ref: composeRefs(ref, childRef),
+    } as React.HTMLAttributes<HTMLElement> & React.RefAttributes<HTMLElement>);
+  },
+);
 FormControl.displayName = 'FormControl';
 
 const FormDescription = React.forwardRef<

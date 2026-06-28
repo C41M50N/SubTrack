@@ -20,14 +20,14 @@ export default function UIDebugPage() {
             </Button>
           </div>
           <div className="flex flex-row space-x-2">
-            <Button className="w-[130px]" variant="primary-2">
-              Primary 2
+            <Button className="w-[130px]" variant="ghost">
+              Ghost
             </Button>
-            <Button className="w-[130px]" variant="secondary-2">
-              Secondary 2
+            <Button className="w-[130px]" variant="destructive">
+              Destructive
             </Button>
-            <Button className="w-[130px]" variant="outline-2">
-              Outline 2
+            <Button className="w-[130px]" variant="link">
+              Link
             </Button>
           </div>
         </div>

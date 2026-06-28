@@ -116,7 +116,7 @@ export function SubscriptionFormFields({
                   </Button>
                 </FormControl>
               </PopoverTrigger>
-              <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+              <PopoverContent className="w-(--anchor-width) p-0">
                 <Command
                   defaultValue={field.value}
                   onValueChange={field.onChange}
