@@ -1,37 +1,107 @@
-# SubTrack
+**T**anStack Start + **B**etter Auth + **D**rizzle Starter
 
-SubTrack is a subscription management tool designed to help users take control of their recurring expenses through an intuitive dashboard, custom organization features, and proactive notifications. For more details check out my [writeup](https://cbuff.dev/project/subtrack).
+A practical starter for building a TanStack Start app with authentication, database ORM, and modern styling.
 
-![Dashboard Image](/public/dashboard.jpeg)
+## Who this is for
 
-## Core Features
+- Devs evaluating TanStack Start with a real auth + DB setup
+- Teams that want a clean foundation without a heavy UI kit
+- Anyone who wants type-safe routing, typed data loaders, and a straightforward auth flow
 
-- **Manage Subscriptions**: Manage subscriptions via feature-rich dashboard table
-- **Gain Insights**: Gain insights on your subscriptions via cost metrics
-- **Categorize**: Organize subscriptions using custom categories
-- **Collections**: Separate subscriptions into various collections
-- **Stay Informed**: Stay informed on the state of your subscriptions with a monthly review email
-- **Cancel Reminders**: Create reminders to cancel subscriptions with Todoist
-- **Export Your Data**: Export your subscriptions to a CSV file
+## What is included
 
-## Tech Stack 🛠️
+- TanStack Start + Router file-based routing
+- TanStack Query wired into router SSR (not used by default to keep the template lean)
+- Better Auth with Google provider and server handler route
+- Drizzle ORM schema + migrations wiring for PostgreSQL
+- Tailwind CSS v4 setup
+- Portless local HTTPS URLs for dev (`https://tbd.localhost`)
+- Oxlint for linting
+- Oxfmt for formatting
+- Protected routes + login flow
 
-- [Next.js](https://nextjs.org)
-- [Better-Auth](https://better-auth.com/)
-- [Prisma](https://prisma.io)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
-- [shadcn](https://ui.shadcn.com)
-- [Resend](https://resend.com)
+## Quick start
 
-## Development Environment Requirements
+```bash
+bun install
+bun run dev
+```
 
-- [Node.js (v20+)](https://nodejs.org/)
-- [pnpm (v8+)](https://pnpm.io/)
-- [Docker](https://docker.com)
+The dev script runs Vite through `portless`, so the app is available at `https://tbd.localhost` instead of a fixed `localhost:<port>` URL. On first run, `portless` may prompt to trust its local certificate and start the local proxy.
 
-## FAQ
+## Environment variables
 
-### How do I request more subscription icons?
+Create a `.env.local` file in the project root (see `.env.schema`):
 
-- Create an issue with the "icon request" label. Attach a screenshot of the icon that you want added.
+```
+DATABASE_URL=
+BETTER_AUTH_SECRET=
+BETTER_AUTH_URL=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+```
+
+`.env.schema` is the source of truth for env vars and is used by varlock to generate `env.d.ts`.
+
+## Auth setup
+
+- Auth handler lives at `/api/auth/*`.
+- Update your OAuth callback URLs to match your local and production origins (for Google locally: `https://tbd.localhost/api/auth/callback/google`).
+- Server auth code is in `src/features/auth/server.ts`.
+- Client auth code is in `src/features/auth/client.ts`.
+- Server function auth middleware is in `src/features/auth/middleware.ts`.
+
+## Database + Drizzle
+
+The schema entry point is `src/lib/db/schema.ts`.
+
+```bash
+bun run db:generate
+bun run db:migrate
+bun run db:push
+bun run db:studio
+```
+
+## Scripts
+
+- Dev server: `bun run dev`
+- Production build: `bun run build`
+- Lint: `bun run lint`
+- Lint with fixes: `bun run lint:fix`
+- Format: `bun run fmt`
+- Format (check only): `bun run fmt:check`
+- Tests: `bun run test`
+- Generate Drizzle migrations: `bun run db:generate`
+- Run Drizzle migrations: `bun run db:migrate`
+- Push schema changes: `bun run db:push`
+- Open Drizzle Studio: `bun run db:studio`
+
+Linting is configured in `.oxlintrc.json` and formatting is configured in `.oxfmtrc.json`.
+
+## Project structure
+
+- `src/features/auth`: auth server/client/session/middleware helpers
+- `src/lib/db`: Drizzle client + schema
+- `src/router.tsx`: router setup, including TanStack Query SSR integration
+- `src/routes`: file-based routes (including protected routes)
+- `src/styles.css`: Tailwind setup
+- `docs/tech-stack`: stack notes and conventions
+
+## Next steps
+
+- Setup Shadcn/ui: `bunx --bun shadcn@latest init`
+- Add your own routes in `src/routes`
+- Add additional OAuth providers in `src/features/auth/server.ts`
+- Create your app schema in `src/lib/db/schema.ts`
+
+## Learn more
+
+- TanStack Start: https://tanstack.com/start
+- TanStack Router: https://tanstack.com/router
+- TanStack Query: https://tanstack.com/query
+- Better Auth: https://better-auth.com
+- Drizzle ORM: https://orm.drizzle.team
+- Tailwind CSS: https://tailwindcss.com
+- Portless: https://portless.sh
+- Oxlint: https://oxc.rs/docs/guide/usage/linter.html
+- Oxfmt: https://oxc.rs/docs/guide/usage/formatter.html

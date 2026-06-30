@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1773427528493,
+      "tag": "0000_optimal_secret_warriors",
+      "breakpoints": true
+    }
+  ]
+}
