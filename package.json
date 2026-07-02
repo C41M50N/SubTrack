@@ -30,6 +30,7 @@
     "better-auth": "^1.6.23",
     "drizzle-orm": "^0.45.2",
     "lucide-react": "^0.545.0",
+    "nanoid-dictionary": "^5.0.0",
     "pg": "^8.22.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
