@@ -1,7 +1,9 @@
-import { and, asc, eq } from 'drizzle-orm';
+import { and, asc, desc, eq } from 'drizzle-orm';
 
 import { getMyCollection } from '@/features/collections/server';
+import type { SubscriptionImportRow } from '@/features/subscriptions/schema';
 import { db } from '@/lib/db';
+import { collectionTable } from '@/lib/db/collection-schema';
 import { subscriptionTable } from '@/lib/db/subscription-schema';
 
 export type Subscription = typeof subscriptionTable.$inferSelect;
@@ -120,6 +122,68 @@ export async function updateMySubscription(input: {
   }
 
   return subscription;
+}
+
+export async function importMySubscriptions(input: { userId: string; rows: SubscriptionImportRow[] }) {
+  return db.transaction(async (tx) => {
+    const collectionIdByName = new Map<string, string>();
+    let collectionsCreated = 0;
+
+    for (const row of input.rows) {
+      if (collectionIdByName.has(row.collection)) {
+        continue;
+      }
+
+      const [existing] = await tx
+        .select({ id: collectionTable.id })
+        .from(collectionTable)
+        .where(and(eq(collectionTable.userId, input.userId), eq(collectionTable.name, row.collection)))
+        .orderBy(desc(collectionTable.updatedAt))
+        .limit(1);
+
+      if (existing) {
+        collectionIdByName.set(row.collection, existing.id);
+        continue;
+      }
+
+      const [created] = await tx
+        .insert(collectionTable)
+        .values({ userId: input.userId, name: row.collection })
+        .returning({ id: collectionTable.id });
+
+      collectionIdByName.set(row.collection, created.id);
+      collectionsCreated += 1;
+    }
+
+    if (input.rows.length > 0) {
+      const values = input.rows.map((row) => {
+        const collectionId = collectionIdByName.get(row.collection);
+
+        if (!collectionId) {
+          throw new Error('Failed to resolve collection during import');
+        }
+
+        return {
+          userId: input.userId,
+          name: row.name,
+          status: row.status,
+          iconRef: row.iconRef,
+          category: row.category,
+          costAmount: row.costAmountCents,
+          costFrequency: row.costFrequency,
+          nextInvoiceDate: row.nextInvoiceDate,
+          collectionId,
+        };
+      });
+
+      await tx.insert(subscriptionTable).values(values);
+    }
+
+    return {
+      collectionsCreated,
+      subscriptionsImported: input.rows.length,
+    };
+  });
 }
 
 export async function deleteMySubscription(input: { userId: string; subscriptionId: string }) {

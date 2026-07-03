@@ -47,3 +47,37 @@ export const updateSubscriptionInputSchema = z.object({
 });
 
 export const deleteSubscriptionInputSchema = subscriptionIdInputSchema;
+
+export const subscriptionTransferFormatSchema = z.enum(['json', 'csv']);
+
+export const exportSubscriptionsInputSchema = z.object({
+  format: subscriptionTransferFormatSchema,
+  collectionId: z.string().min(1).optional(),
+});
+
+const collectionNameSchema = z.string().trim().min(1, 'Collection is required').max(100);
+const importCostAmountCentsSchema = z.coerce.number().int().nonnegative();
+
+export const subscriptionImportRowSchema = z.object({
+  name: subscriptionNameSchema,
+  collection: collectionNameSchema,
+  status: subscriptionStatusSchema,
+  category: categorySchema,
+  iconRef: iconRefSchema,
+  costAmountCents: importCostAmountCentsSchema,
+  costFrequency: subscriptionCostFrequencySchema,
+  nextInvoiceDate: invoiceDateSchema,
+});
+
+export type SubscriptionImportRow = z.infer<typeof subscriptionImportRowSchema>;
+
+export const subscriptionImportEnvelopeSchema = z.object({
+  type: z.literal('subtrack.subscriptions'),
+  version: z.literal(1),
+  subscriptions: z.array(subscriptionImportRowSchema),
+});
+
+export const importSubscriptionsInputSchema = z.object({
+  content: z.string().min(1),
+  format: subscriptionTransferFormatSchema.optional(),
+});

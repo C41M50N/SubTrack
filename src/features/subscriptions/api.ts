@@ -1,15 +1,18 @@
 import { createServerFn } from '@tanstack/react-start';
 
 import { requireAuthMiddleware } from '@/features/auth/middleware';
+import { parseSubscriptionImport } from '@/features/subscriptions/import';
 import {
   createSubscriptionInputSchema,
   deleteSubscriptionInputSchema,
+  importSubscriptionsInputSchema,
   listSubscriptionsInputSchema,
   updateSubscriptionInputSchema,
 } from '@/features/subscriptions/schema';
 import {
   createMySubscription,
   deleteMySubscription,
+  importMySubscriptions,
   listMySubscriptions,
   updateMySubscription,
 } from '@/features/subscriptions/server';
@@ -52,6 +55,15 @@ export const updateSubscription = createServerFn({ method: 'POST' })
       nextInvoiceDate: data.nextInvoiceDate,
       status: data.status,
     });
+  });
+
+export const importSubscriptions = createServerFn({ method: 'POST' })
+  .middleware([requireAuthMiddleware])
+  .validator(importSubscriptionsInputSchema)
+  .handler(async ({ context: { auth }, data }) => {
+    const rows = parseSubscriptionImport({ content: data.content, format: data.format });
+
+    return importMySubscriptions({ userId: auth.userId, rows });
   });
 
 export const deleteSubscription = createServerFn({ method: 'POST' })
