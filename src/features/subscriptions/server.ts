@@ -1,4 +1,4 @@
-import { and, asc, desc, eq } from 'drizzle-orm';
+import { and, asc, desc, eq, sql } from 'drizzle-orm';
 
 import { getMyCollection } from '@/features/collections/server';
 import type { SubscriptionImportRow } from '@/features/subscriptions/schema';
@@ -126,23 +126,29 @@ export async function updateMySubscription(input: {
 
 export async function importMySubscriptions(input: { userId: string; rows: SubscriptionImportRow[] }) {
   return db.transaction(async (tx) => {
+    // Collection names are unique per user case-insensitively, so key the cache
+    // and existing-name lookups by the lowercased name.
     const collectionIdByName = new Map<string, string>();
     let collectionsCreated = 0;
 
     for (const row of input.rows) {
-      if (collectionIdByName.has(row.collection)) {
+      const nameKey = row.collection.toLowerCase();
+
+      if (collectionIdByName.has(nameKey)) {
         continue;
       }
 
       const [existing] = await tx
         .select({ id: collectionTable.id })
         .from(collectionTable)
-        .where(and(eq(collectionTable.userId, input.userId), eq(collectionTable.name, row.collection)))
+        .where(
+          and(eq(collectionTable.userId, input.userId), sql`lower(${collectionTable.name}) = ${nameKey}`),
+        )
         .orderBy(desc(collectionTable.updatedAt))
         .limit(1);
 
       if (existing) {
-        collectionIdByName.set(row.collection, existing.id);
+        collectionIdByName.set(nameKey, existing.id);
         continue;
       }
 
@@ -151,13 +157,13 @@ export async function importMySubscriptions(input: { userId: string; rows: Subsc
         .values({ userId: input.userId, name: row.collection })
         .returning({ id: collectionTable.id });
 
-      collectionIdByName.set(row.collection, created.id);
+      collectionIdByName.set(nameKey, created.id);
       collectionsCreated += 1;
     }
 
     if (input.rows.length > 0) {
       const values = input.rows.map((row) => {
-        const collectionId = collectionIdByName.get(row.collection);
+        const collectionId = collectionIdByName.get(row.collection.toLowerCase());
 
         if (!collectionId) {
           throw new Error('Failed to resolve collection during import');
