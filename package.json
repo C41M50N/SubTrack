@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "portless subtrack vite dev",
+    "dev": "portless subtrack.local.cbuff vite dev",
     "build": "vite build",
     "start": "varlock run -- srvx serve --prod --dir . --static dist/client --entry dist/server/server.js",
     "lint": "oxlint",
