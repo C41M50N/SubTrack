@@ -7,6 +7,7 @@ import {
   deleteSubscriptionInputSchema,
   importSubscriptionsInputSchema,
   listSubscriptionsInputSchema,
+  moveSubscriptionInputSchema,
   updateSubscriptionInputSchema,
 } from '@/features/subscriptions/schema';
 import {
@@ -14,6 +15,7 @@ import {
   deleteMySubscription,
   importMySubscriptions,
   listMySubscriptions,
+  moveMySubscription,
   updateMySubscription,
 } from '@/features/subscriptions/server';
 
@@ -54,6 +56,17 @@ export const updateSubscription = createServerFn({ method: 'POST' })
       costFrequency: data.costFrequency,
       nextInvoiceDate: data.nextInvoiceDate,
       status: data.status,
+    });
+  });
+
+export const moveSubscription = createServerFn({ method: 'POST' })
+  .middleware([requireAuthMiddleware])
+  .validator(moveSubscriptionInputSchema)
+  .handler(async ({ context: { auth }, data }) => {
+    return moveMySubscription({
+      userId: auth.userId,
+      subscriptionId: data.subscriptionId,
+      collectionId: data.collectionId,
     });
   });
 

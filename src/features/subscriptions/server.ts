@@ -124,6 +124,26 @@ export async function updateMySubscription(input: {
   return subscription;
 }
 
+export async function moveMySubscription(input: {
+  userId: string;
+  subscriptionId: string;
+  collectionId: string;
+}) {
+  await assertCollectionOwnership(input.userId, input.collectionId);
+
+  const [subscription] = await db
+    .update(subscriptionTable)
+    .set({ collectionId: input.collectionId })
+    .where(getSubscriptionFilter(input.userId, input.subscriptionId))
+    .returning();
+
+  if (!subscription) {
+    throw new Error('Subscription not found');
+  }
+
+  return subscription;
+}
+
 export async function importMySubscriptions(input: { userId: string; rows: SubscriptionImportRow[] }) {
   return db.transaction(async (tx) => {
     // Collection names are unique per user case-insensitively, so key the cache

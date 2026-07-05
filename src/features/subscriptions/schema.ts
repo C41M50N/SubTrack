@@ -48,6 +48,11 @@ export const updateSubscriptionInputSchema = z.object({
 
 export const deleteSubscriptionInputSchema = subscriptionIdInputSchema;
 
+export const moveSubscriptionInputSchema = z.object({
+  subscriptionId: z.string().min(1),
+  collectionId: z.string().min(1),
+});
+
 export const subscriptionTransferFormatSchema = z.enum(['json', 'csv']);
 
 export const exportSubscriptionsInputSchema = z.object({
