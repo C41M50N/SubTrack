@@ -124,11 +124,7 @@ export async function updateMySubscription(input: {
   return subscription;
 }
 
-export async function moveMySubscription(input: {
-  userId: string;
-  subscriptionId: string;
-  collectionId: string;
-}) {
+export async function moveMySubscription(input: { userId: string; subscriptionId: string; collectionId: string }) {
   await assertCollectionOwnership(input.userId, input.collectionId);
 
   const [subscription] = await db
@@ -161,9 +157,7 @@ export async function importMySubscriptions(input: { userId: string; rows: Subsc
       const [existing] = await tx
         .select({ id: collectionTable.id })
         .from(collectionTable)
-        .where(
-          and(eq(collectionTable.userId, input.userId), sql`lower(${collectionTable.name}) = ${nameKey}`),
-        )
+        .where(and(eq(collectionTable.userId, input.userId), sql`lower(${collectionTable.name}) = ${nameKey}`))
         .orderBy(desc(collectionTable.updatedAt))
         .limit(1);
 
