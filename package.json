@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "prepare": "git config core.hooksPath .githooks",
     "dev": "portless subtrack.local.cbuff vite dev",
     "build": "vite build",
     "start": "varlock run -- srvx serve --prod --dir . --static dist/client --entry dist/server/server.js",
