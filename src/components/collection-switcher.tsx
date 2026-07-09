@@ -6,8 +6,19 @@ import {
   PlusIcon,
 } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 import { MenuActionItem } from '@/components/menu-action-item';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -20,17 +31,99 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { CollectionOptionsMenu } from '@/features/collections/components/collection-options-menu';
 import { NewCollectionDialog } from '@/features/collections/components/new-collection-dialog';
+import { RenameCollectionDialog } from '@/features/collections/components/rename-collection-dialog';
+import {
+  useDeleteCollection,
+  useDuplicateCollection,
+} from '@/features/collections/mutations';
 import { collectionsQueryOptions } from '@/features/collections/queries';
+import type { SubscriptionTransferFormat } from '@/features/subscriptions/export';
+
+type CollectionTarget = { id: string; name: string };
 
 export function CollectionSwitcher() {
   const { collectionId } = useParams({ from: '/_protected/c/$collectionId' });
   const navigate = useNavigate();
   const { data: collections } = useSuspenseQuery(collectionsQueryOptions());
+
+  const duplicateCollection = useDuplicateCollection();
+  const deleteCollection = useDeleteCollection();
+
   const [isNewCollectionOpen, setIsNewCollectionOpen] = useState(false);
+  const [renameTarget, setRenameTarget] = useState<CollectionTarget | null>(
+    null,
+  );
+  const [deleteTarget, setDeleteTarget] = useState<CollectionTarget | null>(
+    null,
+  );
 
   const activeCollection = collections.find(
     (collection) => collection.id === collectionId,
   );
+
+  function handleDuplicate(collection: CollectionTarget) {
+    duplicateCollection.mutate(collection.id, {
+      onSuccess: (created) => {
+        toast.success(`Collection duplicated as "${created.name}"`);
+        navigate({
+          to: '/c/$collectionId/dashboard',
+          params: { collectionId: created.id },
+        });
+      },
+      onError: () => {
+        toast.error('Failed to duplicate collection');
+      },
+    });
+  }
+
+  function handleExport(
+    collection: CollectionTarget,
+    format: SubscriptionTransferFormat,
+  ) {
+    const params = new URLSearchParams({ format, collectionId: collection.id });
+    const anchor = document.createElement('a');
+    anchor.href = `/api/subscriptions/export?${params.toString()}`;
+    anchor.rel = 'noopener';
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+  }
+
+  function handleConfirmDelete() {
+    if (!deleteTarget) {
+      return;
+    }
+
+    const target = deleteTarget;
+
+    deleteCollection.mutate(target.id, {
+      onSuccess: () => {
+        toast.success(`Collection "${target.name}" deleted`);
+        setDeleteTarget(null);
+
+        // If we deleted the collection we're currently viewing, fall back to
+        // the first remaining collection, or the dashboard when none are left
+        // (mirrors the c.$collectionId route loader).
+        if (target.id === collectionId) {
+          const [first] = collections.filter(
+            (collection) => collection.id !== target.id,
+          );
+
+          if (first) {
+            navigate({
+              to: '/c/$collectionId/dashboard',
+              params: { collectionId: first.id },
+            });
+          } else {
+            navigate({ to: '/dashboard' });
+          }
+        }
+      },
+      onError: () => {
+        toast.error('Failed to delete collection');
+      },
+    });
+  }
 
   return (
     <>
@@ -70,7 +163,22 @@ export function CollectionSwitcher() {
                   >
                     {collection.name}
                   </span>
-                  <CollectionOptionsMenu />
+                  <CollectionOptionsMenu
+                    onRename={() =>
+                      setRenameTarget({
+                        id: collection.id,
+                        name: collection.name,
+                      })
+                    }
+                    onDuplicate={() => handleDuplicate(collection)}
+                    onExport={(format) => handleExport(collection, format)}
+                    onDelete={() =>
+                      setDeleteTarget({
+                        id: collection.id,
+                        name: collection.name,
+                      })
+                    }
+                  />
                 </div>
               </DropdownMenuItem>
             ))}
@@ -81,10 +189,52 @@ export function CollectionSwitcher() {
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
+
       <NewCollectionDialog
         open={isNewCollectionOpen}
         onOpenChange={setIsNewCollectionOpen}
       />
+
+      <RenameCollectionDialog
+        open={renameTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setRenameTarget(null);
+          }
+        }}
+        collection={renameTarget}
+      />
+
+      <AlertDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeleteTarget(null);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete collection?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently deletes “{deleteTarget?.name}” and all of its
+              subscriptions. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteCollection.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={handleConfirmDelete}
+              disabled={deleteCollection.isPending}
+            >
+              {deleteCollection.isPending ? 'Deleting…' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

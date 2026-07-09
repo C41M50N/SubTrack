@@ -14,9 +14,25 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuGroup,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
 } from '@/components/ui/dropdown-menu';
+import type { SubscriptionTransferFormat } from '@/features/subscriptions/export';
 
-export function CollectionOptionsMenu() {
+interface CollectionOptionsMenuProps {
+  onRename: () => void;
+  onDuplicate: () => void;
+  onExport: (format: SubscriptionTransferFormat) => void;
+  onDelete: () => void;
+}
+
+export function CollectionOptionsMenu({
+  onRename,
+  onDuplicate,
+  onExport,
+  onDelete,
+}: CollectionOptionsMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
@@ -32,16 +48,26 @@ export function CollectionOptionsMenu() {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-44" align="start" side="right">
         <DropdownMenuGroup>
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={onRename}>
             <MenuActionItem icon={TextCursorIcon} label="Rename" />
           </DropdownMenuItem>
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={onDuplicate}>
             <MenuActionItem icon={CopyIcon} label="Duplicate" />
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <MenuActionItem icon={DownloadIcon} label="Export" />
-          </DropdownMenuItem>
-          <DropdownMenuItem variant="destructive">
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger onClick={(e) => e.stopPropagation()}>
+              <MenuActionItem icon={DownloadIcon} label="Export" />
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent>
+              <DropdownMenuItem onClick={() => onExport('json')}>
+                Export as JSON
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onExport('csv')}>
+                Export as CSV
+              </DropdownMenuItem>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+          <DropdownMenuItem variant="destructive" onClick={onDelete}>
             <MenuActionItem
               variant="destructive"
               icon={Trash2Icon}
