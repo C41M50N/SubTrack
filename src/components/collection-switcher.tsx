@@ -1,3 +1,5 @@
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { useNavigate, useParams } from '@tanstack/react-router';
 import {
   ChevronsUpDownIcon,
   GalleryVerticalEndIcon,
@@ -16,8 +18,17 @@ import {
   DropdownMenuGroup,
 } from '@/components/ui/dropdown-menu';
 import { CollectionOptionsMenu } from '@/features/collections/components/collection-options-menu';
+import { collectionsQueryOptions } from '@/features/collections/queries';
 
 export function CollectionSwitcher() {
+  const { collectionId } = useParams({ from: '/_protected/c/$collectionId' });
+  const navigate = useNavigate();
+  const { data: collections } = useSuspenseQuery(collectionsQueryOptions());
+
+  const activeCollection = collections.find(
+    (collection) => collection.id === collectionId,
+  );
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="px-2 w-full">
@@ -28,7 +39,7 @@ export function CollectionSwitcher() {
         >
           <div className="flex items-center gap-3">
             <GalleryVerticalEndIcon className="size-4" />
-            Active Collection
+            {activeCollection?.name ?? 'Select collection'}
           </div>
           <ChevronsUpDownIcon className="size-4" />
         </Button>
@@ -36,24 +47,29 @@ export function CollectionSwitcher() {
       <DropdownMenuContent className="w-56" align="start" side="right">
         <DropdownMenuGroup>
           <DropdownMenuLabel>Collections</DropdownMenuLabel>
-          <DropdownMenuItem className="py-1">
-            <div className="w-full flex items-center justify-between">
-              Collection 1
-              <CollectionOptionsMenu />
-            </div>
-          </DropdownMenuItem>
-          <DropdownMenuItem className="py-1">
-            <div className="w-full flex items-center justify-between">
-              Collection 2
-              <CollectionOptionsMenu />
-            </div>
-          </DropdownMenuItem>
-          <DropdownMenuItem className="py-1">
-            <div className="w-full flex items-center justify-between">
-              Collection 3
-              <CollectionOptionsMenu />
-            </div>
-          </DropdownMenuItem>
+          {collections.map((collection) => (
+            <DropdownMenuItem
+              key={collection.id}
+              className="py-1"
+              onClick={() =>
+                navigate({
+                  to: '/c/$collectionId/dashboard',
+                  params: { collectionId: collection.id },
+                })
+              }
+            >
+              <div className="w-full flex items-center justify-between">
+                <span
+                  className={
+                    collection.id === collectionId ? 'font-medium' : undefined
+                  }
+                >
+                  {collection.name}
+                </span>
+                <CollectionOptionsMenu />
+              </div>
+            </DropdownMenuItem>
+          ))}
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() => console.log('Create new collection')}
