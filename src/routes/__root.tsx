@@ -12,6 +12,7 @@ import {
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 
 import { Button } from '@/components/ui/button';
+import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
 import appCss from '../styles.css?url';
@@ -59,6 +60,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="font-sans antialiased">
         <TooltipProvider>{children}</TooltipProvider>
+        <Toaster position="top-center" />
         <TanStackDevtools
           config={{
             position: 'bottom-right',
