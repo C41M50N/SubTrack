@@ -7,15 +7,12 @@ import {
   Outlet,
   Scripts,
   createRootRouteWithContext,
-  useRouterState,
   type ErrorComponentProps,
 } from '@tanstack/react-router';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 
+import { Button } from '@/components/ui/button';
 import { TooltipProvider } from '@/components/ui/tooltip';
-
-import { Button } from '../components/Button';
-import { Header } from '../components/Header';
 
 import appCss from '../styles.css?url';
 
@@ -51,18 +48,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 });
 
 function RootLayout() {
-  const pathname = useRouterState({
-    select: (state) => state.location.pathname,
-  });
-
-  const showHeader = pathname !== '/login';
-
-  return (
-    <>
-      {showHeader ? <Header /> : null}
-      <Outlet />
-    </>
-  );
+  return <Outlet />;
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
