@@ -2,12 +2,12 @@ import { Link } from '@tanstack/react-router';
 import {
   FileTextIcon,
   LayoutDashboardIcon,
-  PanelLeftCloseIcon,
   SettingsIcon,
   WalletIcon,
 } from 'lucide-react';
 
 import { CollectionSwitcher } from '@/components/collection-switcher';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
   Sidebar,
@@ -20,6 +20,8 @@ import {
 
 export function AppSidebar() {
   const collectionId = 'default';
+  const userName = 'Chris Bosch';
+  const userAvatarUrl = `https://api.dicebear.com/10.x/initials/svg?seed=${userName}`;
   return (
     <Sidebar
       side="left"
@@ -28,12 +30,15 @@ export function AppSidebar() {
       className="h-screen"
     >
       <SidebarHeader className="pt-3 pb-1 w-full bg-gray-50">
-        <div className="flex w-full items-center justify-between pl-3 pr-1">
+        <div className="flex w-full items-center justify-between pl-3 pr-1.5">
           <Link to="/dashboard">
             <h1 className="text-lg font-bold">SubTrack</h1>
           </Link>
-          <Button size="icon" variant="ghost" aria-label="Close sidebar">
-            <PanelLeftCloseIcon className="size-4" />
+          <Button size="icon" variant="ghost" className="p-4 rounded-full">
+            <Avatar className="size-8">
+              <AvatarImage src={userAvatarUrl} alt="User Avatar" />
+              <AvatarFallback>--</AvatarFallback>
+            </Avatar>
           </Button>
         </div>
       </SidebarHeader>
@@ -51,11 +56,9 @@ export function AppSidebar() {
               to="/c/$collectionId/dashboard"
               params={{ collectionId: collectionId }}
             >
-              <SidebarMenuButton size="lg">
-                <div className="flex items-center gap-3">
-                  <LayoutDashboardIcon />
-                  <span>Dashboard</span>
-                </div>
+              <SidebarMenuButton size="lg" className="flex items-center gap-3">
+                <LayoutDashboardIcon />
+                <span>Dashboard</span>
               </SidebarMenuButton>
             </Link>
           </SidebarMenuItem>
@@ -87,11 +90,9 @@ export function AppSidebar() {
               to="/c/$collectionId/invoices"
               params={{ collectionId: collectionId }}
             >
-              <SidebarMenuButton size="lg">
-                <div className="flex items-center gap-3">
-                  <FileTextIcon />
-                  <span>Invoices</span>
-                </div>
+              <SidebarMenuButton size="lg" className="flex items-center gap-3">
+                <FileTextIcon />
+                <span>Invoices</span>
               </SidebarMenuButton>
             </Link>
           </SidebarMenuItem>
@@ -100,11 +101,9 @@ export function AppSidebar() {
               to="/c/$collectionId/settings"
               params={{ collectionId: collectionId }}
             >
-              <SidebarMenuButton size="lg">
-                <div className="flex items-center gap-3">
-                  <SettingsIcon />
-                  <span>Settings</span>
-                </div>
+              <SidebarMenuButton size="lg" className="flex items-center gap-3">
+                <SettingsIcon />
+                <span>Settings</span>
               </SidebarMenuButton>
             </Link>
           </SidebarMenuItem>
