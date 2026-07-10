@@ -8,11 +8,13 @@ import {
 } from 'lucide-react';
 
 import { CollectionSwitcher } from '@/components/collection-switcher';
+import { ThemeSwitcher } from '@/components/theme-switcher';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -41,7 +43,7 @@ export function AppSidebar() {
       collapsible="none"
       className="h-screen"
     >
-      <SidebarHeader className="pt-3 pb-1 w-full bg-gray-50">
+      <SidebarHeader className="pt-3 pb-1 w-full bg-sidebar">
         <div className="flex w-full items-center justify-between pl-3 pr-1.5">
           <Link to="/c/$collectionId/dashboard" params={{ collectionId }}>
             <h1 className="text-lg font-bold">SubTrack</h1>
@@ -86,7 +88,7 @@ export function AppSidebar() {
                       <WalletIcon />
                       <span>Subscriptions</span>
                     </div>
-                    <div className="rounded-full bg-muted mr-0.5 px-2 py-0.5 ring-1 ring-inset ring-neutral-200 group-data-[collapsible=icon]:hidden">
+                    <div className="rounded-full bg-muted mr-0.5 px-2 py-0.5 ring-1 ring-inset ring-ring/50 group-data-[collapsible=icon]:hidden">
                       <span
                         className="text-sm text-muted-foreground"
                         aria-label={`${subscriptionCount} subscriptions`}
@@ -129,6 +131,13 @@ export function AppSidebar() {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarContent>
+      <SidebarFooter className="p-2">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <ThemeSwitcher />
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 }
