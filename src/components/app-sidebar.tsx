@@ -88,7 +88,7 @@ export function AppSidebar() {
                       <WalletIcon />
                       <span>Subscriptions</span>
                     </div>
-                    <div className="rounded-full bg-muted mr-0.5 px-2 py-0.5 ring-1 ring-inset ring-ring/50 group-data-[collapsible=icon]:hidden">
+                    <div className="rounded-full bg-muted mr-0.5 px-2 py-0.5 ring-1 ring-inset ring-border group-data-[collapsible=icon]:hidden">
                       <span
                         className="text-sm text-muted-foreground"
                         aria-label={`${subscriptionCount} subscriptions`}
