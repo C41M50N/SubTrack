@@ -38,7 +38,7 @@ function CollectionLayout() {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main>
+      <main className="flex min-w-0 flex-1 flex-col overflow-y-auto">
         <Outlet />
       </main>
     </SidebarProvider>

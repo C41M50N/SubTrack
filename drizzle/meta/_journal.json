@@ -15,6 +15,13 @@
       "when": 1783112991281,
       "tag": "0001_sharp_wrecking_crew",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784003669426,
+      "tag": "0002_same_menace",
+      "breakpoints": true
     }
   ]
 }

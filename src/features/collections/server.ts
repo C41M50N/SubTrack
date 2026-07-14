@@ -1,6 +1,7 @@
 import { and, asc, eq } from 'drizzle-orm';
 
 import { db } from '@/lib/db';
+import { categoryTable } from '@/lib/db/category-schema';
 import { COLLECTION_NAME_UNIQUE_CONSTRAINT, collectionTable } from '@/lib/db/collection-schema';
 import { subscriptionTable } from '@/lib/db/subscription-schema';
 
@@ -137,6 +138,38 @@ export async function duplicateMyCollection(input: { userId: string; collectionI
       })
       .returning();
 
+    // Categories are collection-scoped, so copy them into the new collection
+    // first and remap each subscription's categoryId to its copy.
+    const sourceCategories = await tx
+      .select()
+      .from(categoryTable)
+      .where(and(eq(categoryTable.userId, input.userId), eq(categoryTable.collectionId, input.collectionId)));
+
+    const newCategoryIdByOldId = new Map<string, string>();
+
+    if (sourceCategories.length > 0) {
+      const insertedCategories = await tx
+        .insert(categoryTable)
+        .values(
+          sourceCategories.map((category) => ({
+            userId: category.userId,
+            collectionId: collection.id,
+            name: category.name,
+          })),
+        )
+        .returning({ id: categoryTable.id, name: categoryTable.name });
+
+      const newIdByName = new Map(insertedCategories.map((category) => [category.name, category.id]));
+
+      for (const category of sourceCategories) {
+        const newId = newIdByName.get(category.name);
+
+        if (newId) {
+          newCategoryIdByOldId.set(category.id, newId);
+        }
+      }
+    }
+
     const subscriptions = await tx
       .select()
       .from(subscriptionTable)
@@ -149,7 +182,7 @@ export async function duplicateMyCollection(input: { userId: string; collectionI
           name: subscription.name,
           status: subscription.status,
           iconRef: subscription.iconRef,
-          category: subscription.category,
+          categoryId: subscription.categoryId ? (newCategoryIdByOldId.get(subscription.categoryId) ?? null) : null,
           costAmount: subscription.costAmount,
           costFrequency: subscription.costFrequency,
           nextInvoiceDate: subscription.nextInvoiceDate,

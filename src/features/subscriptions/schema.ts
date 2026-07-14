@@ -8,6 +8,7 @@ export const subscriptionCostFrequencySchema = z.enum(subscriptionCostFrequencyE
 
 const subscriptionNameSchema = z.string().trim().min(1, 'Name is required').max(100);
 const categorySchema = z.string().trim().min(1, 'Category is required').max(100);
+const categoryIdSchema = z.string().min(1, 'Category is required');
 const iconRefSchema = z.string().trim().min(1, 'Icon is required').max(200);
 const costAmountSchema = z.number().int().nonnegative();
 const invoiceDateSchema = z.iso.date();
@@ -27,7 +28,7 @@ export const createSubscriptionInputSchema = z.object({
   name: subscriptionNameSchema,
   collectionId: z.string().min(1),
   iconRef: iconRefSchema,
-  category: categorySchema,
+  categoryId: categoryIdSchema.nullable(),
   costAmount: costAmountSchema,
   costFrequency: subscriptionCostFrequencySchema,
   nextInvoiceDate: invoiceDateSchema,
@@ -39,7 +40,7 @@ export const updateSubscriptionInputSchema = z.object({
   name: subscriptionNameSchema.optional(),
   collectionId: z.string().min(1).optional(),
   iconRef: iconRefSchema.optional(),
-  category: categorySchema.optional(),
+  categoryId: categoryIdSchema.nullable().optional(),
   costAmount: costAmountSchema.optional(),
   costFrequency: subscriptionCostFrequencySchema.optional(),
   nextInvoiceDate: invoiceDateSchema.optional(),
