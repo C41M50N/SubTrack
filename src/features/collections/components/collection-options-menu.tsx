@@ -35,16 +35,18 @@ export function CollectionOptionsMenu({
 }: CollectionOptionsMenuProps) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
-        <Button
-          size="icon-xs"
-          variant="ghost"
-          aria-label="Collection options"
-          className="h-4 p-3"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <EllipsisIcon className="size-4" />
-        </Button>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            size="icon-xs"
+            variant="ghost"
+            aria-label="Collection options"
+            className="h-4 p-3"
+            onClick={(e) => e.stopPropagation()}
+          />
+        }
+      >
+        <EllipsisIcon className="size-4" />
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-44" align="start" side="right">
         <DropdownMenuGroup>
