@@ -130,19 +130,15 @@ export function CollectionSwitcher() {
       <DropdownMenu>
         <DropdownMenuTrigger
           className="px-2 w-full"
-          render={
-            <Button
-              size="lg"
-              variant="outline"
-              className="px-3 w-full justify-between"
-            />
-          }
+          render={<Button size="lg" variant="outline" />}
         >
-          <div className="flex items-center gap-3">
-            <GalleryVerticalEndIcon className="size-4" />
-            {activeCollection?.name ?? 'Select collection'}
+          <div className="w-full px-2 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <GalleryVerticalEndIcon className="size-4.5 stroke-[1.75] stroke-neutral-50" />
+              {activeCollection?.name ?? 'Select collection'}
+            </div>
+            <ChevronsUpDownIcon className="size-4" />
           </div>
-          <ChevronsUpDownIcon className="size-4" />
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56" align="start" side="right">
           <DropdownMenuGroup>

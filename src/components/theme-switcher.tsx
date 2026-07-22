@@ -41,13 +41,15 @@ export function ThemeSwitcher() {
     <DropdownMenu>
       <DropdownMenuTrigger
         className="w-full"
-        render={<Button variant="outline" className="w-full justify-between" />}
+        render={<Button variant="outline" />}
       >
-        <div className="flex items-center gap-2">
-          <ActiveIcon className="size-4" />
-          {activeLabel}
+        <div className="w-full px-2 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <ActiveIcon className="size-4.5 stroke-[1.75] stroke-neutral-50" />
+            {activeLabel}
+          </div>
+          <ChevronsUpDownIcon className="size-4" />
         </div>
-        <ChevronsUpDownIcon className="size-4" />
       </DropdownMenuTrigger>
       <DropdownMenuContent
         className="w-(--anchor-width)"
