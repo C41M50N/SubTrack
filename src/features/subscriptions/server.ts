@@ -3,6 +3,7 @@ import { and, asc, desc, eq, getTableColumns, sql } from 'drizzle-orm';
 import { assertCategoryInCollection } from '@/features/categories/server';
 import { getMyCollection } from '@/features/collections/server';
 import type { SubscriptionImportRow } from '@/features/subscriptions/schema';
+import { buildSeedSubscriptions } from '@/features/subscriptions/seed-data';
 import { db } from '@/lib/db';
 import { categoryTable } from '@/lib/db/category-schema';
 import { collectionTable } from '@/lib/db/collection-schema';
@@ -276,6 +277,95 @@ export async function importMySubscriptions(input: { userId: string; rows: Subsc
       subscriptionsImported: input.rows.length,
     };
   });
+}
+
+// Dev-only seeding: replace all subscriptions in a collection with a fixed sample
+// set (invoice dates are generated per run). Destructive and transactional so a
+// failure leaves the collection untouched.
+export async function seedMySubscriptions(input: { userId: string; collectionId: string }) {
+  await assertCollectionOwnership(input.userId, input.collectionId);
+
+  const rows = buildSeedSubscriptions();
+
+  return db.transaction(async (tx) => {
+    const deleted = await tx
+      .delete(subscriptionTable)
+      .where(and(eq(subscriptionTable.userId, input.userId), eq(subscriptionTable.collectionId, input.collectionId)))
+      .returning({ id: subscriptionTable.id });
+
+    // Categories are collection-scoped and unique by lower(name); resolve each
+    // once, reusing existing categories or creating them on demand.
+    const categoryIdByName = new Map<string, string>();
+
+    async function resolveCategoryId(name: string): Promise<string> {
+      const key = name.toLowerCase();
+      const cached = categoryIdByName.get(key);
+
+      if (cached) {
+        return cached;
+      }
+
+      const [existing] = await tx
+        .select({ id: categoryTable.id })
+        .from(categoryTable)
+        .where(
+          and(
+            eq(categoryTable.userId, input.userId),
+            eq(categoryTable.collectionId, input.collectionId),
+            sql`lower(${categoryTable.name}) = ${key}`,
+          ),
+        )
+        .limit(1);
+
+      if (existing) {
+        categoryIdByName.set(key, existing.id);
+        return existing.id;
+      }
+
+      const [created] = await tx
+        .insert(categoryTable)
+        .values({ userId: input.userId, collectionId: input.collectionId, name })
+        .returning({ id: categoryTable.id });
+
+      categoryIdByName.set(key, created.id);
+      return created.id;
+    }
+
+    const values = [];
+
+    for (const row of rows) {
+      values.push({
+        userId: input.userId,
+        name: row.name,
+        status: row.status,
+        iconRef: row.iconRef,
+        categoryId: await resolveCategoryId(row.category),
+        costAmount: row.costAmountCents,
+        costFrequency: row.costFrequency,
+        nextInvoiceDate: row.nextInvoiceDate,
+        collectionId: input.collectionId,
+      });
+    }
+
+    await tx.insert(subscriptionTable).values(values);
+
+    return {
+      subscriptionsDeleted: deleted.length,
+      subscriptionsSeeded: rows.length,
+    };
+  });
+}
+
+// Dev-only: remove every subscription in a collection.
+export async function clearMySubscriptions(input: { userId: string; collectionId: string }) {
+  await assertCollectionOwnership(input.userId, input.collectionId);
+
+  const deleted = await db
+    .delete(subscriptionTable)
+    .where(and(eq(subscriptionTable.userId, input.userId), eq(subscriptionTable.collectionId, input.collectionId)))
+    .returning({ id: subscriptionTable.id });
+
+  return { subscriptionsDeleted: deleted.length };
 }
 
 export async function deleteMySubscription(input: { userId: string; subscriptionId: string }) {

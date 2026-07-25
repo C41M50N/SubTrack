@@ -87,3 +87,12 @@ export const importSubscriptionsInputSchema = z.object({
   content: z.string().min(1),
   format: subscriptionTransferFormatSchema.optional(),
 });
+
+// Dev-only seeding/clearing operate on a single collection.
+export const seedSubscriptionsInputSchema = z.object({
+  collectionId: z.string().min(1),
+});
+
+export const clearSubscriptionsInputSchema = z.object({
+  collectionId: z.string().min(1),
+});

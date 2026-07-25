@@ -40,7 +40,12 @@ export function SubscriptionIcon({
   return (
     <span
       className={cn(
-        'flex shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted font-medium text-muted-foreground ring-1 ring-inset ring-border',
+        'flex shrink-0 items-center justify-center overflow-hidden rounded-md ring-1 ring-inset ring-border',
+        // Logos get an off-white backing so transparent, dark-inked marks stay
+        // visible in dark mode; the initials fallback stays theme-aware.
+        showImage
+          ? 'bg-logo-surface'
+          : 'bg-muted font-medium text-muted-foreground',
         styles.box,
         className,
       )}

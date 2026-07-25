@@ -134,7 +134,7 @@ export function CollectionSwitcher() {
         >
           <div className="w-full px-2 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <GalleryVerticalEndIcon className="size-4.5 stroke-[1.75] stroke-neutral-50" />
+              <GalleryVerticalEndIcon className="size-4.5 stroke-[1.75]" />
               {activeCollection?.name ?? 'Select collection'}
             </div>
             <ChevronsUpDownIcon className="size-4" />
