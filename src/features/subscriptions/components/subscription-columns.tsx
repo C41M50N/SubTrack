@@ -19,11 +19,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { SubscriptionIcon } from '@/features/subscriptions/components/subscription-icon';
 import {
   effectiveMonthlyCents,
   formatCurrencyFromCents,
-  formatFrequency,
   frequencyUnit,
 } from '@/features/subscriptions/cost';
 import {
@@ -158,16 +162,20 @@ export function createSubscriptionColumns({
         />
       ),
       cell: ({ row }) => (
-        <div className="flex flex-col">
-          <span className="font-medium">
+        <Tooltip>
+          <TooltipTrigger
+            render={<span className="font-medium tabular-nums" />}
+          >
             {formatCurrencyFromCents(row.original.costAmount)}
-          </span>
-          <span className="text-xs text-muted-foreground">
-            {formatFrequency(row.original.costFrequency)} ·{' '}
+            <span className="text-xs font-normal text-muted-foreground">
+              {frequencyUnit(row.original.costFrequency)}
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>
             {formatCurrencyFromCents(effectiveMonthlyCents(row.original))}
-            {frequencyUnit('monthly')}
-          </span>
-        </div>
+            {frequencyUnit('monthly')} effective
+          </TooltipContent>
+        </Tooltip>
       ),
     },
     {
