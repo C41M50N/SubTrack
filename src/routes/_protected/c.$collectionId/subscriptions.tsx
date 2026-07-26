@@ -95,7 +95,7 @@ function RouteComponent() {
         count={baseItems.length}
       />
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid items-start gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <SubscriptionsTable
             table={table}
