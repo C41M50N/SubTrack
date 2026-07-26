@@ -4,6 +4,10 @@ import {
   buildMonthlyBreakdown,
   effectiveMonthlyCents,
   effectiveYearlyCents,
+  formatCentsForInput,
+  normalizeCostInput,
+  parseCostToCents,
+  sanitizeCostInput,
   sumEffectiveMonthlyCents,
   sumEffectiveYearlyCents,
   type CostInput,
@@ -129,5 +133,129 @@ describe('buildMonthlyBreakdown', () => {
     );
 
     expect(entries.every((entry) => entry.totalCents === 0)).toBe(true);
+  });
+});
+
+describe('sanitizeCostInput', () => {
+  it('keeps a plain decimal untouched', () => {
+    expect(sanitizeCostInput('9.99')).toBe('9.99');
+  });
+
+  it('strips grouping commas that would otherwise truncate the amount', () => {
+    expect(sanitizeCostInput('1,299.00')).toBe('1299.00');
+  });
+
+  it('strips a pasted currency symbol', () => {
+    expect(sanitizeCostInput('$9.99')).toBe('9.99');
+  });
+
+  it('caps precision at two decimals', () => {
+    expect(sanitizeCostInput('9.999')).toBe('9.99');
+  });
+
+  it('drops a minus sign', () => {
+    expect(sanitizeCostInput('-5')).toBe('5');
+  });
+
+  it('preserves a trailing dot mid-typing', () => {
+    expect(sanitizeCostInput('12.')).toBe('12.');
+  });
+
+  it('preserves a leading dot mid-typing', () => {
+    expect(sanitizeCostInput('.5')).toBe('.5');
+  });
+
+  it('collapses repeated dots', () => {
+    expect(sanitizeCostInput('1.2.3')).toBe('1.23');
+  });
+
+  it('returns empty for input with no digits', () => {
+    expect(sanitizeCostInput('abc')).toBe('');
+  });
+});
+
+describe('parseCostToCents', () => {
+  it('converts a decimal amount to cents', () => {
+    expect(parseCostToCents('9.99')).toBe(999);
+  });
+
+  it('avoids float drift', () => {
+    expect(parseCostToCents('19.99')).toBe(1999);
+  });
+
+  it('handles a whole number', () => {
+    expect(parseCostToCents('10')).toBe(1000);
+  });
+
+  it('accepts zero', () => {
+    expect(parseCostToCents('0')).toBe(0);
+  });
+
+  it('rejects an empty string', () => {
+    expect(parseCostToCents('')).toBeNull();
+  });
+
+  it('rejects whitespace only', () => {
+    expect(parseCostToCents('   ')).toBeNull();
+  });
+
+  it('rejects a bare dot', () => {
+    expect(parseCostToCents('.')).toBeNull();
+  });
+
+  it('rejects trailing garbage that parseFloat would accept', () => {
+    expect(parseCostToCents('9.9abc')).toBeNull();
+  });
+
+  it('rejects a negative amount', () => {
+    expect(parseCostToCents('-5')).toBeNull();
+  });
+
+  it('rejects a non-finite amount', () => {
+    expect(parseCostToCents('Infinity')).toBeNull();
+  });
+});
+
+describe('formatCentsForInput', () => {
+  it('pads to two decimals', () => {
+    expect(formatCentsForInput(990)).toBe('9.90');
+  });
+
+  it('renders a whole dollar amount with cents', () => {
+    expect(formatCentsForInput(1000)).toBe('10.00');
+  });
+
+  it('renders zero', () => {
+    expect(formatCentsForInput(0)).toBe('0.00');
+  });
+
+  it('round-trips through parseCostToCents', () => {
+    expect(parseCostToCents(formatCentsForInput(1599))).toBe(1599);
+  });
+});
+
+describe('normalizeCostInput', () => {
+  it('pads a partial decimal on blur', () => {
+    expect(normalizeCostInput('9.9')).toBe('9.90');
+  });
+
+  it('strips leading zeros', () => {
+    expect(normalizeCostInput('0009.99')).toBe('9.99');
+  });
+
+  it('completes a leading dot', () => {
+    expect(normalizeCostInput('.5')).toBe('0.50');
+  });
+
+  it('leaves an empty field empty', () => {
+    expect(normalizeCostInput('')).toBe('');
+  });
+
+  it('completes a trailing dot', () => {
+    expect(normalizeCostInput('12.')).toBe('12.00');
+  });
+
+  it('leaves unparseable input alone so the user can fix it', () => {
+    expect(normalizeCostInput('.')).toBe('.');
   });
 });

@@ -38,7 +38,13 @@ import { useCreateCategory } from '@/features/categories/mutations';
 import type { CategoryRecord } from '@/features/categories/queries';
 import { CategoryCombobox } from '@/features/subscriptions/components/category-combobox';
 import { IconPicker } from '@/features/subscriptions/components/icon-picker';
-import { formatFrequency } from '@/features/subscriptions/cost';
+import {
+  formatCentsForInput,
+  formatFrequency,
+  normalizeCostInput,
+  parseCostToCents,
+  sanitizeCostInput,
+} from '@/features/subscriptions/cost';
 import { formatInvoiceDate } from '@/features/subscriptions/format';
 import {
   useCreateSubscription,
@@ -47,6 +53,7 @@ import {
 import type { SubscriptionRecord } from '@/features/subscriptions/queries';
 import {
   createSubscriptionInputSchema,
+  MAX_COST_AMOUNT_CENTS,
   updateSubscriptionInputSchema,
 } from '@/features/subscriptions/schema';
 import type {
@@ -98,7 +105,7 @@ function formFromSubscription(subscription: SubscriptionRecord): FormState {
     name: subscription.name,
     iconRef: subscription.iconRef,
     categoryId: subscription.categoryId,
-    cost: (subscription.costAmount / 100).toString(),
+    cost: formatCentsForInput(subscription.costAmount),
     costFrequency: subscription.costFrequency,
     nextInvoiceDate: subscription.nextInvoiceDate,
     status: subscription.status,
@@ -141,6 +148,17 @@ export function SubscriptionFormDialog({
     setErrors((previous) => ({ ...previous, [key]: undefined }));
   }
 
+  function handleCostChange(value: string) {
+    update('cost', sanitizeCostInput(value));
+  }
+
+  function handleCostBlur() {
+    setForm((previous) => ({
+      ...previous,
+      cost: normalizeCostInput(previous.cost),
+    }));
+  }
+
   function handleCreateCategory(name: string) {
     createCategory.mutate(
       { collectionId, name },
@@ -154,18 +172,21 @@ export function SubscriptionFormDialog({
   function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const costAmount = Math.round(Number.parseFloat(form.cost) * 100);
+    const costAmount = parseCostToCents(form.cost);
     const nextErrors: Partial<Record<keyof FormState, string>> = {};
 
-    if (!Number.isFinite(costAmount)) {
+    if (costAmount === null) {
       nextErrors.cost = 'Enter a valid amount';
+    } else if (costAmount > MAX_COST_AMOUNT_CENTS) {
+      nextErrors.cost = 'Cost is too large';
     }
 
     if (!form.categoryId) {
       nextErrors.categoryId = 'Category is required';
     }
 
-    if (Object.keys(nextErrors).length > 0) {
+    // The null check also narrows costAmount to a number for the parses below.
+    if (costAmount === null || Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
       return;
     }
@@ -289,7 +310,8 @@ export function SubscriptionFormDialog({
                 <InputGroupInput
                   id="subscription-cost"
                   value={form.cost}
-                  onChange={(event) => update('cost', event.target.value)}
+                  onChange={(event) => handleCostChange(event.target.value)}
+                  onBlur={handleCostBlur}
                   inputMode="decimal"
                   placeholder="0.00"
                   aria-invalid={errors.cost ? true : undefined}

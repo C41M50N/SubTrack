@@ -20,6 +20,58 @@ export function formatCurrencyFromCents(cents: number): string {
   return currencyFormatter.format(cents / 100);
 }
 
+/**
+ * Strips anything that can't belong in a decimal amount so pasted values like
+ * `$1,299.00` survive intact. Without this, `Number.parseFloat` stops at the
+ * comma and silently records $1.00.
+ *
+ * Only filters characters, never reorders or reformats, so the caret stays put
+ * while typing.
+ */
+export function sanitizeCostInput(value: string): string {
+  const cleaned = value.replace(/[^\d.]/g, '');
+  const [whole, ...fractions] = cleaned.split('.');
+
+  if (fractions.length === 0) {
+    return whole;
+  }
+
+  // Extra dots collapse into the fraction, capped at cents precision.
+  return `${whole}.${fractions.join('').slice(0, 2)}`;
+}
+
+/** Parses a decimal amount string to integer cents, or null if unusable. */
+export function parseCostToCents(value: string): number | null {
+  const trimmed = value.trim();
+
+  if (trimmed === '') {
+    return null;
+  }
+
+  // Number() rejects trailing garbage that Number.parseFloat would accept.
+  const amount = Number(trimmed);
+
+  if (!Number.isFinite(amount) || amount < 0) {
+    return null;
+  }
+
+  const cents = Math.round(amount * 100);
+
+  return Number.isSafeInteger(cents) ? cents : null;
+}
+
+/** Renders stored cents for a text input, e.g. 990 -> "9.90". */
+export function formatCentsForInput(cents: number): string {
+  return (cents / 100).toFixed(2);
+}
+
+/** Blur normalization: pads to cents precision, leaves unparseable input alone. */
+export function normalizeCostInput(value: string): string {
+  const cents = parseCostToCents(value);
+
+  return cents === null ? value : formatCentsForInput(cents);
+}
+
 const frequencyLabels: Record<SubscriptionCostFrequency, string> = {
   weekly: 'Weekly',
   monthly: 'Monthly',

@@ -10,7 +10,14 @@ const subscriptionNameSchema = z.string().trim().min(1, 'Name is required').max(
 const categorySchema = z.string().trim().min(1, 'Category is required').max(100);
 const categoryIdSchema = z.string().min(1, 'Category is required');
 const iconRefSchema = z.string().trim().min(1, 'Icon is required').max(200);
-const costAmountSchema = z.number().int().nonnegative();
+/** Postgres int4 upper bound — `cost_amount` is an `integer` column. */
+export const MAX_COST_AMOUNT_CENTS = 2_147_483_647;
+
+const costAmountSchema = z
+  .number()
+  .int()
+  .nonnegative('Cost must be zero or more')
+  .max(MAX_COST_AMOUNT_CENTS, 'Cost is too large');
 const invoiceDateSchema = z.iso.date();
 
 export const subscriptionIdInputSchema = z.object({
@@ -62,7 +69,11 @@ export const exportSubscriptionsInputSchema = z.object({
 });
 
 const collectionNameSchema = z.string().trim().min(1, 'Collection is required').max(100);
-const importCostAmountCentsSchema = z.coerce.number().int().nonnegative();
+const importCostAmountCentsSchema = z.coerce
+  .number()
+  .int()
+  .nonnegative('Cost must be zero or more')
+  .max(MAX_COST_AMOUNT_CENTS, 'Cost is too large');
 
 export const subscriptionImportRowSchema = z.object({
   name: subscriptionNameSchema,
