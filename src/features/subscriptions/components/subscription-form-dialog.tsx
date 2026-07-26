@@ -17,6 +17,12 @@ import {
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from '@/components/ui/input-group';
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -275,16 +281,24 @@ export function SubscriptionFormDialog({
 
           <div className="grid gap-6 sm:grid-cols-2">
             <Field data-invalid={errors.cost ? true : undefined}>
-              <FieldLabel htmlFor="subscription-cost">Cost (USD)</FieldLabel>
-              <Input
-                id="subscription-cost"
-                value={form.cost}
-                onChange={(event) => update('cost', event.target.value)}
-                inputMode="decimal"
-                placeholder="9.99"
-                aria-invalid={errors.cost ? true : undefined}
-                disabled={isPending}
-              />
+              <FieldLabel htmlFor="subscription-cost">Cost</FieldLabel>
+              <InputGroup data-disabled={isPending || undefined}>
+                <InputGroupAddon>
+                  <InputGroupText>$</InputGroupText>
+                </InputGroupAddon>
+                <InputGroupInput
+                  id="subscription-cost"
+                  value={form.cost}
+                  onChange={(event) => update('cost', event.target.value)}
+                  inputMode="decimal"
+                  placeholder="0.00"
+                  aria-invalid={errors.cost ? true : undefined}
+                  disabled={isPending}
+                />
+                <InputGroupAddon align="inline-end">
+                  <InputGroupText>USD</InputGroupText>
+                </InputGroupAddon>
+              </InputGroup>
               <FieldError>{errors.cost}</FieldError>
             </Field>
 
