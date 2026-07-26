@@ -26,7 +26,10 @@ import {
   formatFrequency,
   frequencyUnit,
 } from '@/features/subscriptions/cost';
-import { formatInvoiceDate } from '@/features/subscriptions/format';
+import {
+  formatInvoiceDate,
+  formatInvoiceDistance,
+} from '@/features/subscriptions/format';
 import type { SubscriptionRecord } from '@/features/subscriptions/queries';
 import { cn } from '@/lib/utils';
 
@@ -177,9 +180,12 @@ export function createSubscriptionColumns({
         />
       ),
       cell: ({ row }) => (
-        <span className="text-muted-foreground">
-          {formatInvoiceDate(row.original.nextInvoiceDate)}
-        </span>
+        <div className="flex flex-col">
+          <span>{formatInvoiceDate(row.original.nextInvoiceDate)}</span>
+          <span className="text-xs text-muted-foreground">
+            {formatInvoiceDistance(row.original.nextInvoiceDate)}
+          </span>
+        </div>
       ),
     },
     {
