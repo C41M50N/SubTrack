@@ -38,7 +38,7 @@ export async function createSubscriptionInvoice(input: { userId: string; subscri
       subscriptionId: subscription.id,
       name: subscription.name,
       iconRef: subscription.iconRef,
-      category: subscription.category,
+      category: subscription.category ?? 'Uncategorized',
       amount: subscription.costAmount,
       invoiceDate: subscription.nextInvoiceDate,
     })

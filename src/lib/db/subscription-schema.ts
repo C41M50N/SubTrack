@@ -3,6 +3,7 @@ import { check, date, foreignKey, index, integer, pgEnum, pgTable, text, timesta
 
 import { generateId } from '@/lib/data-utils';
 import { user } from '@/lib/db/auth-schema';
+import { categoryTable } from '@/lib/db/category-schema';
 import { collectionTable } from '@/lib/db/collection-schema';
 
 export const subscriptionStatusEnum = pgEnum('subscription_status', ['active', 'inactive']);
@@ -26,7 +27,9 @@ export const subscriptionTable = pgTable(
     name: text('name').notNull(),
     status: subscriptionStatusEnum('status').notNull().default('active'),
     iconRef: text('icon_ref').notNull(),
-    category: text('category').notNull(),
+    // Categories are collection-scoped. Deleting a category leaves its
+    // subscriptions "Uncategorized" rather than removing them.
+    categoryId: text('category_id').references(() => categoryTable.id, { onDelete: 'set null' }),
     costAmount: integer('cost_amount').notNull(), // in cents
     costFrequency: subscriptionCostFrequencyEnum('cost_frequency').notNull(),
     nextInvoiceDate: date('next_invoice_date', { mode: 'string' }).notNull(),
@@ -48,6 +51,9 @@ export const subscriptionTable = pgTable(
 
     // All subscriptions for this user with this status
     index('subscriptions_user_status_idx').on(table.userId, table.status),
+
+    // All subscriptions assigned to this category
+    index('subscriptions_category_id_idx').on(table.categoryId),
 
     // Let other tables prove a referenced subscription belongs to this user.
     // id is already unique; this pairs it with userId for composite foreign keys.

@@ -36,9 +36,9 @@ export const Route = createFileRoute('/_protected/c/$collectionId')({
 
 function CollectionLayout() {
   return (
-    <SidebarProvider>
+    <SidebarProvider className="h-svh overflow-hidden">
       <AppSidebar />
-      <main>
+      <main className="flex min-w-0 flex-1 flex-col overflow-y-auto">
         <Outlet />
       </main>
     </SidebarProvider>
