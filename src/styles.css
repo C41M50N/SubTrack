@@ -5,6 +5,16 @@
 @import '@fontsource-variable/inter';
 
 @custom-variant dark (&:is(.dark *));
+
+/*
+ * Engages the fill-the-viewport layout, where the page itself does not scroll
+ * and long lists scroll inside their own container. Requires enough width for
+ * multi-column layouts (matches `lg`) and enough height to leave those
+ * containers a usable scroll window (roughly five table rows). Below either
+ * threshold, content falls back to its natural height and the page scrolls.
+ */
+@custom-variant roomy (@media (min-width: 64rem) and (min-height: 41.25rem));
+
 @plugin "@tailwindcss/typography";
 
 @theme {
@@ -61,6 +71,9 @@ body,
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
+  /* Opaque equivalent of `muted/40`, for sticky surfaces that scrolling
+     content passes underneath and so cannot be translucent. */
+  --color-muted-solid: color-mix(in srgb, var(--muted) 40%, var(--background));
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);

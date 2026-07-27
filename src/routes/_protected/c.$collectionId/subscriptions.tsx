@@ -75,7 +75,7 @@ function RouteComponent() {
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-6">
+    <div className="flex flex-1 flex-col gap-6 p-6 roomy:min-h-0">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-heading text-2xl font-semibold">Subscriptions</h1>
@@ -95,8 +95,8 @@ function RouteComponent() {
         count={baseItems.length}
       />
 
-      <div className="grid items-start gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+      <div className="grid items-start gap-6 lg:grid-cols-3 roomy:min-h-0 roomy:flex-1">
+        <div className="flex flex-col lg:col-span-2 roomy:max-h-full roomy:min-h-0">
           <SubscriptionsTable
             table={table}
             categories={categories}

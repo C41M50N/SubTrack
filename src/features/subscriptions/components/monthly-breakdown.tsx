@@ -1,10 +1,10 @@
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   buildMonthlyBreakdown,
   formatCurrencyFromCents,
@@ -19,14 +19,14 @@ export function MonthlyBreakdown({ items }: MonthlyBreakdownProps) {
   const entries = buildMonthlyBreakdown(items);
 
   return (
-    <Card className="gap-0 py-0">
-      <CardHeader className="border-b py-4">
+    <Card className="gap-0 py-0 roomy:max-h-full roomy:min-h-0">
+      <CardHeader className="shrink-0 border-b py-4">
         <CardTitle className="text-base">Monthly cost breakdown</CardTitle>
         <CardDescription>
           Projected invoices over the next 12 months
         </CardDescription>
       </CardHeader>
-      <CardContent className="p-0">
+      <ScrollArea className="min-h-0 flex-1">
         <ul className="divide-y">
           {entries.map((entry) => {
             return (
@@ -44,7 +44,7 @@ export function MonthlyBreakdown({ items }: MonthlyBreakdownProps) {
             );
           })}
         </ul>
-      </CardContent>
+      </ScrollArea>
     </Card>
   );
 }

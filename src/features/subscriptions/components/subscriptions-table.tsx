@@ -13,6 +13,7 @@ import {
 } from '@tanstack/react-table';
 import { useMemo, useState } from 'react';
 
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Table,
   TableBody,
@@ -82,23 +83,23 @@ export function SubscriptionsTable({
   const columnCount = table.getAllLeafColumns().length;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex min-h-0 flex-1 flex-col gap-4">
       <SubscriptionsTableToolbar
         table={table}
         categories={categories}
         onBulkDelete={onBulkDelete}
       />
 
-      <div className="overflow-hidden rounded-xl ring-1 ring-foreground/10">
-        <Table>
+      <ScrollArea className="min-h-0 flex-1 rounded-xl ring-1 ring-foreground/10">
+        <Table containerClassName="overflow-visible">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow
-                key={headerGroup.id}
-                className="bg-muted/40 hover:bg-muted/40"
-              >
+              <TableRow key={headerGroup.id} className="hover:bg-transparent">
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="px-3">
+                  <TableHead
+                    key={header.id}
+                    className="sticky top-0 z-10 bg-muted-solid px-3 shadow-[inset_0_-1px_0_var(--border)] last:pr-4"
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -127,7 +128,7 @@ export function SubscriptionsTable({
                   data-state={row.getIsSelected() ? 'selected' : undefined}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="px-3 py-2.5">
+                    <TableCell key={cell.id} className="px-3 py-2.5 last:pr-4">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -139,7 +140,7 @@ export function SubscriptionsTable({
             )}
           </TableBody>
         </Table>
-      </div>
+      </ScrollArea>
 
       <SubscriptionsTableFooter table={table} />
     </div>
