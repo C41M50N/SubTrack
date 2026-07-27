@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest';
 
 import {
   buildMonthlyBreakdown,
+  buildUpcomingWindow,
   effectiveMonthlyCents,
   effectiveYearlyCents,
+  findNextInvoice,
   formatCentsForInput,
   normalizeCostInput,
   parseCostToCents,
@@ -67,6 +69,112 @@ describe('sum helpers', () => {
 
     expect(sumEffectiveMonthlyCents(items)).toBe(2000);
     expect(sumEffectiveYearlyCents(items)).toBe(24000);
+  });
+});
+
+describe('findNextInvoice', () => {
+  it('returns null for an empty list', () => {
+    expect(findNextInvoice([])).toBeNull();
+  });
+
+  it('picks the earliest invoice date', () => {
+    const soon = sub({ nextInvoiceDate: '2026-02-01' });
+    const later = sub({ nextInvoiceDate: '2026-05-20' });
+
+    expect(findNextInvoice([later, soon])).toBe(soon);
+  });
+
+  it('surfaces an overdue date rather than rolling it forward', () => {
+    const overdue = sub({ nextInvoiceDate: '2020-01-01' });
+
+    expect(findNextInvoice([sub({ nextInvoiceDate: '2026-02-01' }), overdue])).toBe(overdue);
+  });
+
+  it('breaks a same-day tie on the larger amount', () => {
+    const small = sub({ costAmount: 500, nextInvoiceDate: '2026-02-01' });
+    const large = sub({ costAmount: 9900, nextInvoiceDate: '2026-02-01' });
+
+    expect(findNextInvoice([small, large])).toBe(large);
+  });
+});
+
+describe('buildUpcomingWindow', () => {
+  const from = new Date(2026, 0, 10); // Jan 10, 2026
+
+  it('returns an empty window for no items', () => {
+    expect(buildUpcomingWindow([], from)).toEqual({
+      totalCents: 0,
+      invoiceCount: 0,
+      charges: [],
+    });
+  });
+
+  it('counts a charge falling inside the window', () => {
+    const window = buildUpcomingWindow([sub({ costAmount: 1599, nextInvoiceDate: '2026-01-20' })], from, 30);
+
+    expect(window.totalCents).toBe(1599);
+    expect(window.invoiceCount).toBe(1);
+    expect(window.charges).toHaveLength(1);
+  });
+
+  it('excludes a charge falling past the window', () => {
+    const window = buildUpcomingWindow([sub({ costAmount: 1599, nextInvoiceDate: '2026-03-20' })], from, 30);
+
+    expect(window.totalCents).toBe(0);
+    expect(window.charges).toHaveLength(0);
+  });
+
+  it('includes the window start day and excludes the end day', () => {
+    const onStart = buildUpcomingWindow([sub({ nextInvoiceDate: '2026-01-10' })], from, 30);
+    const onEnd = buildUpcomingWindow([sub({ nextInvoiceDate: '2026-02-09' })], from, 30);
+
+    expect(onStart.invoiceCount).toBe(1);
+    expect(onEnd.invoiceCount).toBe(0);
+  });
+
+  it('bills the full amount of a yearly plan renewing inside the window', () => {
+    // The whole point of the metric: effective cost would smooth this to 5000/mo.
+    const window = buildUpcomingWindow(
+      [sub({ costAmount: 60000, costFrequency: 'yearly', nextInvoiceDate: '2026-01-15' })],
+      from,
+      30,
+    );
+
+    expect(window.totalCents).toBe(60000);
+  });
+
+  it('collapses repeat weekly charges into one entry with an occurrence count', () => {
+    const window = buildUpcomingWindow(
+      [sub({ costAmount: 100, costFrequency: 'weekly', nextInvoiceDate: '2026-01-12' })],
+      from,
+      30,
+    );
+
+    // Jan 12, 19, 26 and Feb 2 all land before Feb 9.
+    expect(window.charges).toHaveLength(1);
+    expect(window.charges[0].occurrences).toBe(4);
+    expect(window.charges[0].totalCents).toBe(400);
+    expect(window.invoiceCount).toBe(4);
+  });
+
+  it('rolls an overdue date forward instead of counting it as due now', () => {
+    const window = buildUpcomingWindow(
+      [sub({ costAmount: 500, costFrequency: 'monthly', nextInvoiceDate: '2025-06-15' })],
+      from,
+      30,
+    );
+
+    expect(window.charges[0].date).toEqual(new Date(2026, 0, 15));
+    expect(window.invoiceCount).toBe(1);
+  });
+
+  it('orders charges soonest first', () => {
+    const later = sub({ nextInvoiceDate: '2026-02-01' });
+    const sooner = sub({ nextInvoiceDate: '2026-01-11' });
+
+    const window = buildUpcomingWindow([later, sooner], from, 30);
+
+    expect(window.charges.map((charge) => charge.item)).toEqual([sooner, later]);
   });
 });
 

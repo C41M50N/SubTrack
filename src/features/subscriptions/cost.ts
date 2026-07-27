@@ -1,4 +1,4 @@
-import { addMonths, addWeeks, addYears, format, isBefore, parseISO, startOfMonth } from 'date-fns';
+import { addDays, addMonths, addWeeks, addYears, format, isBefore, parseISO, startOfDay, startOfMonth } from 'date-fns';
 
 import type { SubscriptionCostFrequency } from '@/features/subscriptions/server';
 
@@ -133,6 +133,33 @@ export function sumEffectiveYearlyCents(items: CostInput[]): number {
   return items.reduce((total, item) => total + effectiveYearlyCents(item), 0);
 }
 
+/**
+ * The soonest upcoming invoice across the given items, or null when empty.
+ *
+ * Compares the stored `nextInvoiceDate` verbatim rather than rolling overdue
+ * dates forward, so this always agrees with the table's "Next invoice" column.
+ * A stale date therefore surfaces as overdue instead of being silently hidden.
+ * Ties break on the larger amount, so the more consequential charge leads.
+ */
+export function findNextInvoice<T extends CostInput>(items: T[]): T | null {
+  let soonest: T | null = null;
+
+  for (const item of items) {
+    if (soonest === null) {
+      soonest = item;
+      continue;
+    }
+
+    if (item.nextInvoiceDate < soonest.nextInvoiceDate) {
+      soonest = item;
+    } else if (item.nextInvoiceDate === soonest.nextInvoiceDate && item.costAmount > soonest.costAmount) {
+      soonest = item;
+    }
+  }
+
+  return soonest;
+}
+
 function advance(date: Date, frequency: SubscriptionCostFrequency): Date {
   switch (frequency) {
     case 'weekly':
@@ -144,6 +171,82 @@ function advance(date: Date, frequency: SubscriptionCostFrequency): Date {
     case 'biennially':
       return addYears(date, 2);
   }
+}
+
+export type UpcomingCharge<T extends CostInput> = {
+  item: T;
+  /** First occurrence inside the window. Later repeats are folded into totals. */
+  date: Date;
+  /** How many times this item bills inside the window (weekly plans bill ~4x). */
+  occurrences: number;
+  /** `item.costAmount * occurrences`. */
+  totalCents: number;
+};
+
+export type UpcomingWindow<T extends CostInput> = {
+  /** Real cash leaving the account across the window, not a smoothed average. */
+  totalCents: number;
+  /** Individual invoices, so 4 weekly charges count as 4. */
+  invoiceCount: number;
+  /** One entry per subscription that bills at all, soonest first. */
+  charges: UpcomingCharge<T>[];
+};
+
+/**
+ * Projects actual invoices across the next `days` and totals them.
+ *
+ * This is deliberately unlike effective cost: a $600 annual plan renewing next
+ * week contributes its full $600 here but only $50 to the monthly average. The
+ * gap between the two numbers is the point.
+ *
+ * Charges are grouped by subscription rather than returned as a flat invoice
+ * list, so a weekly plan occupies one slot with `occurrences: 4` instead of
+ * four near-identical rows. That keeps the result renderable at any list
+ * length: callers show the total, then as many logos as fit.
+ */
+export function buildUpcomingWindow<T extends CostInput>(
+  items: T[],
+  from: Date = new Date(),
+  days = 30,
+): UpcomingWindow<T> {
+  const windowStart = startOfDay(from);
+  const windowEndExclusive = addDays(windowStart, days);
+
+  const charges: UpcomingCharge<T>[] = [];
+  let totalCents = 0;
+  let invoiceCount = 0;
+
+  for (const item of items) {
+    let occurrence = parseISO(item.nextInvoiceDate);
+
+    // Matches buildMonthlyBreakdown: a stale date rolls forward to its next
+    // real occurrence rather than being counted as due today.
+    while (isBefore(occurrence, windowStart)) {
+      occurrence = advance(occurrence, item.costFrequency);
+    }
+
+    let occurrences = 0;
+    const first = occurrence;
+
+    while (isBefore(occurrence, windowEndExclusive)) {
+      occurrences += 1;
+      occurrence = advance(occurrence, item.costFrequency);
+    }
+
+    if (occurrences === 0) {
+      continue;
+    }
+
+    const chargeTotal = item.costAmount * occurrences;
+
+    totalCents += chargeTotal;
+    invoiceCount += occurrences;
+    charges.push({ item, date: first, occurrences, totalCents: chargeTotal });
+  }
+
+  charges.sort((a, b) => a.date.getTime() - b.date.getTime());
+
+  return { totalCents, invoiceCount, charges };
 }
 
 export type MonthlyBreakdownEntry = {

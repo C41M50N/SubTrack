@@ -64,13 +64,16 @@ function RouteComponent() {
     onDelete: handleDelete,
   });
 
-  const selectedRows = table.getFilteredSelectedRowModel().rows;
-  const visibleRows = table.getFilteredRowModel().rows;
-  const baseRows = selectedRows.length > 0 ? selectedRows : visibleRows;
-  const baseItems = baseRows.map((row) => row.original);
+  const selectedItems = table
+    .getFilteredSelectedRowModel()
+    .rows.map((row) => row.original);
+  const visibleItems = table
+    .getFilteredRowModel()
+    .rows.map((row) => row.original);
+  const baseItems = selectedItems.length > 0 ? selectedItems : visibleItems;
 
   function handleBulkDelete() {
-    setDeleteTargets(selectedRows.map((row) => row.original));
+    setDeleteTargets(selectedItems);
     setDeleteOpen(true);
   }
 
@@ -89,11 +92,7 @@ function RouteComponent() {
         </Button>
       </header>
 
-      <CostMetrics
-        items={baseItems}
-        basis={selectedRows.length > 0 ? 'selected' : 'visible'}
-        count={baseItems.length}
-      />
+      <CostMetrics items={visibleItems} selectedItems={selectedItems} />
 
       <div className="grid items-start gap-6 lg:grid-cols-3 roomy:min-h-0 roomy:flex-1">
         <div className="flex flex-col lg:col-span-2 roomy:max-h-full roomy:min-h-0">
