@@ -14,6 +14,7 @@
     "fmt:check": "oxfmt --check",
     "preview": "vite preview",
     "test": "vitest run",
+    "invoices:process": "varlock run -- bun src/jobs/process-due-invoices.ts",
     "db:generate": "varlock run -- drizzle-kit generate",
     "db:migrate": "varlock run -- drizzle-kit migrate",
     "db:push": "varlock run -- drizzle-kit push",
