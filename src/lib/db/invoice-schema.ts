@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { check, date, index, integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+import { check, date, index, integer, pgTable, text, timestamp, unique } from 'drizzle-orm/pg-core';
 
 import { generateId } from '@/lib/data-utils';
 import { user } from '@/lib/db/auth-schema';
@@ -33,6 +33,9 @@ export const subscriptionInvoiceTable = pgTable(
 
     // All invoices on or near this calendar date
     index('subscription_invoices_invoice_date_idx').on(table.invoiceDate),
+
+    // A scheduled charge may be recorded only once for a subscription.
+    unique('subscription_invoices_subscription_id_invoice_date_unique').on(table.subscriptionId, table.invoiceDate),
 
     // Require that the invoice amount is non-negative
     check('subscription_invoices_amount_non_negative', sql`${table.amount} >= 0`),

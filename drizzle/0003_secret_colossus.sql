@@ -1,0 +1,1 @@
+ALTER TABLE "subscription_invoices" ADD CONSTRAINT "subscription_invoices_subscription_id_invoice_date_unique" UNIQUE("subscription_id","invoice_date");

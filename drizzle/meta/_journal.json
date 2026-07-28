@@ -22,6 +22,13 @@
       "when": 1784003669426,
       "tag": "0002_same_menace",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1785212843095,
+      "tag": "0003_secret_colossus",
+      "breakpoints": true
     }
   ]
 }
