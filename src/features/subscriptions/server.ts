@@ -7,6 +7,7 @@ import { buildSeedSubscriptions } from '@/features/subscriptions/seed-data';
 import { db } from '@/lib/db';
 import { categoryTable } from '@/lib/db/category-schema';
 import { collectionTable } from '@/lib/db/collection-schema';
+import { subscriptionInvoiceTable } from '@/lib/db/invoice-schema';
 import { subscriptionTable } from '@/lib/db/subscription-schema';
 
 export type Subscription = typeof subscriptionTable.$inferSelect;
@@ -158,19 +159,31 @@ export async function updateMySubscription(input: {
 export async function moveMySubscription(input: { userId: string; subscriptionId: string; collectionId: string }) {
   await assertCollectionOwnership(input.userId, input.collectionId);
 
-  const [subscription] = await db
-    .update(subscriptionTable)
-    // Categories are collection-scoped, so the old category can't follow the
-    // subscription into its new collection. Reset it to Uncategorized.
-    .set({ collectionId: input.collectionId, categoryId: null })
-    .where(getSubscriptionFilter(input.userId, input.subscriptionId))
-    .returning();
+  return db.transaction(async (tx) => {
+    const [subscription] = await tx
+      .update(subscriptionTable)
+      // Categories are collection-scoped, so the old category can't follow the
+      // subscription into its new collection. Reset it to Uncategorized.
+      .set({ collectionId: input.collectionId, categoryId: null })
+      .where(getSubscriptionFilter(input.userId, input.subscriptionId))
+      .returning();
 
-  if (!subscription) {
-    throw new Error('Subscription not found');
-  }
+    if (!subscription) {
+      throw new Error('Subscription not found');
+    }
 
-  return subscription;
+    await tx
+      .update(subscriptionInvoiceTable)
+      .set({ collectionId: input.collectionId })
+      .where(
+        and(
+          eq(subscriptionInvoiceTable.userId, input.userId),
+          eq(subscriptionInvoiceTable.subscriptionId, input.subscriptionId),
+        ),
+      );
+
+    return subscription;
+  });
 }
 
 export async function importMySubscriptions(input: { userId: string; rows: SubscriptionImportRow[] }) {

@@ -14,6 +14,16 @@ export async function listMyInvoices(userId: string) {
     .orderBy(desc(subscriptionInvoiceTable.invoiceDate));
 }
 
+export async function listMyInvoicesByCollection(userId: string, collectionId: string) {
+  return db
+    .select()
+    .from(subscriptionInvoiceTable)
+    .where(
+      and(eq(subscriptionInvoiceTable.userId, userId), eq(subscriptionInvoiceTable.collectionId, collectionId)),
+    )
+    .orderBy(desc(subscriptionInvoiceTable.invoiceDate));
+}
+
 export async function listMyInvoicesBySubscription(userId: string, subscriptionId: string) {
   return db
     .select()
@@ -36,6 +46,7 @@ export async function createSubscriptionInvoice(input: { userId: string; subscri
     .values({
       userId: subscription.userId,
       subscriptionId: subscription.id,
+      collectionId: subscription.collectionId,
       name: subscription.name,
       iconRef: subscription.iconRef,
       category: subscription.category ?? 'Uncategorized',

@@ -46,6 +46,7 @@ export async function processDueInvoices(): Promise<ProcessDueInvoicesResult> {
         invoices.push({
           userId: subscription.userId,
           subscriptionId: subscription.id,
+          collectionId: subscription.collectionId,
           name: subscription.name,
           iconRef: subscription.iconRef,
           category: subscription.category ?? 'Uncategorized',
