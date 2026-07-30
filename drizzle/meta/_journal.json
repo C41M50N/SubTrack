@@ -22,6 +22,27 @@
       "when": 1784003669426,
       "tag": "0002_same_menace",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1785212843095,
+      "tag": "0003_secret_colossus",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1785273786486,
+      "tag": "0004_needy_trish_tilby",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1785359405076,
+      "tag": "0005_clear_hemingway",
+      "breakpoints": true
     }
   ]
 }

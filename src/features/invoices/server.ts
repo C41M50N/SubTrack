@@ -1,4 +1,4 @@
-import { and, desc, eq } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, lt } from 'drizzle-orm';
 
 import { getMySubscription } from '@/features/subscriptions/server';
 import { db } from '@/lib/db';
@@ -12,6 +12,29 @@ export async function listMyInvoices(userId: string) {
     .from(subscriptionInvoiceTable)
     .where(eq(subscriptionInvoiceTable.userId, userId))
     .orderBy(desc(subscriptionInvoiceTable.invoiceDate));
+}
+
+export async function listMyInvoicesByCollection(
+  userId: string,
+  input: { collectionId: string; startDate: string; endDate: string },
+) {
+  return db
+    .select()
+    .from(subscriptionInvoiceTable)
+    .where(
+      and(
+        eq(subscriptionInvoiceTable.userId, userId),
+        eq(subscriptionInvoiceTable.collectionId, input.collectionId),
+        gte(subscriptionInvoiceTable.invoiceDate, input.startDate),
+        lt(subscriptionInvoiceTable.invoiceDate, input.endDate),
+      ),
+    )
+    .orderBy(
+      desc(subscriptionInvoiceTable.invoiceDate),
+      desc(subscriptionInvoiceTable.amount),
+      asc(subscriptionInvoiceTable.name),
+      asc(subscriptionInvoiceTable.id),
+    );
 }
 
 export async function listMyInvoicesBySubscription(userId: string, subscriptionId: string) {
@@ -36,6 +59,7 @@ export async function createSubscriptionInvoice(input: { userId: string; subscri
     .values({
       userId: subscription.userId,
       subscriptionId: subscription.id,
+      collectionId: subscription.collectionId,
       name: subscription.name,
       iconRef: subscription.iconRef,
       category: subscription.category ?? 'Uncategorized',
