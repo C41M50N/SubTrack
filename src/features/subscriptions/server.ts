@@ -7,7 +7,6 @@ import { buildSeedSubscriptions } from '@/features/subscriptions/seed-data';
 import { db } from '@/lib/db';
 import { categoryTable } from '@/lib/db/category-schema';
 import { collectionTable } from '@/lib/db/collection-schema';
-import { subscriptionInvoiceTable } from '@/lib/db/invoice-schema';
 import { subscriptionTable } from '@/lib/db/subscription-schema';
 
 export type Subscription = typeof subscriptionTable.$inferSelect;
@@ -171,16 +170,6 @@ export async function moveMySubscription(input: { userId: string; subscriptionId
     if (!subscription) {
       throw new Error('Subscription not found');
     }
-
-    await tx
-      .update(subscriptionInvoiceTable)
-      .set({ collectionId: input.collectionId })
-      .where(
-        and(
-          eq(subscriptionInvoiceTable.userId, input.userId),
-          eq(subscriptionInvoiceTable.subscriptionId, input.subscriptionId),
-        ),
-      );
 
     return subscription;
   });

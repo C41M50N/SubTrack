@@ -9,10 +9,8 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
-import type { CategoryRecord } from '@/features/categories/queries';
-
 type CategoryFilterProps = {
-  options: CategoryRecord[];
+  options: { id: string; name: string }[];
   selected: string[];
   onChange: (next: string[]) => void;
 };

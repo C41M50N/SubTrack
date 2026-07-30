@@ -7,8 +7,14 @@ export type InvoiceRecord = InvoicesListData[number];
 
 export const invoicesListQueryKey = ['invoices', 'list'] as const;
 
-export function collectionInvoicesQueryKey(collectionId: string) {
-  return ['invoices', 'by-collection', collectionId] as const;
+export type CollectionInvoiceRange = {
+  collectionId: string;
+  startDate: string;
+  endDate: string;
+};
+
+export function collectionInvoicesQueryKey(input: CollectionInvoiceRange) {
+  return ['invoices', 'by-collection', input.collectionId, input.startDate, input.endDate] as const;
 }
 
 export function subscriptionInvoicesQueryKey(subscriptionId: string) {
@@ -22,10 +28,10 @@ export function invoicesQueryOptions() {
   });
 }
 
-export function collectionInvoicesQueryOptions(collectionId: string) {
+export function collectionInvoicesQueryOptions(input: CollectionInvoiceRange) {
   return queryOptions({
-    queryKey: collectionInvoicesQueryKey(collectionId),
-    queryFn: () => listInvoicesByCollection({ data: { collectionId } }),
+    queryKey: collectionInvoicesQueryKey(input),
+    queryFn: () => listInvoicesByCollection({ data: input }),
   });
 }
 

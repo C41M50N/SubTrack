@@ -20,7 +20,7 @@ export const listInvoices = createServerFn({ method: 'GET' })
 export const listInvoicesByCollection = createServerFn({ method: 'GET' })
   .middleware([requireAuthMiddleware])
   .validator(listInvoicesByCollectionInputSchema)
-  .handler(async ({ context: { auth }, data }) => listMyInvoicesByCollection(auth.userId, data.collectionId));
+  .handler(async ({ context: { auth }, data }) => listMyInvoicesByCollection(auth.userId, data));
 
 export const listInvoicesBySubscription = createServerFn({ method: 'GET' })
   .middleware([requireAuthMiddleware])

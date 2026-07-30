@@ -35,8 +35,8 @@ export const subscriptionInvoiceTable = pgTable(
     // All invoices for this user
     index('subscription_invoices_user_id_idx').on(table.userId),
 
-    // All invoices for this user in this collection
-    index('subscription_invoices_user_collection_id_idx').on(table.userId, table.collectionId),
+    // Month-bounded invoice history for this user and collection.
+    index('subscription_invoices_user_collection_date_idx').on(table.userId, table.collectionId, table.invoiceDate),
 
     // All invoices linked to this subscription
     index('subscription_invoices_subscription_id_idx').on(table.subscriptionId),
