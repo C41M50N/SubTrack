@@ -170,3 +170,72 @@ export function invoicesInCurrentMonth<T extends InvoiceItem>(invoices: T[], now
 
   return invoices.filter((invoice) => invoice.date.startsWith(monthKey));
 }
+
+/** Most slices the category donut draws, counting the "Other" slice. */
+export const CATEGORY_SLICE_CAP = 10;
+
+/** Categories below this share of monthly cost fold into "Other" regardless of count. */
+export const CATEGORY_MIN_SHARE = 0.02;
+
+export const OTHER_CATEGORY_LABEL = 'Other';
+
+export type CategorySlice = CategoryShare &
+  (
+    | {
+        kind: 'category';
+        /** 1-based color slot; assigned by rank so the top category is always slot 1. */
+        slot: number;
+      }
+    | {
+        kind: 'other';
+        /** The categories this slice absorbed, still ranked. */
+        folded: CategoryShare[];
+      }
+  );
+
+export type FoldCategoryOptions = {
+  maxSlices?: number;
+  minShare?: number;
+};
+
+/**
+ * Folds a ranked breakdown into at most `maxSlices` slices for the donut.
+ *
+ * Categories under `minShare` always fold into "Other": a sliver too thin to
+ * see earns nothing from its own color. If the survivors still exceed the cap,
+ * the last slot becomes "Other" so the ranking stays intact from the top. When
+ * nothing costs anything, shares are all zero and only the cap applies.
+ */
+export function foldCategoryShares(
+  entries: CategoryShare[],
+  { maxSlices = CATEGORY_SLICE_CAP, minShare = CATEGORY_MIN_SHARE }: FoldCategoryOptions = {},
+): CategorySlice[] {
+  const totalCents = entries.reduce((sum, entry) => sum + entry.monthlyCents, 0);
+  const isSliver = (entry: CategoryShare) => totalCents > 0 && entry.share < minShare;
+
+  let kept = entries.filter((entry) => !isSliver(entry));
+  let folded = entries.filter(isSliver);
+
+  if (kept.length + (folded.length > 0 ? 1 : 0) > maxSlices) {
+    const visible = Math.max(1, maxSlices - 1);
+    folded = [...kept.slice(visible), ...folded];
+    kept = kept.slice(0, visible);
+  }
+
+  const slices: CategorySlice[] = kept.map((entry, index) => ({ ...entry, kind: 'category', slot: index + 1 }));
+
+  if (folded.length > 0) {
+    const monthlyCents = folded.reduce((sum, entry) => sum + entry.monthlyCents, 0);
+
+    slices.push({
+      kind: 'other',
+      category: OTHER_CATEGORY_LABEL,
+      monthlyCents,
+      count: folded.reduce((sum, entry) => sum + entry.count, 0),
+      share: totalCents > 0 ? monthlyCents / totalCents : 0,
+      folded,
+    });
+  }
+
+  return slices;
+}

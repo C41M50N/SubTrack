@@ -4,6 +4,7 @@ import {
   buildCategoryBreakdown,
   buildSpendTrend,
   countCategories,
+  foldCategoryShares,
   getRecordedTrendRange,
   invoicesInCurrentMonth,
 } from '@/features/dashboard/domain';
@@ -144,6 +145,74 @@ describe('buildCategoryBreakdown', () => {
     ]);
 
     expect(breakdown[0].share).toBe(0);
+  });
+});
+
+describe('foldCategoryShares', () => {
+  const share = (category: string, monthlyCents: number, total: number, count = 1) => ({
+    category,
+    monthlyCents,
+    count,
+    share: total > 0 ? monthlyCents / total : 0,
+  });
+
+  it('keeps everything and assigns slots by rank when under the cap and minimum', () => {
+    const slices = foldCategoryShares([share('A', 600, 1000), share('B', 400, 1000)]);
+
+    expect(slices).toEqual([
+      { kind: 'category', slot: 1, category: 'A', monthlyCents: 600, count: 1, share: 0.6 },
+      { kind: 'category', slot: 2, category: 'B', monthlyCents: 400, count: 1, share: 0.4 },
+    ]);
+  });
+
+  it('folds slivers under the minimum share into Other regardless of count', () => {
+    const slices = foldCategoryShares([share('A', 975, 1000), share('B', 15, 1000, 2), share('C', 10, 1000)]);
+
+    expect(slices.map((slice) => slice.category)).toEqual(['A', 'Other']);
+    expect(slices[1]).toMatchObject({
+      kind: 'other',
+      monthlyCents: 25,
+      count: 3,
+      share: 0.025,
+      folded: [share('B', 15, 1000, 2), share('C', 10, 1000)],
+    });
+  });
+
+  it('turns the last slot into Other when the cap is exceeded, keeping the fold ranked', () => {
+    const entries = [
+      share('A', 50, 100),
+      share('B', 20, 100),
+      share('C', 15, 100),
+      share('D', 10, 100),
+      share('E', 5, 100),
+    ];
+    const slices = foldCategoryShares(entries, { maxSlices: 3, minShare: 0 });
+
+    expect(slices.map((slice) => slice.category)).toEqual(['A', 'B', 'Other']);
+    expect(slices[2]).toMatchObject({ kind: 'other', monthlyCents: 30, share: 0.3 });
+    expect(
+      (slices[2] as { folded: unknown[] }).folded.map((entry) => (entry as { category: string }).category),
+    ).toEqual(['C', 'D', 'E']);
+  });
+
+  it('counts the Other slice against the cap when slivers already forced one', () => {
+    const entries = [share('A', 40, 100), share('B', 30, 100), share('C', 29, 100), share('D', 1, 100)];
+    const slices = foldCategoryShares(entries, { maxSlices: 3, minShare: 0.02 });
+
+    expect(slices.map((slice) => slice.category)).toEqual(['A', 'B', 'Other']);
+    expect(slices[2]).toMatchObject({ monthlyCents: 30, count: 2 });
+  });
+
+  it('does not fold anything when exactly at the cap', () => {
+    const entries = [share('A', 50, 100), share('B', 30, 100), share('C', 20, 100)];
+
+    expect(foldCategoryShares(entries, { maxSlices: 3 }).map((slice) => slice.category)).toEqual(['A', 'B', 'C']);
+  });
+
+  it('ignores the minimum share when nothing costs anything', () => {
+    const slices = foldCategoryShares([share('Free', 0, 0), share('Also free', 0, 0)]);
+
+    expect(slices.map((slice) => slice.category)).toEqual(['Free', 'Also free']);
   });
 });
 
