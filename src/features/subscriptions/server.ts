@@ -1,13 +1,16 @@
-import { and, asc, desc, eq, getTableColumns, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, getTableColumns, inArray, sql } from 'drizzle-orm';
 
 import { assertCategoryInCollection } from '@/features/categories/server';
 import { getMyCollection } from '@/features/collections/server';
+import { getImportedDeactivatedAt } from '@/features/subscriptions/import';
 import type { SubscriptionImportRow } from '@/features/subscriptions/schema';
 import { buildSeedSubscriptions } from '@/features/subscriptions/seed-data';
+import { getNextInvoiceDateOnOrAfter } from '@/jobs/invoice-schedule';
 import { db } from '@/lib/db';
 import { categoryTable } from '@/lib/db/category-schema';
 import { collectionTable } from '@/lib/db/collection-schema';
 import { subscriptionTable } from '@/lib/db/subscription-schema';
+import { UserFacingError } from '@/lib/errors';
 
 export type Subscription = typeof subscriptionTable.$inferSelect;
 export type SubscriptionStatus = Subscription['status'];
@@ -77,7 +80,6 @@ export async function createMySubscription(input: {
   costAmount: number;
   costFrequency: SubscriptionCostFrequency;
   nextInvoiceDate: string;
-  status?: SubscriptionStatus;
 }) {
   await assertCollectionOwnership(input.userId, input.collectionId);
 
@@ -96,7 +98,6 @@ export async function createMySubscription(input: {
       costAmount: input.costAmount,
       costFrequency: input.costFrequency,
       nextInvoiceDate: input.nextInvoiceDate,
-      status: input.status ?? 'active',
     })
     .returning();
 
@@ -113,7 +114,6 @@ export async function updateMySubscription(input: {
   costAmount?: number;
   costFrequency?: SubscriptionCostFrequency;
   nextInvoiceDate?: string;
-  status?: SubscriptionStatus;
 }) {
   if (input.collectionId) {
     await assertCollectionOwnership(input.userId, input.collectionId);
@@ -139,7 +139,6 @@ export async function updateMySubscription(input: {
     costAmount: input.costAmount,
     costFrequency: input.costFrequency,
     nextInvoiceDate: input.nextInvoiceDate,
-    status: input.status,
   };
 
   const [subscription] = await db
@@ -177,6 +176,7 @@ export async function moveMySubscription(input: { userId: string; subscriptionId
 
 export async function importMySubscriptions(input: { userId: string; rows: SubscriptionImportRow[] }) {
   return db.transaction(async (tx) => {
+    const importedAt = new Date();
     // Collection names are unique per user case-insensitively, so key the cache
     // and existing-name lookups by the lowercased name.
     const collectionIdByName = new Map<string, string>();
@@ -267,6 +267,7 @@ export async function importMySubscriptions(input: { userId: string; rows: Subsc
           costAmount: row.costAmountCents,
           costFrequency: row.costFrequency,
           nextInvoiceDate: row.nextInvoiceDate,
+          deactivatedAt: getImportedDeactivatedAt(row, importedAt),
           collectionId,
         });
       }
@@ -370,15 +371,162 @@ export async function clearMySubscriptions(input: { userId: string; collectionId
   return { subscriptionsDeleted: deleted.length };
 }
 
-export async function deleteMySubscription(input: { userId: string; subscriptionId: string }) {
-  const [subscription] = await db
-    .delete(subscriptionTable)
-    .where(getSubscriptionFilter(input.userId, input.subscriptionId))
-    .returning();
+function assertEverySubscriptionFound(foundCount: number, expectedCount: number) {
+  if (foundCount !== expectedCount) {
+    throw new UserFacingError('Subscriptions changed. Refresh and try again.');
+  }
+}
 
-  if (!subscription) {
-    throw new Error('Subscription not found');
+export async function deactivateMySubscriptions(input: { userId: string; subscriptionIds: string[] }) {
+  return db.transaction(async (tx) => {
+    const subscriptions = await tx
+      .select({ id: subscriptionTable.id })
+      .from(subscriptionTable)
+      .where(
+        and(
+          eq(subscriptionTable.userId, input.userId),
+          eq(subscriptionTable.status, 'active'),
+          inArray(subscriptionTable.id, input.subscriptionIds),
+        ),
+      )
+      .for('update');
+
+    assertEverySubscriptionFound(subscriptions.length, input.subscriptionIds.length);
+
+    const deactivatedAt = new Date();
+    const updated = await tx
+      .update(subscriptionTable)
+      .set({ status: 'inactive', deactivatedAt })
+      .where(
+        and(
+          eq(subscriptionTable.userId, input.userId),
+          eq(subscriptionTable.status, 'active'),
+          inArray(subscriptionTable.id, input.subscriptionIds),
+        ),
+      )
+      .returning();
+
+    assertEverySubscriptionFound(updated.length, input.subscriptionIds.length);
+
+    return { subscriptions: updated, deactivatedAt };
+  });
+}
+
+export async function reactivateMySubscriptions(input: {
+  userId: string;
+  subscriptionIds: string[];
+  nextInvoiceDate?: string;
+}) {
+  if (input.nextInvoiceDate && input.subscriptionIds.length !== 1) {
+    throw new Error('A custom invoice date can only be used for one subscription');
   }
 
-  return subscription;
+  return db.transaction(async (tx) => {
+    const clock = await tx.execute<{ processingDate: string }>(sql`select current_date as "processingDate"`);
+    const processingDate = clock.rows[0]?.processingDate;
+
+    if (!processingDate) {
+      throw new Error('Could not read the database date');
+    }
+
+    if (input.nextInvoiceDate && input.nextInvoiceDate < processingDate) {
+      throw new UserFacingError('Next invoice date must be today or later');
+    }
+
+    const subscriptions = await tx
+      .select({
+        id: subscriptionTable.id,
+        costFrequency: subscriptionTable.costFrequency,
+        nextInvoiceDate: subscriptionTable.nextInvoiceDate,
+      })
+      .from(subscriptionTable)
+      .where(
+        and(
+          eq(subscriptionTable.userId, input.userId),
+          eq(subscriptionTable.status, 'inactive'),
+          inArray(subscriptionTable.id, input.subscriptionIds),
+        ),
+      )
+      .for('update');
+
+    assertEverySubscriptionFound(subscriptions.length, input.subscriptionIds.length);
+
+    const nextInvoiceDateCases = subscriptions.map((subscription) => {
+      const nextInvoiceDate =
+        input.nextInvoiceDate ??
+        getNextInvoiceDateOnOrAfter(subscription.nextInvoiceDate, subscription.costFrequency, processingDate);
+
+      return sql`when ${subscription.id} then ${nextInvoiceDate}::date`;
+    });
+    const nextInvoiceDate = sql<string>`case ${subscriptionTable.id} ${sql.join(nextInvoiceDateCases, sql.raw(' '))} end`;
+    const updated = await tx
+      .update(subscriptionTable)
+      .set({ status: 'active', deactivatedAt: null, nextInvoiceDate })
+      .where(
+        and(
+          eq(subscriptionTable.userId, input.userId),
+          eq(subscriptionTable.status, 'inactive'),
+          inArray(subscriptionTable.id, input.subscriptionIds),
+        ),
+      )
+      .returning();
+
+    assertEverySubscriptionFound(updated.length, input.subscriptionIds.length);
+    return updated;
+  });
+}
+
+export async function undoMyDeactivation(input: { userId: string; subscriptionIds: string[]; deactivatedAt: Date }) {
+  return db.transaction(async (tx) => {
+    const subscriptions = await tx
+      .select({ id: subscriptionTable.id })
+      .from(subscriptionTable)
+      .where(
+        and(
+          eq(subscriptionTable.userId, input.userId),
+          eq(subscriptionTable.status, 'inactive'),
+          eq(subscriptionTable.deactivatedAt, input.deactivatedAt),
+          inArray(subscriptionTable.id, input.subscriptionIds),
+        ),
+      )
+      .for('update');
+
+    assertEverySubscriptionFound(subscriptions.length, input.subscriptionIds.length);
+
+    const updated = await tx
+      .update(subscriptionTable)
+      .set({ status: 'active', deactivatedAt: null })
+      .where(
+        and(
+          eq(subscriptionTable.userId, input.userId),
+          eq(subscriptionTable.status, 'inactive'),
+          eq(subscriptionTable.deactivatedAt, input.deactivatedAt),
+          inArray(subscriptionTable.id, input.subscriptionIds),
+        ),
+      )
+      .returning();
+
+    assertEverySubscriptionFound(updated.length, input.subscriptionIds.length);
+    return updated;
+  });
+}
+
+export async function deleteMySubscriptions(input: { userId: string; subscriptionIds: string[] }) {
+  return db.transaction(async (tx) => {
+    const subscriptions = await tx
+      .select({ id: subscriptionTable.id })
+      .from(subscriptionTable)
+      .where(and(eq(subscriptionTable.userId, input.userId), inArray(subscriptionTable.id, input.subscriptionIds)))
+      .for('update');
+
+    assertEverySubscriptionFound(subscriptions.length, input.subscriptionIds.length);
+
+    const deleted = await tx
+      .delete(subscriptionTable)
+      .where(and(eq(subscriptionTable.userId, input.userId), inArray(subscriptionTable.id, input.subscriptionIds)))
+      .returning();
+
+    assertEverySubscriptionFound(deleted.length, input.subscriptionIds.length);
+    return deleted;
+  });
 }

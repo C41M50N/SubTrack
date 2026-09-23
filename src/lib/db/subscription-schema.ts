@@ -26,6 +26,7 @@ export const subscriptionTable = pgTable(
       .references(() => user.id, { onDelete: 'cascade' }),
     name: text('name').notNull(),
     status: subscriptionStatusEnum('status').notNull().default('active'),
+    deactivatedAt: timestamp('deactivated_at', { withTimezone: true }),
     iconRef: text('icon_ref').notNull(),
     // Categories are collection-scoped. Deleting a category leaves its
     // subscriptions "Uncategorized" rather than removing them.

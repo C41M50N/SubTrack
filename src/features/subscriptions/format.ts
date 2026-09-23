@@ -8,6 +8,14 @@ export function formatInvoiceDate(isoDate: string): string {
   return format(parseISO(isoDate), 'MMM d, yyyy');
 }
 
+export function formatDeactivatedDate(date: Date | string): string {
+  return format(new Date(date), 'MMM d, yyyy');
+}
+
+export function formatDeactivatedDateTime(date: Date | string): string {
+  return format(new Date(date), 'PPpp');
+}
+
 function pluralize(count: number, unit: string): string {
   return `${count} ${unit}${count === 1 ? '' : 's'}`;
 }

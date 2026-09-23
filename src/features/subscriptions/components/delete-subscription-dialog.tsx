@@ -64,7 +64,17 @@ export function DeleteSubscriptionDialog({
           <AlertDialogDescription>
             This permanently removes{' '}
             {isBulk ? 'these subscriptions' : 'this subscription'} and cannot be
-            undone.
+            undone. Recorded invoices will remain.
+            {subscriptions.every(
+              (subscription) => subscription.status === 'active',
+            ) && (
+              <>
+                {' '}
+                If you only want to pause tracking{' '}
+                {isBulk ? 'these subscriptions' : 'this subscription'}, consider
+                deactivating instead.
+              </>
+            )}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

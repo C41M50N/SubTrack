@@ -43,6 +43,13 @@
       "when": 1785359405076,
       "tag": "0005_clear_hemingway",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790140872305,
+      "tag": "0006_whole_ser_duncan",
+      "breakpoints": true
     }
   ]
 }

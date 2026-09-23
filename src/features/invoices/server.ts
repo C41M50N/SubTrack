@@ -1,8 +1,10 @@
 import { and, asc, desc, eq, gte, lt } from 'drizzle-orm';
 
-import { getMySubscription } from '@/features/subscriptions/server';
+import { getSubscriptionFilter } from '@/features/subscriptions/server';
 import { db } from '@/lib/db';
+import { categoryTable } from '@/lib/db/category-schema';
 import { subscriptionInvoiceTable } from '@/lib/db/invoice-schema';
+import { subscriptionTable } from '@/lib/db/subscription-schema';
 
 export type SubscriptionInvoice = typeof subscriptionInvoiceTable.$inferSelect;
 
@@ -48,25 +50,37 @@ export async function listMyInvoicesBySubscription(userId: string, subscriptionI
 }
 
 export async function createSubscriptionInvoice(input: { userId: string; subscriptionId: string }) {
-  const subscription = await getMySubscription(input.userId, input.subscriptionId);
+  return db.transaction(async (tx) => {
+    const [subscription] = await tx
+      .select({ subscription: subscriptionTable, category: categoryTable.name })
+      .from(subscriptionTable)
+      .leftJoin(categoryTable, eq(subscriptionTable.categoryId, categoryTable.id))
+      .where(getSubscriptionFilter(input.userId, input.subscriptionId))
+      .limit(1)
+      .for('update', { of: subscriptionTable });
 
-  if (!subscription) {
-    throw new Error('Subscription not found');
-  }
+    if (!subscription) {
+      throw new Error('Subscription not found');
+    }
 
-  const [invoice] = await db
-    .insert(subscriptionInvoiceTable)
-    .values({
-      userId: subscription.userId,
-      subscriptionId: subscription.id,
-      collectionId: subscription.collectionId,
-      name: subscription.name,
-      iconRef: subscription.iconRef,
-      category: subscription.category ?? 'Uncategorized',
-      amount: subscription.costAmount,
-      invoiceDate: subscription.nextInvoiceDate,
-    })
-    .returning();
+    if (subscription.subscription.status !== 'active') {
+      throw new Error('Inactive subscriptions cannot record invoices');
+    }
 
-  return invoice;
+    const [invoice] = await tx
+      .insert(subscriptionInvoiceTable)
+      .values({
+        userId: subscription.subscription.userId,
+        subscriptionId: subscription.subscription.id,
+        collectionId: subscription.subscription.collectionId,
+        name: subscription.subscription.name,
+        iconRef: subscription.subscription.iconRef,
+        category: subscription.category ?? 'Uncategorized',
+        amount: subscription.subscription.costAmount,
+        invoiceDate: subscription.subscription.nextInvoiceDate,
+      })
+      .returning();
+
+    return invoice;
+  });
 }

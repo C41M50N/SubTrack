@@ -5,23 +5,30 @@ import { parseSubscriptionImport } from '@/features/subscriptions/import';
 import {
   clearSubscriptionsInputSchema,
   createSubscriptionInputSchema,
-  deleteSubscriptionInputSchema,
+  deactivateSubscriptionsInputSchema,
+  deleteSubscriptionsInputSchema,
   importSubscriptionsInputSchema,
   listSubscriptionsInputSchema,
   moveSubscriptionInputSchema,
+  reactivateSubscriptionsInputSchema,
   seedSubscriptionsInputSchema,
+  undoDeactivationInputSchema,
   updateSubscriptionInputSchema,
 } from '@/features/subscriptions/schema';
 import {
   clearMySubscriptions,
   createMySubscription,
-  deleteMySubscription,
+  deactivateMySubscriptions,
+  deleteMySubscriptions,
   importMySubscriptions,
   listMySubscriptions,
   moveMySubscription,
+  reactivateMySubscriptions,
   seedMySubscriptions,
   updateMySubscription,
+  undoMyDeactivation,
 } from '@/features/subscriptions/server';
+import { withUserFacingErrors } from '@/lib/errors';
 
 export const listSubscriptions = createServerFn({ method: 'GET' })
   .middleware([requireAuthMiddleware])
@@ -41,7 +48,6 @@ export const createSubscription = createServerFn({ method: 'POST' })
       costAmount: data.costAmount,
       costFrequency: data.costFrequency,
       nextInvoiceDate: data.nextInvoiceDate,
-      status: data.status,
     });
   });
 
@@ -59,7 +65,6 @@ export const updateSubscription = createServerFn({ method: 'POST' })
       costAmount: data.costAmount,
       costFrequency: data.costFrequency,
       nextInvoiceDate: data.nextInvoiceDate,
-      status: data.status,
     });
   });
 
@@ -97,12 +102,45 @@ export const clearSubscriptions = createServerFn({ method: 'POST' })
     return clearMySubscriptions({ userId: auth.userId, collectionId: data.collectionId });
   });
 
-export const deleteSubscription = createServerFn({ method: 'POST' })
+export const deactivateSubscriptions = createServerFn({ method: 'POST' })
   .middleware([requireAuthMiddleware])
-  .validator(deleteSubscriptionInputSchema)
+  .validator(deactivateSubscriptionsInputSchema)
   .handler(async ({ context: { auth }, data }) => {
-    return deleteMySubscription({
+    const result = await deactivateMySubscriptions({
       userId: auth.userId,
-      subscriptionId: data.subscriptionId,
+      subscriptionIds: data.subscriptionIds,
     });
+
+    return { ...result, deactivatedAt: result.deactivatedAt.toISOString() };
+  });
+
+export const reactivateSubscriptions = createServerFn({ method: 'POST' })
+  .middleware([requireAuthMiddleware])
+  .validator(reactivateSubscriptionsInputSchema)
+  .handler(async ({ context: { auth }, data }) => {
+    return withUserFacingErrors('Failed to reactivate. Refresh and try again.', () =>
+      reactivateMySubscriptions({
+        userId: auth.userId,
+        subscriptionIds: data.subscriptionIds,
+        nextInvoiceDate: data.nextInvoiceDate,
+      }),
+    );
+  });
+
+export const undoDeactivation = createServerFn({ method: 'POST' })
+  .middleware([requireAuthMiddleware])
+  .validator(undoDeactivationInputSchema)
+  .handler(async ({ context: { auth }, data }) => {
+    return undoMyDeactivation({
+      userId: auth.userId,
+      subscriptionIds: data.subscriptionIds,
+      deactivatedAt: new Date(data.deactivatedAt),
+    });
+  });
+
+export const deleteSubscriptions = createServerFn({ method: 'POST' })
+  .middleware([requireAuthMiddleware])
+  .validator(deleteSubscriptionsInputSchema)
+  .handler(async ({ context: { auth }, data }) => {
+    return deleteMySubscriptions({ userId: auth.userId, subscriptionIds: data.subscriptionIds });
   });

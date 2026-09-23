@@ -16,6 +16,7 @@ export type SubscriptionExportRecord = {
   costAmountCents: number;
   costFrequency: string;
   nextInvoiceDate: string;
+  deactivatedAt: string | null;
 };
 
 const csvHeaders = [
@@ -27,6 +28,7 @@ const csvHeaders = [
   'cost_amount_cents',
   'cost_frequency',
   'next_invoice_date',
+  'deactivated_at',
 ];
 
 export function toSubscriptionExportRecords(
@@ -42,6 +44,7 @@ export function toSubscriptionExportRecords(
     costAmountCents: subscription.costAmount,
     costFrequency: subscription.costFrequency,
     nextInvoiceDate: subscription.nextInvoiceDate,
+    deactivatedAt: subscription.deactivatedAt?.toISOString() ?? null,
   }));
 }
 
@@ -75,6 +78,7 @@ export function serializeSubscriptionsToCsv(records: SubscriptionExportRecord[])
       String(record.costAmountCents),
       record.costFrequency,
       record.nextInvoiceDate,
+      record.deactivatedAt ?? '',
     ]),
   });
 }

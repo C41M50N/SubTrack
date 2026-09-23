@@ -8,6 +8,8 @@ import {
 
 export type SubscriptionTransferFormat = 'json' | 'csv';
 
+const FUTURE_TIMESTAMP_TOLERANCE_MS = 5 * 60 * 1000;
+
 // Maps exported CSV headers to import row keys.
 const csvHeaderToField: Record<string, keyof SubscriptionImportRow> = {
   name: 'name',
@@ -19,6 +21,10 @@ const csvHeaderToField: Record<string, keyof SubscriptionImportRow> = {
   cost_frequency: 'costFrequency',
   next_invoice_date: 'nextInvoiceDate',
 };
+
+const optionalCsvHeaderToField = {
+  deactivated_at: 'deactivatedAt',
+} as const;
 
 const requiredCsvHeaders = Object.keys(csvHeaderToField);
 
@@ -65,6 +71,14 @@ function parseCsvRows(content: string): unknown[] {
       record[field] = (row[header] ?? '').trim();
     }
 
+    for (const [header, field] of Object.entries(optionalCsvHeaderToField)) {
+      const value = (row[header] ?? '').trim();
+
+      if (value) {
+        record[field] = value;
+      }
+    }
+
     return record;
   });
 }
@@ -97,4 +111,19 @@ export function parseSubscriptionImport(input: {
   }
 
   return rows;
+}
+
+export function getImportedDeactivatedAt(row: SubscriptionImportRow, importedAt: Date): Date | null {
+  if (row.status === 'active') {
+    return null;
+  }
+
+  const deactivatedAt = row.deactivatedAt ? new Date(row.deactivatedAt) : importedAt;
+  const latestAllowed = new Date(importedAt.getTime() + FUTURE_TIMESTAMP_TOLERANCE_MS);
+
+  if (deactivatedAt > latestAllowed) {
+    throw new Error('Deactivation time cannot be in the future');
+  }
+
+  return deactivatedAt;
 }

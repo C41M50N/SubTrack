@@ -30,25 +30,42 @@ import {
 import { SubscriptionsTableFooter } from '@/features/subscriptions/components/subscriptions-table-footer';
 import { SubscriptionsTableToolbar } from '@/features/subscriptions/components/subscriptions-table-toolbar';
 import type { SubscriptionRecord } from '@/features/subscriptions/queries';
+import type { SubscriptionView } from '@/features/subscriptions/search';
+import { getDefaultSubscriptionSorting } from '@/features/subscriptions/table-state';
 
 type UseSubscriptionsTableOptions = SubscriptionColumnActions & {
   data: SubscriptionRecord[];
+  view: SubscriptionView;
 };
 
 export function useSubscriptionsTable({
   data,
+  view,
   onEdit,
+  onDeactivate,
+  onReactivate,
   onDelete,
 }: UseSubscriptionsTableOptions) {
-  const [sorting, setSorting] = useState<SortingState>([
-    { id: 'nextInvoiceDate', desc: false },
-  ]);
+  // Sorting is keyed by view so a view switch never pairs the new columns
+  // with a sort on a column that only exists in the previous view.
+  const [sortingState, setSortingState] = useState<{
+    view: SubscriptionView;
+    sorting: SortingState;
+  }>(() => ({ view, sorting: getDefaultSubscriptionSorting(view) }));
+  const sorting =
+    sortingState.view === view
+      ? sortingState.sorting
+      : getDefaultSubscriptionSorting(view);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const columns = useMemo(
-    () => createSubscriptionColumns({ onEdit, onDelete }),
-    [onEdit, onDelete],
+    () =>
+      createSubscriptionColumns(
+        { onEdit, onDeactivate, onReactivate, onDelete },
+        view,
+      ),
+    [onDeactivate, onDelete, onEdit, onReactivate, view],
   );
 
   return useReactTable({
@@ -57,7 +74,11 @@ export function useSubscriptionsTable({
     state: { sorting, columnFilters, rowSelection },
     getRowId: (row) => row.id,
     enableRowSelection: true,
-    onSortingChange: setSorting,
+    onSortingChange: (updater) =>
+      setSortingState({
+        view,
+        sorting: typeof updater === 'function' ? updater(sorting) : updater,
+      }),
     onColumnFiltersChange: setColumnFilters,
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
@@ -71,22 +92,49 @@ export function useSubscriptionsTable({
 type SubscriptionsTableProps = {
   table: TableInstance<SubscriptionRecord>;
   categories: CategoryRecord[];
+  view: SubscriptionView;
+  activeCount: number;
+  inactiveCount: number;
+  onViewChange: (view: SubscriptionView) => void;
+  onBulkDeactivate: () => void;
+  onBulkReactivate: () => void;
   onBulkDelete: () => void;
 };
 
 export function SubscriptionsTable({
   table,
   categories,
+  view,
+  activeCount,
+  inactiveCount,
+  onViewChange,
+  onBulkDeactivate,
+  onBulkReactivate,
   onBulkDelete,
 }: SubscriptionsTableProps) {
   const rows = table.getRowModel().rows;
   const columnCount = table.getAllLeafColumns().length;
+  const hasSubscriptions = table.getCoreRowModel().rows.length > 0;
+  let emptyMessage = 'No subscriptions match your filters.';
+
+  if (!hasSubscriptions) {
+    emptyMessage =
+      view === 'active'
+        ? 'No active subscriptions.'
+        : 'No inactive subscriptions.';
+  }
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4">
       <SubscriptionsTableToolbar
         table={table}
         categories={categories}
+        view={view}
+        activeCount={activeCount}
+        inactiveCount={inactiveCount}
+        onViewChange={onViewChange}
+        onBulkDeactivate={onBulkDeactivate}
+        onBulkReactivate={onBulkReactivate}
         onBulkDelete={onBulkDelete}
       />
 
@@ -118,7 +166,7 @@ export function SubscriptionsTable({
                   colSpan={columnCount}
                   className="h-24 text-center text-muted-foreground"
                 >
-                  No subscriptions match your filters.
+                  {emptyMessage}
                 </TableCell>
               </TableRow>
             ) : (
@@ -142,7 +190,7 @@ export function SubscriptionsTable({
         </Table>
       </ScrollArea>
 
-      <SubscriptionsTableFooter table={table} />
+      <SubscriptionsTableFooter table={table} view={view} />
     </div>
   );
 }

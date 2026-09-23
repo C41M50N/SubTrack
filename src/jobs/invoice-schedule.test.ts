@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildDueInvoiceSchedule } from '@/jobs/invoice-schedule';
+import { buildDueInvoiceSchedule, getNextInvoiceDateOnOrAfter } from '@/jobs/invoice-schedule';
 
 describe('buildDueInvoiceSchedule', () => {
   it.each([
@@ -30,5 +30,23 @@ describe('buildDueInvoiceSchedule', () => {
       invoiceDates: ['2026-01-31', '2026-02-28', '2026-03-28'],
       nextInvoiceDate: '2026-04-28',
     });
+  });
+});
+
+describe('getNextInvoiceDateOnOrAfter', () => {
+  it.each([
+    ['weekly', '2026-07-21', '2026-07-28', '2026-07-28'],
+    ['monthly', '2026-01-31', '2026-03-01', '2026-03-28'],
+    ['yearly', '2025-07-28', '2026-07-29', '2027-07-28'],
+    ['biennially', '2024-07-28', '2026-07-28', '2026-07-28'],
+  ] as const)(
+    'advances a %s schedule without creating missed invoices',
+    (frequency, nextDate, earliestDate, expected) => {
+      expect(getNextInvoiceDateOnOrAfter(nextDate, frequency, earliestDate)).toBe(expected);
+    },
+  );
+
+  it('keeps a future scheduled date unchanged', () => {
+    expect(getNextInvoiceDateOnOrAfter('2026-08-15', 'monthly', '2026-07-28')).toBe('2026-08-15');
   });
 });

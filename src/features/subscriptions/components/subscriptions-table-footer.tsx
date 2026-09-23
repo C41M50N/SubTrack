@@ -3,13 +3,17 @@ import { RotateCcwIcon } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import type { SubscriptionRecord } from '@/features/subscriptions/queries';
+import type { SubscriptionView } from '@/features/subscriptions/search';
+import { getDefaultSubscriptionSorting } from '@/features/subscriptions/table-state';
 
 type SubscriptionsTableFooterProps = {
   table: Table<SubscriptionRecord>;
+  view: SubscriptionView;
 };
 
 export function SubscriptionsTableFooter({
   table,
+  view,
 }: SubscriptionsTableFooterProps) {
   const visibleCount = table.getFilteredRowModel().rows.length;
   const totalCount = table.getCoreRowModel().rows.length;
@@ -21,7 +25,7 @@ export function SubscriptionsTableFooter({
 
   function handleReset() {
     table.resetColumnFilters();
-    table.resetSorting();
+    table.setSorting(getDefaultSubscriptionSorting(view));
     table.resetRowSelection();
   }
 

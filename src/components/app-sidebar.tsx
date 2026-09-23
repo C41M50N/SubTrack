@@ -27,7 +27,7 @@ export function AppSidebar() {
   const { user } = useRouteContext({ from: '/_protected' });
 
   const { data: subscriptions } = useQuery(
-    subscriptionsQueryOptions({ collectionId }),
+    subscriptionsQueryOptions({ collectionId, status: 'active' }),
   );
   const subscriptionCount = subscriptions?.length ?? 0;
 
@@ -91,7 +91,7 @@ export function AppSidebar() {
                     <div className="rounded-full bg-muted mr-0.5 px-2 py-0.5 ring-1 ring-inset ring-border group-data-[collapsible=icon]:hidden">
                       <span
                         className="text-sm text-muted-foreground"
-                        aria-label={`${subscriptionCount} subscriptions`}
+                        aria-label={`${subscriptionCount} active subscriptions`}
                       >
                         {subscriptionCount}
                       </span>

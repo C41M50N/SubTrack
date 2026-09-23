@@ -16,3 +16,17 @@ export function buildDueInvoiceSchedule(
 
   return { invoiceDates, nextInvoiceDate: scheduledDate };
 }
+
+export function getNextInvoiceDateOnOrAfter(
+  nextInvoiceDate: string,
+  frequency: SubscriptionCostFrequency,
+  earliestDate: string,
+): string {
+  let scheduledDate = nextInvoiceDate;
+
+  while (scheduledDate < earliestDate) {
+    scheduledDate = advanceInvoiceDate(scheduledDate, frequency);
+  }
+
+  return scheduledDate;
+}

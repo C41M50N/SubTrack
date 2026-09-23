@@ -20,10 +20,6 @@ const costAmountSchema = z
   .max(MAX_COST_AMOUNT_CENTS, 'Cost is too large');
 const invoiceDateSchema = z.iso.date();
 
-export const subscriptionIdInputSchema = z.object({
-  subscriptionId: z.string().min(1),
-});
-
 export const listSubscriptionsInputSchema = z
   .object({
     collectionId: z.string().min(1).optional(),
@@ -39,7 +35,6 @@ export const createSubscriptionInputSchema = z.object({
   costAmount: costAmountSchema,
   costFrequency: subscriptionCostFrequencySchema,
   nextInvoiceDate: invoiceDateSchema,
-  status: subscriptionStatusSchema.optional(),
 });
 
 export const updateSubscriptionInputSchema = z.object({
@@ -51,10 +46,29 @@ export const updateSubscriptionInputSchema = z.object({
   costAmount: costAmountSchema.optional(),
   costFrequency: subscriptionCostFrequencySchema.optional(),
   nextInvoiceDate: invoiceDateSchema.optional(),
-  status: subscriptionStatusSchema.optional(),
 });
 
-export const deleteSubscriptionInputSchema = subscriptionIdInputSchema;
+const uniqueSubscriptionIdsSchema = z
+  .array(z.string().min(1))
+  .min(1)
+  .max(500)
+  .refine((ids) => new Set(ids).size === ids.length, 'Subscription IDs must be unique');
+
+export const subscriptionIdsInputSchema = z.object({
+  subscriptionIds: uniqueSubscriptionIdsSchema,
+});
+
+export const deactivateSubscriptionsInputSchema = subscriptionIdsInputSchema;
+
+export const reactivateSubscriptionsInputSchema = subscriptionIdsInputSchema.extend({
+  nextInvoiceDate: invoiceDateSchema.optional(),
+});
+
+export const undoDeactivationInputSchema = subscriptionIdsInputSchema.extend({
+  deactivatedAt: z.iso.datetime({ offset: true }),
+});
+
+export const deleteSubscriptionsInputSchema = subscriptionIdsInputSchema;
 
 export const moveSubscriptionInputSchema = z.object({
   subscriptionId: z.string().min(1),
@@ -84,6 +98,7 @@ export const subscriptionImportRowSchema = z.object({
   costAmountCents: importCostAmountCentsSchema,
   costFrequency: subscriptionCostFrequencySchema,
   nextInvoiceDate: invoiceDateSchema,
+  deactivatedAt: z.iso.datetime({ offset: true }).nullable().optional(),
 });
 
 export type SubscriptionImportRow = z.infer<typeof subscriptionImportRowSchema>;

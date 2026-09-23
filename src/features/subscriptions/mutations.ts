@@ -6,8 +6,11 @@ import { collectionsListQueryKey } from '@/features/collections/queries';
 import {
   clearSubscriptions,
   createSubscription,
-  deleteSubscription,
+  deactivateSubscriptions,
+  deleteSubscriptions,
+  reactivateSubscriptions,
   seedSubscriptions,
+  undoDeactivation,
   updateSubscription,
 } from '@/features/subscriptions/api';
 import { subscriptionsListQueryKey } from '@/features/subscriptions/queries';
@@ -38,27 +41,40 @@ export function useUpdateSubscription() {
   });
 }
 
-export function useDeleteSubscription() {
+export function useDeleteSubscriptions() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (subscriptionId: string) => deleteSubscription({ data: { subscriptionId } }),
+    mutationFn: (subscriptionIds: string[]) => deleteSubscriptions({ data: { subscriptionIds } }),
     onSuccess: () => {
       return queryClient.invalidateQueries({ queryKey: subscriptionsListQueryKey });
     },
   });
 }
 
-export function useDeleteSubscriptions() {
+function useLifecycleMutation<Variables, Result>(mutationFn: (variables: Variables) => Promise<Result>) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (subscriptionIds: string[]) =>
-      Promise.all(subscriptionIds.map((subscriptionId) => deleteSubscription({ data: { subscriptionId } }))),
-    onSuccess: () => {
-      return queryClient.invalidateQueries({ queryKey: subscriptionsListQueryKey });
-    },
+    mutationFn,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: subscriptionsListQueryKey }),
   });
+}
+
+export function useDeactivateSubscriptions() {
+  return useLifecycleMutation((subscriptionIds: string[]) => deactivateSubscriptions({ data: { subscriptionIds } }));
+}
+
+export function useReactivateSubscriptions() {
+  return useLifecycleMutation((input: { subscriptionIds: string[]; nextInvoiceDate?: string }) =>
+    reactivateSubscriptions({ data: input }),
+  );
+}
+
+export function useUndoDeactivation() {
+  return useLifecycleMutation((input: { subscriptionIds: string[]; deactivatedAt: string }) =>
+    undoDeactivation({ data: input }),
+  );
 }
 
 // Dev-only: seeding can create categories, so invalidate categories too. Collections

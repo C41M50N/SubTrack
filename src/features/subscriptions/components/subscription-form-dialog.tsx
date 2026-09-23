@@ -14,7 +14,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Field, FieldError, FieldLabel } from '@/components/ui/field';
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import {
   InputGroup,
@@ -56,10 +61,7 @@ import {
   MAX_COST_AMOUNT_CENTS,
   updateSubscriptionInputSchema,
 } from '@/features/subscriptions/schema';
-import type {
-  SubscriptionCostFrequency,
-  SubscriptionStatus,
-} from '@/features/subscriptions/server';
+import type { SubscriptionCostFrequency } from '@/features/subscriptions/server';
 import { cn } from '@/lib/utils';
 
 const FREQUENCY_OPTIONS: SubscriptionCostFrequency[] = [
@@ -68,14 +70,13 @@ const FREQUENCY_OPTIONS: SubscriptionCostFrequency[] = [
   'yearly',
   'biennially',
 ];
-const STATUS_OPTIONS: SubscriptionStatus[] = ['active', 'inactive'];
-
 type SubscriptionFormDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   collectionId: string;
   subscription?: SubscriptionRecord | null;
   categories: CategoryRecord[];
+  onCreated?: () => void;
 };
 
 type FormState = {
@@ -85,7 +86,6 @@ type FormState = {
   cost: string;
   costFrequency: SubscriptionCostFrequency;
   nextInvoiceDate: string;
-  status: SubscriptionStatus;
 };
 
 function emptyForm(): FormState {
@@ -96,7 +96,6 @@ function emptyForm(): FormState {
     cost: '',
     costFrequency: 'monthly',
     nextInvoiceDate: format(new Date(), 'yyyy-MM-dd'),
-    status: 'active',
   };
 }
 
@@ -108,7 +107,6 @@ function formFromSubscription(subscription: SubscriptionRecord): FormState {
     cost: formatCentsForInput(subscription.costAmount),
     costFrequency: subscription.costFrequency,
     nextInvoiceDate: subscription.nextInvoiceDate,
-    status: subscription.status,
   };
 }
 
@@ -118,6 +116,7 @@ export function SubscriptionFormDialog({
   collectionId,
   subscription,
   categories,
+  onCreated,
 }: SubscriptionFormDialogProps) {
   const isEdit = Boolean(subscription);
   const createSubscription = useCreateSubscription();
@@ -200,7 +199,6 @@ export function SubscriptionFormDialog({
         costAmount,
         costFrequency: form.costFrequency,
         nextInvoiceDate: form.nextInvoiceDate,
-        status: form.status,
       });
 
       if (!parsed.success) {
@@ -227,7 +225,6 @@ export function SubscriptionFormDialog({
       costAmount,
       costFrequency: form.costFrequency,
       nextInvoiceDate: form.nextInvoiceDate,
-      status: form.status,
     });
 
     if (!parsed.success) {
@@ -239,6 +236,7 @@ export function SubscriptionFormDialog({
       onSuccess: () => {
         toast.success(`Added “${form.name}”`);
         onOpenChange(false);
+        onCreated?.();
       },
       onError: () => toast.error('Failed to add subscription'),
     });
@@ -356,79 +354,55 @@ export function SubscriptionFormDialog({
             </Field>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2">
-            <Field data-invalid={errors.nextInvoiceDate ? true : undefined}>
-              <FieldLabel htmlFor="subscription-next-invoice">
-                Next invoice
-              </FieldLabel>
-              <Popover>
-                <PopoverTrigger
-                  render={
-                    <Button
-                      id="subscription-next-invoice"
-                      type="button"
-                      variant="outline"
-                      disabled={isPending}
-                      aria-invalid={errors.nextInvoiceDate ? true : undefined}
-                      className={cn(
-                        'w-full justify-start gap-2 font-normal',
-                        !form.nextInvoiceDate && 'text-muted-foreground',
-                      )}
-                    />
-                  }
-                >
-                  <CalendarIcon className="size-4 text-muted-foreground" />
-                  {form.nextInvoiceDate
-                    ? formatInvoiceDate(form.nextInvoiceDate)
-                    : 'Pick a date'}
-                </PopoverTrigger>
-                <PopoverContent align="start" className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={
-                      form.nextInvoiceDate
-                        ? parseISO(form.nextInvoiceDate)
-                        : undefined
-                    }
-                    onSelect={(date) => {
-                      if (date) {
-                        update('nextInvoiceDate', format(date, 'yyyy-MM-dd'));
-                      }
-                    }}
-                    autoFocus
+          <Field data-invalid={errors.nextInvoiceDate ? true : undefined}>
+            <FieldLabel htmlFor="subscription-next-invoice">
+              Next invoice
+            </FieldLabel>
+            <Popover>
+              <PopoverTrigger
+                render={
+                  <Button
+                    id="subscription-next-invoice"
+                    type="button"
+                    variant="outline"
+                    disabled={isPending}
+                    aria-invalid={errors.nextInvoiceDate ? true : undefined}
+                    className={cn(
+                      'w-full justify-start gap-2 font-normal',
+                      !form.nextInvoiceDate && 'text-muted-foreground',
+                    )}
                   />
-                </PopoverContent>
-              </Popover>
-              <FieldError>{errors.nextInvoiceDate}</FieldError>
-            </Field>
-
-            <Field>
-              <FieldLabel htmlFor="subscription-status">Status</FieldLabel>
-              <Select
-                value={form.status}
-                onValueChange={(value) =>
-                  update('status', value as SubscriptionStatus)
                 }
               >
-                <SelectTrigger
-                  id="subscription-status"
-                  className="w-full"
-                  disabled={isPending}
-                >
-                  <SelectValue>
-                    {(value) => (value === 'active' ? 'Active' : 'Inactive')}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {STATUS_OPTIONS.map((status) => (
-                    <SelectItem key={status} value={status}>
-                      {status === 'active' ? 'Active' : 'Inactive'}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-          </div>
+                <CalendarIcon className="size-4 text-muted-foreground" />
+                {form.nextInvoiceDate
+                  ? formatInvoiceDate(form.nextInvoiceDate)
+                  : 'Pick a date'}
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={
+                    form.nextInvoiceDate
+                      ? parseISO(form.nextInvoiceDate)
+                      : undefined
+                  }
+                  onSelect={(date) => {
+                    if (date) {
+                      update('nextInvoiceDate', format(date, 'yyyy-MM-dd'));
+                    }
+                  }}
+                  autoFocus
+                />
+              </PopoverContent>
+            </Popover>
+            {subscription?.status === 'inactive' && (
+              <FieldDescription>
+                Used to calculate the next invoice when reactivated.
+              </FieldDescription>
+            )}
+            <FieldError>{errors.nextInvoiceDate}</FieldError>
+          </Field>
 
           <DialogFooter>
             <DialogClose
