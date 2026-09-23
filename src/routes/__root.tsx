@@ -7,13 +7,14 @@ import {
   Outlet,
   Scripts,
   createRootRouteWithContext,
-  useRouterState,
   type ErrorComponentProps,
 } from '@tanstack/react-router';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
+import { ThemeProvider } from 'next-themes';
 
-import { Button } from '../components/Button';
-import { Header } from '../components/Header';
+import { Button } from '@/components/ui/button';
+import { Toaster } from '@/components/ui/sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 import appCss from '../styles.css?url';
 
@@ -49,18 +50,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 });
 
 function RootLayout() {
-  const pathname = useRouterState({
-    select: (state) => state.location.pathname,
-  });
-
-  const showHeader = pathname !== '/login';
-
-  return (
-    <>
-      {showHeader ? <Header /> : null}
-      <Outlet />
-    </>
-  );
+  return <Outlet />;
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
@@ -70,7 +60,15 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className="font-sans antialiased">
-        {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <TooltipProvider>{children}</TooltipProvider>
+          <Toaster />
+        </ThemeProvider>
         <TanStackDevtools
           config={{
             position: 'bottom-right',

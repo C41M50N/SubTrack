@@ -1,7 +1,7 @@
 import Papa from 'papaparse';
 import slugify from 'slugify';
 
-import type { Subscription } from '@/features/subscriptions/server';
+import type { SubscriptionListItem } from '@/features/subscriptions/server';
 
 export type SubscriptionTransferFormat = 'json' | 'csv';
 
@@ -16,6 +16,7 @@ export type SubscriptionExportRecord = {
   costAmountCents: number;
   costFrequency: string;
   nextInvoiceDate: string;
+  deactivatedAt: string | null;
 };
 
 const csvHeaders = [
@@ -27,21 +28,23 @@ const csvHeaders = [
   'cost_amount_cents',
   'cost_frequency',
   'next_invoice_date',
+  'deactivated_at',
 ];
 
 export function toSubscriptionExportRecords(
-  subscriptions: Subscription[],
+  subscriptions: SubscriptionListItem[],
   collectionNameById: Map<string, string>,
 ): SubscriptionExportRecord[] {
   return subscriptions.map((subscription) => ({
     name: subscription.name,
     collection: collectionNameById.get(subscription.collectionId) ?? '',
     status: subscription.status,
-    category: subscription.category,
+    category: subscription.category ?? '',
     iconRef: subscription.iconRef,
     costAmountCents: subscription.costAmount,
     costFrequency: subscription.costFrequency,
     nextInvoiceDate: subscription.nextInvoiceDate,
+    deactivatedAt: subscription.deactivatedAt?.toISOString() ?? null,
   }));
 }
 
@@ -75,6 +78,7 @@ export function serializeSubscriptionsToCsv(records: SubscriptionExportRecord[])
       String(record.costAmountCents),
       record.costFrequency,
       record.nextInvoiceDate,
+      record.deactivatedAt ?? '',
     ]),
   });
 }

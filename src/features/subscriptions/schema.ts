@@ -8,13 +8,17 @@ export const subscriptionCostFrequencySchema = z.enum(subscriptionCostFrequencyE
 
 const subscriptionNameSchema = z.string().trim().min(1, 'Name is required').max(100);
 const categorySchema = z.string().trim().min(1, 'Category is required').max(100);
+const categoryIdSchema = z.string().min(1, 'Category is required');
 const iconRefSchema = z.string().trim().min(1, 'Icon is required').max(200);
-const costAmountSchema = z.number().int().nonnegative();
-const invoiceDateSchema = z.iso.date();
+/** Postgres int4 upper bound — `cost_amount` is an `integer` column. */
+export const MAX_COST_AMOUNT_CENTS = 2_147_483_647;
 
-export const subscriptionIdInputSchema = z.object({
-  subscriptionId: z.string().min(1),
-});
+const costAmountSchema = z
+  .number()
+  .int()
+  .nonnegative('Cost must be zero or more')
+  .max(MAX_COST_AMOUNT_CENTS, 'Cost is too large');
+const invoiceDateSchema = z.iso.date();
 
 export const listSubscriptionsInputSchema = z
   .object({
@@ -27,11 +31,10 @@ export const createSubscriptionInputSchema = z.object({
   name: subscriptionNameSchema,
   collectionId: z.string().min(1),
   iconRef: iconRefSchema,
-  category: categorySchema,
+  categoryId: categoryIdSchema.nullable(),
   costAmount: costAmountSchema,
   costFrequency: subscriptionCostFrequencySchema,
   nextInvoiceDate: invoiceDateSchema,
-  status: subscriptionStatusSchema.optional(),
 });
 
 export const updateSubscriptionInputSchema = z.object({
@@ -39,14 +42,33 @@ export const updateSubscriptionInputSchema = z.object({
   name: subscriptionNameSchema.optional(),
   collectionId: z.string().min(1).optional(),
   iconRef: iconRefSchema.optional(),
-  category: categorySchema.optional(),
+  categoryId: categoryIdSchema.nullable().optional(),
   costAmount: costAmountSchema.optional(),
   costFrequency: subscriptionCostFrequencySchema.optional(),
   nextInvoiceDate: invoiceDateSchema.optional(),
-  status: subscriptionStatusSchema.optional(),
 });
 
-export const deleteSubscriptionInputSchema = subscriptionIdInputSchema;
+const uniqueSubscriptionIdsSchema = z
+  .array(z.string().min(1))
+  .min(1)
+  .max(500)
+  .refine((ids) => new Set(ids).size === ids.length, 'Subscription IDs must be unique');
+
+export const subscriptionIdsInputSchema = z.object({
+  subscriptionIds: uniqueSubscriptionIdsSchema,
+});
+
+export const deactivateSubscriptionsInputSchema = subscriptionIdsInputSchema;
+
+export const reactivateSubscriptionsInputSchema = subscriptionIdsInputSchema.extend({
+  nextInvoiceDate: invoiceDateSchema.optional(),
+});
+
+export const undoDeactivationInputSchema = subscriptionIdsInputSchema.extend({
+  deactivatedAt: z.iso.datetime({ offset: true }),
+});
+
+export const deleteSubscriptionsInputSchema = subscriptionIdsInputSchema;
 
 export const moveSubscriptionInputSchema = z.object({
   subscriptionId: z.string().min(1),
@@ -61,7 +83,11 @@ export const exportSubscriptionsInputSchema = z.object({
 });
 
 const collectionNameSchema = z.string().trim().min(1, 'Collection is required').max(100);
-const importCostAmountCentsSchema = z.coerce.number().int().nonnegative();
+const importCostAmountCentsSchema = z.coerce
+  .number()
+  .int()
+  .nonnegative('Cost must be zero or more')
+  .max(MAX_COST_AMOUNT_CENTS, 'Cost is too large');
 
 export const subscriptionImportRowSchema = z.object({
   name: subscriptionNameSchema,
@@ -72,6 +98,7 @@ export const subscriptionImportRowSchema = z.object({
   costAmountCents: importCostAmountCentsSchema,
   costFrequency: subscriptionCostFrequencySchema,
   nextInvoiceDate: invoiceDateSchema,
+  deactivatedAt: z.iso.datetime({ offset: true }).nullable().optional(),
 });
 
 export type SubscriptionImportRow = z.infer<typeof subscriptionImportRowSchema>;
@@ -85,4 +112,13 @@ export const subscriptionImportEnvelopeSchema = z.object({
 export const importSubscriptionsInputSchema = z.object({
   content: z.string().min(1),
   format: subscriptionTransferFormatSchema.optional(),
+});
+
+// Dev-only seeding/clearing operate on a single collection.
+export const seedSubscriptionsInputSchema = z.object({
+  collectionId: z.string().min(1),
+});
+
+export const clearSubscriptionsInputSchema = z.object({
+  collectionId: z.string().min(1),
 });

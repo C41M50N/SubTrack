@@ -1,7 +1,7 @@
 import { Link, createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 
-import { Button } from '@/components/Button';
+import { Button } from '@/components/ui/button';
 import { authClient } from '@/features/auth/client';
 import { getSession } from '@/features/auth/session';
 

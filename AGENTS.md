@@ -4,6 +4,8 @@ The goal of SubTrack is to provide a simple and efficient way to track and manag
 
 Currently, the project only serves me, but I am treating it like a public product. The engineering and design quality is high. The project is open source and part of my portfolio, so the code, design, and product decisions are meant to reflect the level of care I would bring to client work. It gives potential clients and employers a practical look at how I approach software development, design, and product thinking.
 
+Current project stage: Development. Data models are still evolving. No need to handle backwards compatibility yet.
+
 # Development
 
 Don't run `db:generate` unless I explicitly tell you to.
