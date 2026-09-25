@@ -63,11 +63,7 @@ export function NewCollectionDialog({
         });
       },
       onError: (mutationError) => {
-        setError(
-          mutationError instanceof Error
-            ? mutationError.message
-            : 'Failed to create collection',
-        );
+        setError(mutationError.message);
         toast.error('Failed to create collection');
       },
     });

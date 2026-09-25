@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { categoryTable } from '@/lib/db/category-schema';
 import { COLLECTION_NAME_UNIQUE_CONSTRAINT, collectionTable } from '@/lib/db/collection-schema';
 import { subscriptionTable } from '@/lib/db/subscription-schema';
+import { UserFacingError } from '@/lib/errors';
 
 export type Collection = typeof collectionTable.$inferSelect;
 
@@ -20,6 +21,8 @@ function isDuplicateCollectionNameError(error: unknown): boolean {
     (error as { constraint?: unknown }).constraint === COLLECTION_NAME_UNIQUE_CONSTRAINT
   );
 }
+
+const DUPLICATE_COLLECTION_NAME_MESSAGE = 'A collection with this name already exists';
 
 export function getCollectionFilter(userId: string, collectionId: string) {
   return and(eq(collectionTable.userId, userId), eq(collectionTable.id, collectionId));
@@ -76,7 +79,7 @@ export async function createMyCollection(input: { userId: string; name: string }
     return collection;
   } catch (error) {
     if (isDuplicateCollectionNameError(error)) {
-      throw new Error('A collection with this name already exists');
+      throw new UserFacingError(DUPLICATE_COLLECTION_NAME_MESSAGE);
     }
 
     throw error;
@@ -96,7 +99,7 @@ export async function renameMyCollection(input: { userId: string; collectionId: 
       .returning();
   } catch (error) {
     if (isDuplicateCollectionNameError(error)) {
-      throw new Error('A collection with this name already exists');
+      throw new UserFacingError(DUPLICATE_COLLECTION_NAME_MESSAGE);
     }
 
     throw error;

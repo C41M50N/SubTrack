@@ -71,11 +71,7 @@ export function RenameCollectionDialog({
           onOpenChange(false);
         },
         onError: (mutationError) => {
-          setError(
-            mutationError instanceof Error
-              ? mutationError.message
-              : 'Failed to rename collection',
-          );
+          setError(mutationError.message);
           toast.error('Failed to rename collection');
         },
       },

@@ -14,6 +14,7 @@ import {
   listMyCollections,
   renameMyCollection,
 } from '@/features/collections/server';
+import { withUserFacingErrors } from '@/lib/errors';
 
 export const listCollections = createServerFn({ method: 'GET' })
   .middleware([requireAuthMiddleware])
@@ -23,21 +24,25 @@ export const createCollection = createServerFn({ method: 'POST' })
   .middleware([requireAuthMiddleware])
   .validator(createCollectionInputSchema)
   .handler(async ({ context: { auth }, data }) => {
-    return createMyCollection({
-      userId: auth.userId,
-      name: data.name,
-    });
+    return withUserFacingErrors('Failed to create collection', () =>
+      createMyCollection({
+        userId: auth.userId,
+        name: data.name,
+      }),
+    );
   });
 
 export const renameCollection = createServerFn({ method: 'POST' })
   .middleware([requireAuthMiddleware])
   .validator(renameCollectionInputSchema)
   .handler(async ({ context: { auth }, data }) => {
-    return renameMyCollection({
-      userId: auth.userId,
-      collectionId: data.collectionId,
-      name: data.name,
-    });
+    return withUserFacingErrors('Failed to rename collection', () =>
+      renameMyCollection({
+        userId: auth.userId,
+        collectionId: data.collectionId,
+        name: data.name,
+      }),
+    );
   });
 
 export const duplicateCollection = createServerFn({ method: 'POST' })
