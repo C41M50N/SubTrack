@@ -130,7 +130,9 @@ Undo restores every moved subscription to its exact previous collection and cate
 - Success toast: **Moved back to Work**, naming the source collection.
 - Failure toast: **Could not undo move. Refresh and try again.**
 
-Undo is all-or-nothing. If any moved subscription changed since the move, undo must fail without changing anything.
+Undo is all-or-nothing. If any moved subscription was deleted, moved again, or recategorized since the move, undo must fail without changing anything.
+
+Other edits made since the move, such as renaming, repricing, or deactivating, do not block undo. Undo writes only `collectionId` and `categoryId`, so it keeps those edits.
 
 ### Pending state
 
@@ -272,7 +274,7 @@ The implementation is complete when:
 6. Recorded invoices remain in the source collection's history.
 7. Success toasts name the target collection and offer Undo for 8 seconds.
 8. Undo restores the exact previous collection and category, and deletes only created categories that remain unused.
-9. Undo fails without changes when any moved subscription changed after the move.
+9. Undo fails without changes when any moved subscription no longer has the collection and category the move gave it. Other edits do not block undo and are kept.
 10. Users with one collection see disabled **Move to** controls with a hover- and focus-accessible tooltip.
 11. The subscription update operation no longer accepts `collectionId`.
 12. Import and seed use the shared category resolution helper.
