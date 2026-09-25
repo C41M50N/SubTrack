@@ -1,13 +1,14 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { z } from 'zod';
 
-import { categoriesListQueryKey } from '@/features/categories/queries';
+import { categoriesListQueryKey, categoriesQueryOptions } from '@/features/categories/queries';
 import { collectionsListQueryKey } from '@/features/collections/queries';
 import {
   clearSubscriptions,
   createSubscription,
   deactivateSubscriptions,
   deleteSubscriptions,
+  moveSubscriptions,
   reactivateSubscriptions,
   seedSubscriptions,
   undoDeactivation,
@@ -75,6 +76,21 @@ export function useUndoDeactivation() {
   return useLifecycleMutation((input: { subscriptionIds: string[]; deactivatedAt: string }) =>
     undoDeactivation({ data: input }),
   );
+}
+
+// A move changes subscriptions in two collections and may create categories in
+// the target. Collections and recorded invoices are unaffected.
+export function useMoveSubscriptions() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: { subscriptionIds: string[]; collectionId: string }) => moveSubscriptions({ data: input }),
+    onSuccess: (_result, input) =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: subscriptionsListQueryKey }),
+        queryClient.invalidateQueries({ queryKey: categoriesQueryOptions(input.collectionId).queryKey }),
+      ]),
+  });
 }
 
 // Dev-only: seeding can create categories, so invalidate categories too. Collections

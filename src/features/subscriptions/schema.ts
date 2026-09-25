@@ -40,7 +40,6 @@ export const createSubscriptionInputSchema = z.object({
 export const updateSubscriptionInputSchema = z.object({
   subscriptionId: z.string().min(1),
   name: subscriptionNameSchema.optional(),
-  collectionId: z.string().min(1).optional(),
   iconRef: iconRefSchema.optional(),
   categoryId: categoryIdSchema.nullable().optional(),
   costAmount: costAmountSchema.optional(),
@@ -70,8 +69,7 @@ export const undoDeactivationInputSchema = subscriptionIdsInputSchema.extend({
 
 export const deleteSubscriptionsInputSchema = subscriptionIdsInputSchema;
 
-export const moveSubscriptionInputSchema = z.object({
-  subscriptionId: z.string().min(1),
+export const moveSubscriptionsInputSchema = subscriptionIdsInputSchema.extend({
   collectionId: z.string().min(1),
 });
 

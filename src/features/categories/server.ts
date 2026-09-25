@@ -1,7 +1,8 @@
-import { and, asc, eq, sql } from 'drizzle-orm';
+import { and, asc, eq, inArray, sql } from 'drizzle-orm';
 
+import { dedupeCategoryNames, toCategoryNameKey } from '@/features/categories/names';
 import { getMyCollection } from '@/features/collections/server';
-import { db } from '@/lib/db';
+import { db, type DbTransaction } from '@/lib/db';
 import { CATEGORY_NAME_UNIQUE_CONSTRAINT, categoryTable } from '@/lib/db/category-schema';
 
 export type Category = typeof categoryTable.$inferSelect;
@@ -44,7 +45,7 @@ export async function listMyCategories(userId: string, collectionId: string) {
 export async function createMyCategory(input: { userId: string; collectionId: string; name: string }) {
   await assertCollectionOwnership(input.userId, input.collectionId);
 
-  const nameKey = input.name.toLowerCase();
+  const nameKey = toCategoryNameKey(input.name);
 
   const findExisting = () =>
     db
@@ -90,9 +91,79 @@ export async function createMyCategory(input: { userId: string; collectionId: st
   }
 }
 
+/**
+ * Resolves category names to IDs in one collection, creating any that don't
+ * exist yet. Runs inside the caller's transaction so created categories roll
+ * back with it.
+ *
+ * `categoryIdByKey` is keyed by `toCategoryNameKey(name)`.
+ */
+export async function findOrCreateCategoriesByName(
+  tx: DbTransaction,
+  input: { userId: string; collectionId: string; names: Iterable<string> },
+) {
+  const names = dedupeCategoryNames(input.names);
+  const categoryIdByKey = new Map<string, string>();
+
+  if (names.length === 0) {
+    return { categoryIdByKey };
+  }
+
+  const selectByKeys = (keys: string[]) =>
+    tx
+      .select({ id: categoryTable.id, name: categoryTable.name })
+      .from(categoryTable)
+      .where(
+        and(
+          eq(categoryTable.userId, input.userId),
+          eq(categoryTable.collectionId, input.collectionId),
+          inArray(sql`lower(${categoryTable.name})`, keys),
+        ),
+      );
+  const addToMapping = (categories: { id: string; name: string }[]) => {
+    for (const category of categories) {
+      categoryIdByKey.set(toCategoryNameKey(category.name), category.id);
+    }
+  };
+  const getMissingNames = () => names.filter((name) => !categoryIdByKey.has(toCategoryNameKey(name)));
+
+  addToMapping(await selectByKeys(names.map(toCategoryNameKey)));
+
+  const namesToCreate = getMissingNames();
+
+  if (namesToCreate.length > 0) {
+    const created = await tx
+      .insert(categoryTable)
+      .values(namesToCreate.map((name) => ({ userId: input.userId, collectionId: input.collectionId, name })))
+      .onConflictDoNothing()
+      .returning({ id: categoryTable.id, name: categoryTable.name });
+
+    addToMapping(created);
+
+    // A concurrent insert may have won the race for some names; those rows
+    // exist now, so read them back.
+    const racedNames = getMissingNames();
+
+    if (racedNames.length > 0) {
+      addToMapping(await selectByKeys(racedNames.map(toCategoryNameKey)));
+    }
+
+    if (getMissingNames().length > 0) {
+      throw new Error('Failed to resolve categories');
+    }
+  }
+
+  return { categoryIdByKey };
+}
+
 /** Throws unless the category exists and belongs to this user's collection. */
-export async function assertCategoryInCollection(userId: string, collectionId: string, categoryId: string) {
-  const [category] = await db
+export async function assertCategoryInCollection(
+  userId: string,
+  collectionId: string,
+  categoryId: string,
+  executor: typeof db | DbTransaction = db,
+) {
+  const [category] = await executor
     .select({ id: categoryTable.id })
     .from(categoryTable)
     .where(

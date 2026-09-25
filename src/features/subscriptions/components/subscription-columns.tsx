@@ -27,6 +27,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import type { CollectionRecord } from '@/features/collections/queries';
+import { MoveToSubmenu } from '@/features/subscriptions/components/move-subscriptions';
 import { SubscriptionIcon } from '@/features/subscriptions/components/subscription-icon';
 import {
   effectiveMonthlyCents,
@@ -84,14 +86,22 @@ function SortableHeader({
 
 export type SubscriptionColumnActions = {
   onEdit: (subscription: SubscriptionRecord) => void;
+  onMove: (subscription: SubscriptionRecord, target: CollectionRecord) => void;
   onDeactivate: (subscription: SubscriptionRecord) => void;
   onReactivate: (subscription: SubscriptionRecord) => void;
   onDelete: (subscription: SubscriptionRecord) => void;
 };
 
 export function createSubscriptionColumns(
-  { onEdit, onDeactivate, onReactivate, onDelete }: SubscriptionColumnActions,
+  {
+    onEdit,
+    onMove,
+    onDeactivate,
+    onReactivate,
+    onDelete,
+  }: SubscriptionColumnActions,
   view: SubscriptionView,
+  moveTargets: CollectionRecord[],
 ): ColumnDef<SubscriptionRecord>[] {
   return [
     {
@@ -277,6 +287,10 @@ export function createSubscriptionColumns(
                 <DropdownMenuItem onClick={() => onEdit(row.original)}>
                   <MenuActionItem icon={PencilIcon} label="Edit" />
                 </DropdownMenuItem>
+                <MoveToSubmenu
+                  targets={moveTargets}
+                  onSelect={(target) => onMove(row.original, target)}
+                />
                 {view === 'active' ? (
                   <DropdownMenuItem onClick={() => onDeactivate(row.original)}>
                     <MenuActionItem icon={CirclePauseIcon} label="Deactivate" />

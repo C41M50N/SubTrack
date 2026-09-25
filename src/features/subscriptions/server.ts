@@ -1,7 +1,8 @@
 import { and, asc, desc, eq, getTableColumns, inArray, sql } from 'drizzle-orm';
 
-import { assertCategoryInCollection } from '@/features/categories/server';
-import { getMyCollection } from '@/features/collections/server';
+import { toCategoryNameKey } from '@/features/categories/names';
+import { assertCategoryInCollection, findOrCreateCategoriesByName } from '@/features/categories/server';
+import { getCollectionFilter, getMyCollection } from '@/features/collections/server';
 import { getImportedDeactivatedAt } from '@/features/subscriptions/import';
 import type { SubscriptionImportRow } from '@/features/subscriptions/schema';
 import { buildSeedSubscriptions } from '@/features/subscriptions/seed-data';
@@ -104,71 +105,48 @@ export async function createMySubscription(input: {
   return subscription;
 }
 
+// Moving is the only way to change a subscription's collection, so updates
+// never accept a collectionId.
 export async function updateMySubscription(input: {
   userId: string;
   subscriptionId: string;
   name?: string;
-  collectionId?: string;
   iconRef?: string;
   categoryId?: string | null;
   costAmount?: number;
   costFrequency?: SubscriptionCostFrequency;
   nextInvoiceDate?: string;
 }) {
-  if (input.collectionId) {
-    await assertCollectionOwnership(input.userId, input.collectionId);
-  }
+  return db.transaction(async (tx) => {
+    // Lock the row so a concurrent move can't change its collection between the
+    // category check and the update.
+    const [current] = await tx
+      .select({ collectionId: subscriptionTable.collectionId })
+      .from(subscriptionTable)
+      .where(getSubscriptionFilter(input.userId, input.subscriptionId))
+      .for('update');
 
-  // A non-null category must belong to the subscription's (possibly new) collection.
-  if (input.categoryId) {
-    const collectionId =
-      input.collectionId ?? (await getMySubscription(input.userId, input.subscriptionId))?.collectionId;
-
-    if (!collectionId) {
+    if (!current) {
       throw new Error('Subscription not found');
     }
 
-    await assertCategoryInCollection(input.userId, collectionId, input.categoryId);
-  }
+    // A non-null category must belong to the subscription's collection.
+    if (input.categoryId) {
+      await assertCategoryInCollection(input.userId, current.collectionId, input.categoryId, tx);
+    }
 
-  const values = {
-    name: input.name,
-    collectionId: input.collectionId,
-    iconRef: input.iconRef,
-    categoryId: input.categoryId,
-    costAmount: input.costAmount,
-    costFrequency: input.costFrequency,
-    nextInvoiceDate: input.nextInvoiceDate,
-  };
-
-  const [subscription] = await db
-    .update(subscriptionTable)
-    .set(values)
-    .where(getSubscriptionFilter(input.userId, input.subscriptionId))
-    .returning();
-
-  if (!subscription) {
-    throw new Error('Subscription not found');
-  }
-
-  return subscription;
-}
-
-export async function moveMySubscription(input: { userId: string; subscriptionId: string; collectionId: string }) {
-  await assertCollectionOwnership(input.userId, input.collectionId);
-
-  return db.transaction(async (tx) => {
     const [subscription] = await tx
       .update(subscriptionTable)
-      // Categories are collection-scoped, so the old category can't follow the
-      // subscription into its new collection. Reset it to Uncategorized.
-      .set({ collectionId: input.collectionId, categoryId: null })
+      .set({
+        name: input.name,
+        iconRef: input.iconRef,
+        categoryId: input.categoryId,
+        costAmount: input.costAmount,
+        costFrequency: input.costFrequency,
+        nextInvoiceDate: input.nextInvoiceDate,
+      })
       .where(getSubscriptionFilter(input.userId, input.subscriptionId))
       .returning();
-
-    if (!subscription) {
-      throw new Error('Subscription not found');
-    }
 
     return subscription;
   });
@@ -210,68 +188,55 @@ export async function importMySubscriptions(input: { userId: string; rows: Subsc
       collectionsCreated += 1;
     }
 
-    // Categories are unique per collection (case-insensitive), so key the cache
-    // by collection id + lowercased name. Reuse an existing category or create it.
-    const categoryIdByKey = new Map<string, string>();
+    const rowsWithCollection = input.rows.map((row) => {
+      const collectionId = collectionIdByName.get(row.collection.toLowerCase());
 
-    async function resolveCategoryId(collectionId: string, name: string): Promise<string> {
-      const key = `${collectionId}:${name.toLowerCase()}`;
-      const cached = categoryIdByKey.get(key);
-
-      if (cached) {
-        return cached;
+      if (!collectionId) {
+        throw new Error('Failed to resolve collection during import');
       }
 
-      const [existing] = await tx
-        .select({ id: categoryTable.id })
-        .from(categoryTable)
-        .where(
-          and(
-            eq(categoryTable.userId, input.userId),
-            eq(categoryTable.collectionId, collectionId),
-            sql`lower(${categoryTable.name}) = ${name.toLowerCase()}`,
-          ),
-        )
-        .limit(1);
+      return { row, collectionId };
+    });
 
-      if (existing) {
-        categoryIdByKey.set(key, existing.id);
-        return existing.id;
-      }
+    // Categories are collection-scoped, so resolve each collection's category
+    // names together, reusing existing categories or creating them.
+    const categoryNamesByCollectionId = new Map<string, string[]>();
 
-      const [created] = await tx
-        .insert(categoryTable)
-        .values({ userId: input.userId, collectionId, name })
-        .returning({ id: categoryTable.id });
-
-      categoryIdByKey.set(key, created.id);
-      return created.id;
+    for (const { row, collectionId } of rowsWithCollection) {
+      const names = categoryNamesByCollectionId.get(collectionId) ?? [];
+      names.push(row.category);
+      categoryNamesByCollectionId.set(collectionId, names);
     }
 
-    if (input.rows.length > 0) {
-      const values = [];
+    const categoryIdByKeyByCollectionId = new Map<string, Map<string, string>>();
 
-      for (const row of input.rows) {
-        const collectionId = collectionIdByName.get(row.collection.toLowerCase());
+    for (const [collectionId, names] of categoryNamesByCollectionId) {
+      const { categoryIdByKey } = await findOrCreateCategoriesByName(tx, { userId: input.userId, collectionId, names });
+      categoryIdByKeyByCollectionId.set(collectionId, categoryIdByKey);
+    }
 
-        if (!collectionId) {
-          throw new Error('Failed to resolve collection during import');
-        }
+    const values = rowsWithCollection.map(({ row, collectionId }) => {
+      const categoryId = categoryIdByKeyByCollectionId.get(collectionId)?.get(toCategoryNameKey(row.category));
 
-        values.push({
-          userId: input.userId,
-          name: row.name,
-          status: row.status,
-          iconRef: row.iconRef,
-          categoryId: await resolveCategoryId(collectionId, row.category),
-          costAmount: row.costAmountCents,
-          costFrequency: row.costFrequency,
-          nextInvoiceDate: row.nextInvoiceDate,
-          deactivatedAt: getImportedDeactivatedAt(row, importedAt),
-          collectionId,
-        });
+      if (!categoryId) {
+        throw new Error('Failed to resolve category during import');
       }
 
+      return {
+        userId: input.userId,
+        name: row.name,
+        status: row.status,
+        iconRef: row.iconRef,
+        categoryId,
+        costAmount: row.costAmountCents,
+        costFrequency: row.costFrequency,
+        nextInvoiceDate: row.nextInvoiceDate,
+        deactivatedAt: getImportedDeactivatedAt(row, importedAt),
+        collectionId,
+      };
+    });
+
+    if (values.length > 0) {
       await tx.insert(subscriptionTable).values(values);
     }
 
@@ -296,53 +261,28 @@ export async function seedMySubscriptions(input: { userId: string; collectionId:
       .where(and(eq(subscriptionTable.userId, input.userId), eq(subscriptionTable.collectionId, input.collectionId)))
       .returning({ id: subscriptionTable.id });
 
-    // Categories are collection-scoped and unique by lower(name); resolve each
-    // once, reusing existing categories or creating them on demand.
-    const categoryIdByName = new Map<string, string>();
-
-    async function resolveCategoryId(name: string): Promise<string> {
-      const key = name.toLowerCase();
-      const cached = categoryIdByName.get(key);
-
-      if (cached) {
-        return cached;
-      }
-
-      const [existing] = await tx
-        .select({ id: categoryTable.id })
-        .from(categoryTable)
-        .where(
-          and(
-            eq(categoryTable.userId, input.userId),
-            eq(categoryTable.collectionId, input.collectionId),
-            sql`lower(${categoryTable.name}) = ${key}`,
-          ),
-        )
-        .limit(1);
-
-      if (existing) {
-        categoryIdByName.set(key, existing.id);
-        return existing.id;
-      }
-
-      const [created] = await tx
-        .insert(categoryTable)
-        .values({ userId: input.userId, collectionId: input.collectionId, name })
-        .returning({ id: categoryTable.id });
-
-      categoryIdByName.set(key, created.id);
-      return created.id;
-    }
+    // Categories are collection-scoped; reuse existing ones or create them.
+    const { categoryIdByKey } = await findOrCreateCategoriesByName(tx, {
+      userId: input.userId,
+      collectionId: input.collectionId,
+      names: rows.map((row) => row.category),
+    });
 
     const values = [];
 
     for (const row of rows) {
+      const categoryId = categoryIdByKey.get(toCategoryNameKey(row.category));
+
+      if (!categoryId) {
+        throw new Error('Failed to resolve category during seeding');
+      }
+
       values.push({
         userId: input.userId,
         name: row.name,
         status: row.status,
         iconRef: row.iconRef,
-        categoryId: await resolveCategoryId(row.category),
+        categoryId,
         costAmount: row.costAmountCents,
         costFrequency: row.costFrequency,
         nextInvoiceDate: row.nextInvoiceDate,
@@ -371,9 +311,11 @@ export async function clearMySubscriptions(input: { userId: string; collectionId
   return { subscriptionsDeleted: deleted.length };
 }
 
+const SUBSCRIPTIONS_CHANGED_MESSAGE = 'Subscriptions changed. Refresh and try again.';
+
 function assertEverySubscriptionFound(foundCount: number, expectedCount: number) {
   if (foundCount !== expectedCount) {
-    throw new UserFacingError('Subscriptions changed. Refresh and try again.');
+    throw new UserFacingError(SUBSCRIPTIONS_CHANGED_MESSAGE);
   }
 }
 
@@ -528,5 +470,80 @@ export async function deleteMySubscriptions(input: { userId: string; subscriptio
 
     assertEverySubscriptionFound(deleted.length, input.subscriptionIds.length);
     return deleted;
+  });
+}
+
+/** A CASE expression that picks a text value per subscription ID. */
+function textBySubscriptionId(valueById: [id: string, value: string | null][]) {
+  const cases = valueById.map(([id, value]) => sql`when ${id} then ${value}::text`);
+
+  return sql<string>`case ${subscriptionTable.id} ${sql.join(cases, sql.raw(' '))} end`;
+}
+
+export async function moveMySubscriptions(input: { userId: string; subscriptionIds: string[]; collectionId: string }) {
+  return db.transaction(async (tx) => {
+    const [targetCollection] = await tx
+      .select({ id: collectionTable.id })
+      .from(collectionTable)
+      .where(getCollectionFilter(input.userId, input.collectionId))
+      .limit(1);
+
+    if (!targetCollection) {
+      throw new Error('Collection not found');
+    }
+
+    const subscriptionFilter = and(
+      eq(subscriptionTable.userId, input.userId),
+      inArray(subscriptionTable.id, input.subscriptionIds),
+    );
+    const subscriptions = await tx
+      .select({
+        id: subscriptionTable.id,
+        collectionId: subscriptionTable.collectionId,
+        categoryId: subscriptionTable.categoryId,
+        categoryName: categoryTable.name,
+      })
+      .from(subscriptionTable)
+      .leftJoin(categoryTable, eq(subscriptionTable.categoryId, categoryTable.id))
+      .where(subscriptionFilter)
+      .for('update', { of: subscriptionTable });
+
+    assertEverySubscriptionFound(subscriptions.length, input.subscriptionIds.length);
+
+    if (subscriptions.some((subscription) => subscription.collectionId === input.collectionId)) {
+      throw new UserFacingError(SUBSCRIPTIONS_CHANGED_MESSAGE);
+    }
+
+    // Categories are collection-scoped, so carry each one over by name,
+    // reusing the target's matching category or creating it.
+    const { categoryIdByKey } = await findOrCreateCategoriesByName(tx, {
+      userId: input.userId,
+      collectionId: input.collectionId,
+      names: subscriptions.flatMap((subscription) => subscription.categoryName ?? []),
+    });
+
+    const movedCategoryIds = subscriptions.map(({ id, categoryName }): [string, string | null] => {
+      if (categoryName === null) {
+        return [id, null];
+      }
+
+      const categoryId = categoryIdByKey.get(toCategoryNameKey(categoryName));
+
+      if (!categoryId) {
+        throw new Error('Failed to resolve category during move');
+      }
+
+      return [id, categoryId];
+    });
+
+    const updated = await tx
+      .update(subscriptionTable)
+      .set({ collectionId: input.collectionId, categoryId: textBySubscriptionId(movedCategoryIds) })
+      .where(subscriptionFilter)
+      .returning();
+
+    assertEverySubscriptionFound(updated.length, input.subscriptionIds.length);
+
+    return updated;
   });
 }
