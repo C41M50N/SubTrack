@@ -11,7 +11,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
@@ -23,6 +23,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import type { CategoryRecord } from '@/features/categories/queries';
+import type { CollectionRecord } from '@/features/collections/queries';
+import type { MoveSubscriptions } from '@/features/subscriptions/components/move-subscriptions';
 import {
   createSubscriptionColumns,
   type SubscriptionColumnActions,
@@ -33,15 +35,22 @@ import type { SubscriptionRecord } from '@/features/subscriptions/queries';
 import type { SubscriptionView } from '@/features/subscriptions/search';
 import { getDefaultSubscriptionSorting } from '@/features/subscriptions/table-state';
 
-type UseSubscriptionsTableOptions = SubscriptionColumnActions & {
+type UseSubscriptionsTableOptions = Omit<
+  SubscriptionColumnActions,
+  'onMove'
+> & {
   data: SubscriptionRecord[];
   view: SubscriptionView;
+  moveTargets: CollectionRecord[];
+  onMove: MoveSubscriptions;
 };
 
 export function useSubscriptionsTable({
   data,
   view,
+  moveTargets,
   onEdit,
+  onMove,
   onDeactivate,
   onReactivate,
   onDelete,
@@ -59,13 +68,35 @@ export function useSubscriptionsTable({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
+  // A successful move clears the whole selection, matching bulk moves.
+  const handleRowMove = useCallback(
+    (subscription: SubscriptionRecord, target: CollectionRecord) =>
+      onMove([subscription], target, { onSuccess: () => setRowSelection({}) }),
+    [onMove],
+  );
+
   const columns = useMemo(
     () =>
       createSubscriptionColumns(
-        { onEdit, onDeactivate, onReactivate, onDelete },
+        {
+          onEdit,
+          onMove: handleRowMove,
+          onDeactivate,
+          onReactivate,
+          onDelete,
+        },
         view,
+        moveTargets,
       ),
-    [onDeactivate, onDelete, onEdit, onReactivate, view],
+    [
+      handleRowMove,
+      moveTargets,
+      onDeactivate,
+      onDelete,
+      onEdit,
+      onReactivate,
+      view,
+    ],
   );
 
   return useReactTable({
@@ -95,7 +126,10 @@ type SubscriptionsTableProps = {
   view: SubscriptionView;
   activeCount: number;
   inactiveCount: number;
+  moveTargets: CollectionRecord[];
+  isMovePending: boolean;
   onViewChange: (view: SubscriptionView) => void;
+  onBulkMove: (target: CollectionRecord) => void;
   onBulkDeactivate: () => void;
   onBulkReactivate: () => void;
   onBulkDelete: () => void;
@@ -107,7 +141,10 @@ export function SubscriptionsTable({
   view,
   activeCount,
   inactiveCount,
+  moveTargets,
+  isMovePending,
   onViewChange,
+  onBulkMove,
   onBulkDeactivate,
   onBulkReactivate,
   onBulkDelete,
@@ -132,7 +169,10 @@ export function SubscriptionsTable({
         view={view}
         activeCount={activeCount}
         inactiveCount={inactiveCount}
+        moveTargets={moveTargets}
+        isMovePending={isMovePending}
         onViewChange={onViewChange}
+        onBulkMove={onBulkMove}
         onBulkDeactivate={onBulkDeactivate}
         onBulkReactivate={onBulkReactivate}
         onBulkDelete={onBulkDelete}

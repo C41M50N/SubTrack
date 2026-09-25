@@ -10,7 +10,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { CategoryRecord } from '@/features/categories/queries';
+import type { CollectionRecord } from '@/features/collections/queries';
 import { CategoryFilter } from '@/features/subscriptions/components/category-filter';
+import { MoveToButton } from '@/features/subscriptions/components/move-subscriptions';
 import type { SubscriptionRecord } from '@/features/subscriptions/queries';
 import type { SubscriptionView } from '@/features/subscriptions/search';
 import { cn } from '@/lib/utils';
@@ -21,7 +23,10 @@ type SubscriptionsTableToolbarProps = {
   view: SubscriptionView;
   activeCount: number;
   inactiveCount: number;
+  moveTargets: CollectionRecord[];
+  isMovePending: boolean;
   onViewChange: (view: SubscriptionView) => void;
+  onBulkMove: (target: CollectionRecord) => void;
   onBulkDeactivate: () => void;
   onBulkReactivate: () => void;
   onBulkDelete: () => void;
@@ -33,7 +38,10 @@ export function SubscriptionsTableToolbar({
   view,
   activeCount,
   inactiveCount,
+  moveTargets,
+  isMovePending,
   onViewChange,
+  onBulkMove,
   onBulkDeactivate,
   onBulkReactivate,
   onBulkDelete,
@@ -96,6 +104,11 @@ export function SubscriptionsTableToolbar({
           <span className="text-sm text-muted-foreground">
             {selectedCount} selected
           </span>
+          <MoveToButton
+            targets={moveTargets}
+            disabled={isMovePending}
+            onSelect={onBulkMove}
+          />
           {view === 'active' ? (
             <Button variant="outline" size="sm" onClick={onBulkDeactivate}>
               <CirclePauseIcon data-icon="inline-start" />

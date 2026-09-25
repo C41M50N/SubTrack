@@ -9,10 +9,11 @@ import {
   deleteSubscriptionsInputSchema,
   importSubscriptionsInputSchema,
   listSubscriptionsInputSchema,
-  moveSubscriptionInputSchema,
+  moveSubscriptionsInputSchema,
   reactivateSubscriptionsInputSchema,
   seedSubscriptionsInputSchema,
   undoDeactivationInputSchema,
+  undoMoveInputSchema,
   updateSubscriptionInputSchema,
 } from '@/features/subscriptions/schema';
 import {
@@ -22,11 +23,12 @@ import {
   deleteMySubscriptions,
   importMySubscriptions,
   listMySubscriptions,
-  moveMySubscription,
+  moveMySubscriptions,
   reactivateMySubscriptions,
   seedMySubscriptions,
   updateMySubscription,
   undoMyDeactivation,
+  undoMyMove,
 } from '@/features/subscriptions/server';
 import { withUserFacingErrors } from '@/lib/errors';
 
@@ -59,7 +61,6 @@ export const updateSubscription = createServerFn({ method: 'POST' })
       userId: auth.userId,
       subscriptionId: data.subscriptionId,
       name: data.name,
-      collectionId: data.collectionId,
       iconRef: data.iconRef,
       categoryId: data.categoryId,
       costAmount: data.costAmount,
@@ -68,15 +69,26 @@ export const updateSubscription = createServerFn({ method: 'POST' })
     });
   });
 
-export const moveSubscription = createServerFn({ method: 'POST' })
+export const moveSubscriptions = createServerFn({ method: 'POST' })
   .middleware([requireAuthMiddleware])
-  .validator(moveSubscriptionInputSchema)
+  .validator(moveSubscriptionsInputSchema)
   .handler(async ({ context: { auth }, data }) => {
-    return moveMySubscription({
-      userId: auth.userId,
-      subscriptionId: data.subscriptionId,
-      collectionId: data.collectionId,
-    });
+    return withUserFacingErrors('Failed to move. Refresh and try again.', () =>
+      moveMySubscriptions({
+        userId: auth.userId,
+        subscriptionIds: data.subscriptionIds,
+        collectionId: data.collectionId,
+      }),
+    );
+  });
+
+export const undoMove = createServerFn({ method: 'POST' })
+  .middleware([requireAuthMiddleware])
+  .validator(undoMoveInputSchema)
+  .handler(async ({ context: { auth }, data }) => {
+    return withUserFacingErrors('Could not undo move. Refresh and try again.', () =>
+      undoMyMove({ userId: auth.userId, payload: data }),
+    );
   });
 
 export const importSubscriptions = createServerFn({ method: 'POST' })

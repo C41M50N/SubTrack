@@ -160,8 +160,13 @@ export async function findOrCreateCategoriesByName(
 }
 
 /** Throws unless the category exists and belongs to this user's collection. */
-export async function assertCategoryInCollection(userId: string, collectionId: string, categoryId: string) {
-  const [category] = await db
+export async function assertCategoryInCollection(
+  userId: string,
+  collectionId: string,
+  categoryId: string,
+  executor: typeof db | DbTransaction = db,
+) {
+  const [category] = await executor
     .select({ id: categoryTable.id })
     .from(categoryTable)
     .where(

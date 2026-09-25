@@ -1,10 +1,11 @@
-import { and, asc, desc, eq, getTableColumns, inArray, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, getTableColumns, inArray, notExists, sql } from 'drizzle-orm';
 
 import { toCategoryNameKey } from '@/features/categories/names';
 import { assertCategoryInCollection, findOrCreateCategoriesByName } from '@/features/categories/server';
-import { getMyCollection } from '@/features/collections/server';
+import { getCollectionFilter, getMyCollection } from '@/features/collections/server';
 import { getImportedDeactivatedAt } from '@/features/subscriptions/import';
-import type { SubscriptionImportRow } from '@/features/subscriptions/schema';
+import { buildMoveUndoPayload, isMoveUnchanged } from '@/features/subscriptions/move';
+import type { MoveUndoPayload, SubscriptionImportRow } from '@/features/subscriptions/schema';
 import { buildSeedSubscriptions } from '@/features/subscriptions/seed-data';
 import { getNextInvoiceDateOnOrAfter } from '@/jobs/invoice-schedule';
 import { db } from '@/lib/db';
@@ -105,71 +106,48 @@ export async function createMySubscription(input: {
   return subscription;
 }
 
+// Moving is the only way to change a subscription's collection, so updates
+// never accept a collectionId.
 export async function updateMySubscription(input: {
   userId: string;
   subscriptionId: string;
   name?: string;
-  collectionId?: string;
   iconRef?: string;
   categoryId?: string | null;
   costAmount?: number;
   costFrequency?: SubscriptionCostFrequency;
   nextInvoiceDate?: string;
 }) {
-  if (input.collectionId) {
-    await assertCollectionOwnership(input.userId, input.collectionId);
-  }
+  return db.transaction(async (tx) => {
+    // Lock the row so a concurrent move can't change its collection between the
+    // category check and the update.
+    const [current] = await tx
+      .select({ collectionId: subscriptionTable.collectionId })
+      .from(subscriptionTable)
+      .where(getSubscriptionFilter(input.userId, input.subscriptionId))
+      .for('update');
 
-  // A non-null category must belong to the subscription's (possibly new) collection.
-  if (input.categoryId) {
-    const collectionId =
-      input.collectionId ?? (await getMySubscription(input.userId, input.subscriptionId))?.collectionId;
-
-    if (!collectionId) {
+    if (!current) {
       throw new Error('Subscription not found');
     }
 
-    await assertCategoryInCollection(input.userId, collectionId, input.categoryId);
-  }
+    // A non-null category must belong to the subscription's collection.
+    if (input.categoryId) {
+      await assertCategoryInCollection(input.userId, current.collectionId, input.categoryId, tx);
+    }
 
-  const values = {
-    name: input.name,
-    collectionId: input.collectionId,
-    iconRef: input.iconRef,
-    categoryId: input.categoryId,
-    costAmount: input.costAmount,
-    costFrequency: input.costFrequency,
-    nextInvoiceDate: input.nextInvoiceDate,
-  };
-
-  const [subscription] = await db
-    .update(subscriptionTable)
-    .set(values)
-    .where(getSubscriptionFilter(input.userId, input.subscriptionId))
-    .returning();
-
-  if (!subscription) {
-    throw new Error('Subscription not found');
-  }
-
-  return subscription;
-}
-
-export async function moveMySubscription(input: { userId: string; subscriptionId: string; collectionId: string }) {
-  await assertCollectionOwnership(input.userId, input.collectionId);
-
-  return db.transaction(async (tx) => {
     const [subscription] = await tx
       .update(subscriptionTable)
-      // Categories are collection-scoped, so the old category can't follow the
-      // subscription into its new collection. Reset it to Uncategorized.
-      .set({ collectionId: input.collectionId, categoryId: null })
+      .set({
+        name: input.name,
+        iconRef: input.iconRef,
+        categoryId: input.categoryId,
+        costAmount: input.costAmount,
+        costFrequency: input.costFrequency,
+        nextInvoiceDate: input.nextInvoiceDate,
+      })
       .where(getSubscriptionFilter(input.userId, input.subscriptionId))
       .returning();
-
-    if (!subscription) {
-      throw new Error('Subscription not found');
-    }
 
     return subscription;
   });
@@ -334,9 +312,11 @@ export async function clearMySubscriptions(input: { userId: string; collectionId
   return { subscriptionsDeleted: deleted.length };
 }
 
+const SUBSCRIPTIONS_CHANGED_MESSAGE = 'Subscriptions changed. Refresh and try again.';
+
 function assertEverySubscriptionFound(foundCount: number, expectedCount: number) {
   if (foundCount !== expectedCount) {
-    throw new UserFacingError('Subscriptions changed. Refresh and try again.');
+    throw new UserFacingError(SUBSCRIPTIONS_CHANGED_MESSAGE);
   }
 }
 
@@ -491,5 +471,178 @@ export async function deleteMySubscriptions(input: { userId: string; subscriptio
 
     assertEverySubscriptionFound(deleted.length, input.subscriptionIds.length);
     return deleted;
+  });
+}
+
+/** A CASE expression that picks a text value per subscription ID. */
+function textBySubscriptionId(valueById: [id: string, value: string | null][]) {
+  const cases = valueById.map(([id, value]) => sql`when ${id} then ${value}::text`);
+
+  return sql<string>`case ${subscriptionTable.id} ${sql.join(cases, sql.raw(' '))} end`;
+}
+
+export async function moveMySubscriptions(input: { userId: string; subscriptionIds: string[]; collectionId: string }) {
+  return db.transaction(async (tx) => {
+    const [targetCollection] = await tx
+      .select({ id: collectionTable.id })
+      .from(collectionTable)
+      .where(getCollectionFilter(input.userId, input.collectionId))
+      .limit(1);
+
+    if (!targetCollection) {
+      throw new Error('Collection not found');
+    }
+
+    const subscriptionFilter = and(
+      eq(subscriptionTable.userId, input.userId),
+      inArray(subscriptionTable.id, input.subscriptionIds),
+    );
+    const subscriptions = await tx
+      .select({
+        id: subscriptionTable.id,
+        collectionId: subscriptionTable.collectionId,
+        categoryId: subscriptionTable.categoryId,
+        categoryName: categoryTable.name,
+      })
+      .from(subscriptionTable)
+      .leftJoin(categoryTable, eq(subscriptionTable.categoryId, categoryTable.id))
+      .where(subscriptionFilter)
+      .for('update', { of: subscriptionTable });
+
+    assertEverySubscriptionFound(subscriptions.length, input.subscriptionIds.length);
+
+    if (subscriptions.some((subscription) => subscription.collectionId === input.collectionId)) {
+      throw new UserFacingError(SUBSCRIPTIONS_CHANGED_MESSAGE);
+    }
+
+    // Categories are collection-scoped, so carry each one over by name,
+    // reusing the target's matching category or creating it.
+    const { categoryIdByKey, createdCategoryIds } = await findOrCreateCategoriesByName(tx, {
+      userId: input.userId,
+      collectionId: input.collectionId,
+      names: subscriptions.flatMap((subscription) => subscription.categoryName ?? []),
+    });
+
+    const movedCategoryIds = subscriptions.map(({ id, categoryName }): [string, string | null] => {
+      if (categoryName === null) {
+        return [id, null];
+      }
+
+      const categoryId = categoryIdByKey.get(toCategoryNameKey(categoryName));
+
+      if (!categoryId) {
+        throw new Error('Failed to resolve category during move');
+      }
+
+      return [id, categoryId];
+    });
+
+    const updated = await tx
+      .update(subscriptionTable)
+      .set({ collectionId: input.collectionId, categoryId: textBySubscriptionId(movedCategoryIds) })
+      .where(subscriptionFilter)
+      .returning();
+
+    assertEverySubscriptionFound(updated.length, input.subscriptionIds.length);
+
+    return {
+      subscriptions: updated,
+      undo: buildMoveUndoPayload({
+        targetCollectionId: input.collectionId,
+        before: subscriptions,
+        after: updated,
+        createdCategoryIds,
+      }),
+    };
+  });
+}
+
+export async function undoMyMove(input: { userId: string; payload: MoveUndoPayload }) {
+  const { targetCollectionId, items, createdCategoryIds } = input.payload;
+  const subscriptionIds = items.map((item) => item.subscriptionId);
+  const subscriptionFilter = and(
+    eq(subscriptionTable.userId, input.userId),
+    inArray(subscriptionTable.id, subscriptionIds),
+  );
+
+  return db.transaction(async (tx) => {
+    const subscriptions = await tx
+      .select({
+        id: subscriptionTable.id,
+        collectionId: subscriptionTable.collectionId,
+        categoryId: subscriptionTable.categoryId,
+      })
+      .from(subscriptionTable)
+      .where(subscriptionFilter)
+      .for('update');
+
+    if (!isMoveUnchanged(input.payload, subscriptions)) {
+      throw new UserFacingError(SUBSCRIPTIONS_CHANGED_MESSAGE);
+    }
+
+    // The payload comes from the client, so confirm every place a subscription
+    // is restored to belongs to this user.
+    const previousCollectionIds = [...new Set(items.map((item) => item.previousCollectionId))];
+    const previousCollections = await tx
+      .select({ id: collectionTable.id })
+      .from(collectionTable)
+      .where(and(eq(collectionTable.userId, input.userId), inArray(collectionTable.id, previousCollectionIds)));
+
+    if (previousCollections.length !== previousCollectionIds.length) {
+      throw new Error('Collection not found');
+    }
+
+    const previousCategoryIds = [...new Set(items.flatMap((item) => item.previousCategoryId ?? []))];
+
+    if (previousCategoryIds.length > 0) {
+      const previousCategories = await tx
+        .select({ id: categoryTable.id, collectionId: categoryTable.collectionId })
+        .from(categoryTable)
+        .where(and(eq(categoryTable.userId, input.userId), inArray(categoryTable.id, previousCategoryIds)));
+      const collectionIdByCategoryId = new Map(
+        previousCategories.map((category) => [category.id, category.collectionId]),
+      );
+
+      for (const item of items) {
+        if (
+          item.previousCategoryId !== null &&
+          collectionIdByCategoryId.get(item.previousCategoryId) !== item.previousCollectionId
+        ) {
+          throw new Error('Category not found');
+        }
+      }
+    }
+
+    const restored = await tx
+      .update(subscriptionTable)
+      .set({
+        collectionId: textBySubscriptionId(items.map((item) => [item.subscriptionId, item.previousCollectionId])),
+        categoryId: textBySubscriptionId(items.map((item) => [item.subscriptionId, item.previousCategoryId])),
+      })
+      .where(subscriptionFilter)
+      .returning();
+
+    assertEverySubscriptionFound(restored.length, subscriptionIds.length);
+
+    // Remove the categories the move created, unless something uses them now.
+    if (createdCategoryIds.length > 0) {
+      await tx
+        .delete(categoryTable)
+        .where(
+          and(
+            eq(categoryTable.userId, input.userId),
+            eq(categoryTable.collectionId, targetCollectionId),
+            inArray(categoryTable.id, createdCategoryIds),
+            notExists(
+              tx
+                .select({ id: subscriptionTable.id })
+                .from(subscriptionTable)
+                .where(eq(subscriptionTable.categoryId, categoryTable.id)),
+            ),
+          ),
+        );
+    }
+
+    return restored;
   });
 }

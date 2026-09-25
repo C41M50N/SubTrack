@@ -1,14 +1,19 @@
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { PlusIcon } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { categoriesQueryOptions } from '@/features/categories/queries';
+import {
+  collectionsQueryOptions,
+  type CollectionRecord,
+} from '@/features/collections/queries';
 import { CostMetrics } from '@/features/subscriptions/components/cost-metrics';
 import { DeactivateSubscriptionDialog } from '@/features/subscriptions/components/deactivate-subscription-dialog';
 import { DeleteSubscriptionDialog } from '@/features/subscriptions/components/delete-subscription-dialog';
 import { MonthlyBreakdown } from '@/features/subscriptions/components/monthly-breakdown';
+import { useMoveSubscriptionsWithUndo } from '@/features/subscriptions/components/move-subscriptions';
 import { ReactivateSubscriptionDialog } from '@/features/subscriptions/components/reactivate-subscription-dialog';
 import { SubscriptionFormDialog } from '@/features/subscriptions/components/subscription-form-dialog';
 import {
@@ -66,6 +71,18 @@ function RouteComponent() {
   const { data: categories } = useSuspenseQuery(
     categoriesQueryOptions(collectionId),
   );
+  const { data: collections } = useSuspenseQuery(collectionsQueryOptions());
+  const currentCollection = collections.find(
+    (collection) => collection.id === collectionId,
+  );
+  // The collections query is already ordered by name.
+  const moveTargets = useMemo(
+    () => collections.filter((collection) => collection.id !== collectionId),
+    [collectionId, collections],
+  );
+  const { move, isPending: isMovePending } = useMoveSubscriptionsWithUndo(
+    currentCollection?.name ?? 'the previous collection',
+  );
 
   const [createOpen, setCreateOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<SubscriptionRecord | null>(null);
@@ -103,7 +120,9 @@ function RouteComponent() {
   const table = useSubscriptionsTable({
     data,
     view,
+    moveTargets,
     onEdit: handleEdit,
+    onMove: move,
     onDeactivate: handleDeactivate,
     onReactivate: handleReactivate,
     onDelete: handleDelete,
@@ -120,6 +139,12 @@ function RouteComponent() {
   function handleBulkDelete() {
     setDeleteTargets(selectedItems);
     setDeleteOpen(true);
+  }
+
+  function handleBulkMove(target: CollectionRecord) {
+    move(selectedItems, target, {
+      onSuccess: () => table.resetRowSelection(),
+    });
   }
 
   function handleBulkDeactivate() {
@@ -174,7 +199,10 @@ function RouteComponent() {
             view={view}
             activeCount={activeSubscriptions.length}
             inactiveCount={inactiveSubscriptions.length}
+            moveTargets={moveTargets}
+            isMovePending={isMovePending}
             onViewChange={handleViewChange}
+            onBulkMove={handleBulkMove}
             onBulkDeactivate={handleBulkDeactivate}
             onBulkReactivate={handleBulkReactivate}
             onBulkDelete={handleBulkDelete}
