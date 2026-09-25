@@ -247,10 +247,19 @@ export async function importMySubscriptions(input: { userId: string; rows: Subsc
   });
 }
 
+// The seed/clear server functions still get RPC endpoints in production builds
+// even though their UI is hidden, so the server has to refuse them too.
+function assertDevOnly() {
+  if (!import.meta.env.DEV) {
+    throw new Error('Only available in development');
+  }
+}
+
 // Dev-only seeding: replace all subscriptions in a collection with a fixed sample
 // set (invoice dates are generated per run). Destructive and transactional so a
 // failure leaves the collection untouched.
 export async function seedMySubscriptions(input: { userId: string; collectionId: string }) {
+  assertDevOnly();
   await assertCollectionOwnership(input.userId, input.collectionId);
 
   const rows = buildSeedSubscriptions();
@@ -301,6 +310,7 @@ export async function seedMySubscriptions(input: { userId: string; collectionId:
 
 // Dev-only: remove every subscription in a collection.
 export async function clearMySubscriptions(input: { userId: string; collectionId: string }) {
+  assertDevOnly();
   await assertCollectionOwnership(input.userId, input.collectionId);
 
   const deleted = await db
