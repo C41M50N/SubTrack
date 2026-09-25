@@ -1,10 +1,12 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "git": {
-    "deploymentEnabled": {
-      "v3": false,
-      "init-ui": false,
-      "feat/invoices-page": false
+  "crons": [
+    {
+      "path": "/api/functions/sendAlerts",
+      "schedule": "30 0 1 * *"
+    },
+    {
+      "path": "/api/functions/updateNextInvoice",
+      "schedule": "0 2 * * *"
     }
-  }
+  ]
 }
