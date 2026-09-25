@@ -25,6 +25,7 @@ import {
   useUndoMove,
 } from '@/features/subscriptions/mutations';
 import type { SubscriptionRecord } from '@/features/subscriptions/queries';
+import type { MoveUndoPayload } from '@/features/subscriptions/schema';
 
 const NO_MOVE_TARGETS_MESSAGE =
   'Create another collection to move subscriptions.';
@@ -38,10 +39,15 @@ export type MoveSubscriptions = (
 /**
  * Moves subscriptions immediately, then offers Undo from the success toast.
  * The Undo payload lives only in the toast action's closure.
+ *
+ * Toasts are shown from each call's promise rather than `mutate` callbacks.
+ * Those callbacks fire only for the latest call while the component is
+ * mounted, so a second move would drop the first move's toast and Undo, and
+ * an Undo clicked after leaving the page would report nothing.
  */
 export function useMoveSubscriptionsWithUndo(sourceCollectionName: string) {
-  const { mutate: moveSubscriptions, isPending } = useMoveSubscriptions();
-  const { mutate: undoMove } = useUndoMove();
+  const { mutateAsync: moveSubscriptions, isPending } = useMoveSubscriptions();
+  const { mutateAsync: undoMove } = useUndoMove();
 
   const move = useCallback<MoveSubscriptions>(
     (subscriptions, target, options) => {
@@ -51,37 +57,29 @@ export function useMoveSubscriptionsWithUndo(sourceCollectionName: string) {
         return;
       }
 
-      moveSubscriptions(
-        {
-          subscriptionIds: subscriptions.map((subscription) => subscription.id),
-          collectionId: target.id,
+      const undo = (payload: MoveUndoPayload) =>
+        undoMove(payload).then(
+          () => toast.success(`Moved back to ${sourceCollectionName}`),
+          () => toast.error('Could not undo move. Refresh and try again.'),
+        );
+
+      moveSubscriptions({
+        subscriptionIds: subscriptions.map((subscription) => subscription.id),
+        collectionId: target.id,
+      }).then(
+        (result) => {
+          options?.onSuccess?.();
+          toast.success(
+            count === 1
+              ? `Moved “${subscriptions[0]?.name}” to ${target.name}`
+              : `Moved ${count} subscriptions to ${target.name}`,
+            {
+              duration: 8_000,
+              action: { label: 'Undo', onClick: () => undo(result.undo) },
+            },
+          );
         },
-        {
-          onSuccess: (result) => {
-            options?.onSuccess?.();
-            toast.success(
-              count === 1
-                ? `Moved “${subscriptions[0]?.name}” to ${target.name}`
-                : `Moved ${count} subscriptions to ${target.name}`,
-              {
-                duration: 8_000,
-                action: {
-                  label: 'Undo',
-                  onClick: () =>
-                    undoMove(result.undo, {
-                      onSuccess: () =>
-                        toast.success(`Moved back to ${sourceCollectionName}`),
-                      onError: () =>
-                        toast.error(
-                          'Could not undo move. Refresh and try again.',
-                        ),
-                    }),
-                },
-              },
-            );
-          },
-          onError: () => toast.error('Failed to move. Refresh and try again.'),
-        },
+        () => toast.error('Failed to move. Refresh and try again.'),
       );
     },
     [moveSubscriptions, sourceCollectionName, undoMove],
