@@ -1,6 +1,7 @@
 import { and, asc, desc, eq, getTableColumns, inArray, sql } from 'drizzle-orm';
 
-import { assertCategoryInCollection } from '@/features/categories/server';
+import { toCategoryNameKey } from '@/features/categories/names';
+import { assertCategoryInCollection, findOrCreateCategoriesByName } from '@/features/categories/server';
 import { getMyCollection } from '@/features/collections/server';
 import { getImportedDeactivatedAt } from '@/features/subscriptions/import';
 import type { SubscriptionImportRow } from '@/features/subscriptions/schema';
@@ -210,68 +211,55 @@ export async function importMySubscriptions(input: { userId: string; rows: Subsc
       collectionsCreated += 1;
     }
 
-    // Categories are unique per collection (case-insensitive), so key the cache
-    // by collection id + lowercased name. Reuse an existing category or create it.
-    const categoryIdByKey = new Map<string, string>();
+    const rowsWithCollection = input.rows.map((row) => {
+      const collectionId = collectionIdByName.get(row.collection.toLowerCase());
 
-    async function resolveCategoryId(collectionId: string, name: string): Promise<string> {
-      const key = `${collectionId}:${name.toLowerCase()}`;
-      const cached = categoryIdByKey.get(key);
-
-      if (cached) {
-        return cached;
+      if (!collectionId) {
+        throw new Error('Failed to resolve collection during import');
       }
 
-      const [existing] = await tx
-        .select({ id: categoryTable.id })
-        .from(categoryTable)
-        .where(
-          and(
-            eq(categoryTable.userId, input.userId),
-            eq(categoryTable.collectionId, collectionId),
-            sql`lower(${categoryTable.name}) = ${name.toLowerCase()}`,
-          ),
-        )
-        .limit(1);
+      return { row, collectionId };
+    });
 
-      if (existing) {
-        categoryIdByKey.set(key, existing.id);
-        return existing.id;
-      }
+    // Categories are collection-scoped, so resolve each collection's category
+    // names together, reusing existing categories or creating them.
+    const categoryNamesByCollectionId = new Map<string, string[]>();
 
-      const [created] = await tx
-        .insert(categoryTable)
-        .values({ userId: input.userId, collectionId, name })
-        .returning({ id: categoryTable.id });
-
-      categoryIdByKey.set(key, created.id);
-      return created.id;
+    for (const { row, collectionId } of rowsWithCollection) {
+      const names = categoryNamesByCollectionId.get(collectionId) ?? [];
+      names.push(row.category);
+      categoryNamesByCollectionId.set(collectionId, names);
     }
 
-    if (input.rows.length > 0) {
-      const values = [];
+    const categoryIdByKeyByCollectionId = new Map<string, Map<string, string>>();
 
-      for (const row of input.rows) {
-        const collectionId = collectionIdByName.get(row.collection.toLowerCase());
+    for (const [collectionId, names] of categoryNamesByCollectionId) {
+      const { categoryIdByKey } = await findOrCreateCategoriesByName(tx, { userId: input.userId, collectionId, names });
+      categoryIdByKeyByCollectionId.set(collectionId, categoryIdByKey);
+    }
 
-        if (!collectionId) {
-          throw new Error('Failed to resolve collection during import');
-        }
+    const values = rowsWithCollection.map(({ row, collectionId }) => {
+      const categoryId = categoryIdByKeyByCollectionId.get(collectionId)?.get(toCategoryNameKey(row.category));
 
-        values.push({
-          userId: input.userId,
-          name: row.name,
-          status: row.status,
-          iconRef: row.iconRef,
-          categoryId: await resolveCategoryId(collectionId, row.category),
-          costAmount: row.costAmountCents,
-          costFrequency: row.costFrequency,
-          nextInvoiceDate: row.nextInvoiceDate,
-          deactivatedAt: getImportedDeactivatedAt(row, importedAt),
-          collectionId,
-        });
+      if (!categoryId) {
+        throw new Error('Failed to resolve category during import');
       }
 
+      return {
+        userId: input.userId,
+        name: row.name,
+        status: row.status,
+        iconRef: row.iconRef,
+        categoryId,
+        costAmount: row.costAmountCents,
+        costFrequency: row.costFrequency,
+        nextInvoiceDate: row.nextInvoiceDate,
+        deactivatedAt: getImportedDeactivatedAt(row, importedAt),
+        collectionId,
+      };
+    });
+
+    if (values.length > 0) {
       await tx.insert(subscriptionTable).values(values);
     }
 
@@ -296,53 +284,28 @@ export async function seedMySubscriptions(input: { userId: string; collectionId:
       .where(and(eq(subscriptionTable.userId, input.userId), eq(subscriptionTable.collectionId, input.collectionId)))
       .returning({ id: subscriptionTable.id });
 
-    // Categories are collection-scoped and unique by lower(name); resolve each
-    // once, reusing existing categories or creating them on demand.
-    const categoryIdByName = new Map<string, string>();
-
-    async function resolveCategoryId(name: string): Promise<string> {
-      const key = name.toLowerCase();
-      const cached = categoryIdByName.get(key);
-
-      if (cached) {
-        return cached;
-      }
-
-      const [existing] = await tx
-        .select({ id: categoryTable.id })
-        .from(categoryTable)
-        .where(
-          and(
-            eq(categoryTable.userId, input.userId),
-            eq(categoryTable.collectionId, input.collectionId),
-            sql`lower(${categoryTable.name}) = ${key}`,
-          ),
-        )
-        .limit(1);
-
-      if (existing) {
-        categoryIdByName.set(key, existing.id);
-        return existing.id;
-      }
-
-      const [created] = await tx
-        .insert(categoryTable)
-        .values({ userId: input.userId, collectionId: input.collectionId, name })
-        .returning({ id: categoryTable.id });
-
-      categoryIdByName.set(key, created.id);
-      return created.id;
-    }
+    // Categories are collection-scoped; reuse existing ones or create them.
+    const { categoryIdByKey } = await findOrCreateCategoriesByName(tx, {
+      userId: input.userId,
+      collectionId: input.collectionId,
+      names: rows.map((row) => row.category),
+    });
 
     const values = [];
 
     for (const row of rows) {
+      const categoryId = categoryIdByKey.get(toCategoryNameKey(row.category));
+
+      if (!categoryId) {
+        throw new Error('Failed to resolve category during seeding');
+      }
+
       values.push({
         userId: input.userId,
         name: row.name,
         status: row.status,
         iconRef: row.iconRef,
-        categoryId: await resolveCategoryId(row.category),
+        categoryId,
         costAmount: row.costAmountCents,
         costFrequency: row.costFrequency,
         nextInvoiceDate: row.nextInvoiceDate,
