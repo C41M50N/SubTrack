@@ -1,11 +1,10 @@
-import { and, asc, desc, eq, getTableColumns, inArray, notExists, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, getTableColumns, inArray, sql } from 'drizzle-orm';
 
 import { toCategoryNameKey } from '@/features/categories/names';
 import { assertCategoryInCollection, findOrCreateCategoriesByName } from '@/features/categories/server';
 import { getCollectionFilter, getMyCollection } from '@/features/collections/server';
 import { getImportedDeactivatedAt } from '@/features/subscriptions/import';
-import { buildMoveUndoPayload, isMoveUnchanged } from '@/features/subscriptions/move';
-import type { MoveUndoPayload, SubscriptionImportRow } from '@/features/subscriptions/schema';
+import type { SubscriptionImportRow } from '@/features/subscriptions/schema';
 import { buildSeedSubscriptions } from '@/features/subscriptions/seed-data';
 import { getNextInvoiceDateOnOrAfter } from '@/jobs/invoice-schedule';
 import { db } from '@/lib/db';
@@ -517,7 +516,7 @@ export async function moveMySubscriptions(input: { userId: string; subscriptionI
 
     // Categories are collection-scoped, so carry each one over by name,
     // reusing the target's matching category or creating it.
-    const { categoryIdByKey, createdCategoryIds } = await findOrCreateCategoriesByName(tx, {
+    const { categoryIdByKey } = await findOrCreateCategoriesByName(tx, {
       userId: input.userId,
       collectionId: input.collectionId,
       names: subscriptions.flatMap((subscription) => subscription.categoryName ?? []),
@@ -545,104 +544,6 @@ export async function moveMySubscriptions(input: { userId: string; subscriptionI
 
     assertEverySubscriptionFound(updated.length, input.subscriptionIds.length);
 
-    return {
-      subscriptions: updated,
-      undo: buildMoveUndoPayload({
-        targetCollectionId: input.collectionId,
-        before: subscriptions,
-        after: updated,
-        createdCategoryIds,
-      }),
-    };
-  });
-}
-
-export async function undoMyMove(input: { userId: string; payload: MoveUndoPayload }) {
-  const { targetCollectionId, items, createdCategoryIds } = input.payload;
-  const subscriptionIds = items.map((item) => item.subscriptionId);
-  const subscriptionFilter = and(
-    eq(subscriptionTable.userId, input.userId),
-    inArray(subscriptionTable.id, subscriptionIds),
-  );
-
-  return db.transaction(async (tx) => {
-    const subscriptions = await tx
-      .select({
-        id: subscriptionTable.id,
-        collectionId: subscriptionTable.collectionId,
-        categoryId: subscriptionTable.categoryId,
-      })
-      .from(subscriptionTable)
-      .where(subscriptionFilter)
-      .for('update');
-
-    if (!isMoveUnchanged(input.payload, subscriptions)) {
-      throw new UserFacingError(SUBSCRIPTIONS_CHANGED_MESSAGE);
-    }
-
-    // The payload comes from the client, so confirm every place a subscription
-    // is restored to belongs to this user.
-    const previousCollectionIds = [...new Set(items.map((item) => item.previousCollectionId))];
-    const previousCollections = await tx
-      .select({ id: collectionTable.id })
-      .from(collectionTable)
-      .where(and(eq(collectionTable.userId, input.userId), inArray(collectionTable.id, previousCollectionIds)));
-
-    if (previousCollections.length !== previousCollectionIds.length) {
-      throw new Error('Collection not found');
-    }
-
-    const previousCategoryIds = [...new Set(items.flatMap((item) => item.previousCategoryId ?? []))];
-
-    if (previousCategoryIds.length > 0) {
-      const previousCategories = await tx
-        .select({ id: categoryTable.id, collectionId: categoryTable.collectionId })
-        .from(categoryTable)
-        .where(and(eq(categoryTable.userId, input.userId), inArray(categoryTable.id, previousCategoryIds)));
-      const collectionIdByCategoryId = new Map(
-        previousCategories.map((category) => [category.id, category.collectionId]),
-      );
-
-      for (const item of items) {
-        if (
-          item.previousCategoryId !== null &&
-          collectionIdByCategoryId.get(item.previousCategoryId) !== item.previousCollectionId
-        ) {
-          throw new Error('Category not found');
-        }
-      }
-    }
-
-    const restored = await tx
-      .update(subscriptionTable)
-      .set({
-        collectionId: textBySubscriptionId(items.map((item) => [item.subscriptionId, item.previousCollectionId])),
-        categoryId: textBySubscriptionId(items.map((item) => [item.subscriptionId, item.previousCategoryId])),
-      })
-      .where(subscriptionFilter)
-      .returning();
-
-    assertEverySubscriptionFound(restored.length, subscriptionIds.length);
-
-    // Remove the categories the move created, unless something uses them now.
-    if (createdCategoryIds.length > 0) {
-      await tx
-        .delete(categoryTable)
-        .where(
-          and(
-            eq(categoryTable.userId, input.userId),
-            eq(categoryTable.collectionId, targetCollectionId),
-            inArray(categoryTable.id, createdCategoryIds),
-            notExists(
-              tx
-                .select({ id: subscriptionTable.id })
-                .from(subscriptionTable)
-                .where(eq(subscriptionTable.categoryId, categoryTable.id)),
-            ),
-          ),
-        );
-    }
-
-    return restored;
+    return updated;
   });
 }

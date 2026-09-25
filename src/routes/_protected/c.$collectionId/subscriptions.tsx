@@ -13,7 +13,7 @@ import { CostMetrics } from '@/features/subscriptions/components/cost-metrics';
 import { DeactivateSubscriptionDialog } from '@/features/subscriptions/components/deactivate-subscription-dialog';
 import { DeleteSubscriptionDialog } from '@/features/subscriptions/components/delete-subscription-dialog';
 import { MonthlyBreakdown } from '@/features/subscriptions/components/monthly-breakdown';
-import { useMoveSubscriptionsWithUndo } from '@/features/subscriptions/components/move-subscriptions';
+import { useMoveSubscriptionsWithFeedback } from '@/features/subscriptions/components/move-subscriptions';
 import { ReactivateSubscriptionDialog } from '@/features/subscriptions/components/reactivate-subscription-dialog';
 import { SubscriptionFormDialog } from '@/features/subscriptions/components/subscription-form-dialog';
 import {
@@ -72,17 +72,12 @@ function RouteComponent() {
     categoriesQueryOptions(collectionId),
   );
   const { data: collections } = useSuspenseQuery(collectionsQueryOptions());
-  const currentCollection = collections.find(
-    (collection) => collection.id === collectionId,
-  );
   // The collections query is already ordered by name.
   const moveTargets = useMemo(
     () => collections.filter((collection) => collection.id !== collectionId),
     [collectionId, collections],
   );
-  const { move, isPending: isMovePending } = useMoveSubscriptionsWithUndo(
-    currentCollection?.name ?? 'the previous collection',
-  );
+  const { move, isPending: isMovePending } = useMoveSubscriptionsWithFeedback();
 
   const [createOpen, setCreateOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<SubscriptionRecord | null>(null);

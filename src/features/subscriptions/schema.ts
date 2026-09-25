@@ -73,35 +73,6 @@ export const moveSubscriptionsInputSchema = subscriptionIdsInputSchema.extend({
   collectionId: z.string().min(1),
 });
 
-const nullableIdSchema = z.string().min(1).nullable();
-
-// The client holds this payload for the lifetime of the Undo action and sends
-// it back, so the server validates it rather than trusting it.
-export const undoMoveInputSchema = z.object({
-  targetCollectionId: z.string().min(1),
-  items: z
-    .array(
-      z.object({
-        subscriptionId: z.string().min(1),
-        previousCollectionId: z.string().min(1),
-        previousCategoryId: nullableIdSchema,
-        movedCategoryId: nullableIdSchema,
-      }),
-    )
-    .min(1)
-    .max(500)
-    .refine(
-      (items) => new Set(items.map((item) => item.subscriptionId)).size === items.length,
-      'Subscription IDs must be unique',
-    ),
-  createdCategoryIds: z
-    .array(z.string().min(1))
-    .max(500)
-    .refine((ids) => new Set(ids).size === ids.length, 'Category IDs must be unique'),
-});
-
-export type MoveUndoPayload = z.infer<typeof undoMoveInputSchema>;
-
 export const subscriptionTransferFormatSchema = z.enum(['json', 'csv']);
 
 export const exportSubscriptionsInputSchema = z.object({

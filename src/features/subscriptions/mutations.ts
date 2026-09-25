@@ -12,15 +12,10 @@ import {
   reactivateSubscriptions,
   seedSubscriptions,
   undoDeactivation,
-  undoMove,
   updateSubscription,
 } from '@/features/subscriptions/api';
 import { subscriptionsListQueryKey } from '@/features/subscriptions/queries';
-import type {
-  createSubscriptionInputSchema,
-  MoveUndoPayload,
-  updateSubscriptionInputSchema,
-} from '@/features/subscriptions/schema';
+import type { createSubscriptionInputSchema, updateSubscriptionInputSchema } from '@/features/subscriptions/schema';
 
 export type CreateSubscriptionInput = z.infer<typeof createSubscriptionInputSchema>;
 export type UpdateSubscriptionInput = z.infer<typeof updateSubscriptionInputSchema>;
@@ -83,31 +78,18 @@ export function useUndoDeactivation() {
   );
 }
 
-// A move or undo changes subscriptions in two collections and may create or
-// delete categories in the target. Collections and recorded invoices are
-// unaffected.
-function invalidateMovedData(queryClient: ReturnType<typeof useQueryClient>, targetCollectionId: string) {
-  return Promise.all([
-    queryClient.invalidateQueries({ queryKey: subscriptionsListQueryKey }),
-    queryClient.invalidateQueries({ queryKey: categoriesQueryOptions(targetCollectionId).queryKey }),
-  ]);
-}
-
+// A move changes subscriptions in two collections and may create categories in
+// the target. Collections and recorded invoices are unaffected.
 export function useMoveSubscriptions() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (input: { subscriptionIds: string[]; collectionId: string }) => moveSubscriptions({ data: input }),
-    onSuccess: (_result, input) => invalidateMovedData(queryClient, input.collectionId),
-  });
-}
-
-export function useUndoMove() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (payload: MoveUndoPayload) => undoMove({ data: payload }),
-    onSuccess: (_result, payload) => invalidateMovedData(queryClient, payload.targetCollectionId),
+    onSuccess: (_result, input) =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: subscriptionsListQueryKey }),
+        queryClient.invalidateQueries({ queryKey: categoriesQueryOptions(input.collectionId).queryKey }),
+      ]),
   });
 }
 

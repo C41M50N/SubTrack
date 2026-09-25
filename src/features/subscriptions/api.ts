@@ -13,7 +13,6 @@ import {
   reactivateSubscriptionsInputSchema,
   seedSubscriptionsInputSchema,
   undoDeactivationInputSchema,
-  undoMoveInputSchema,
   updateSubscriptionInputSchema,
 } from '@/features/subscriptions/schema';
 import {
@@ -28,7 +27,6 @@ import {
   seedMySubscriptions,
   updateMySubscription,
   undoMyDeactivation,
-  undoMyMove,
 } from '@/features/subscriptions/server';
 import { withUserFacingErrors } from '@/lib/errors';
 
@@ -79,15 +77,6 @@ export const moveSubscriptions = createServerFn({ method: 'POST' })
         subscriptionIds: data.subscriptionIds,
         collectionId: data.collectionId,
       }),
-    );
-  });
-
-export const undoMove = createServerFn({ method: 'POST' })
-  .middleware([requireAuthMiddleware])
-  .validator(undoMoveInputSchema)
-  .handler(async ({ context: { auth }, data }) => {
-    return withUserFacingErrors('Could not undo move. Refresh and try again.', () =>
-      undoMyMove({ userId: auth.userId, payload: data }),
     );
   });
 

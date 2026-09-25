@@ -11,7 +11,6 @@ Moving lets users reorganize subscriptions across their collections without recr
 - Move one subscription from its row actions menu.
 - Move several selected subscriptions at once from the table toolbar.
 - Keep each subscription's categorization when it lands in another collection.
-- Reverse an accidental move immediately.
 
 A move changes where a subscription lives going forward. It must not rewrite recorded invoice history.
 
@@ -20,7 +19,6 @@ A move changes where a subscription lives going forward. It must not rewrite rec
 - **Source collection:** The collection a subscription belongs to before the move.
 - **Target collection:** The collection the user selects as the destination.
 - **Created category:** A category the move inserted into the target collection because no category with a matching name existed there.
-- **Undo payload:** The data returned by a move that describes each subscription's previous state and the categories the move created. The client holds it for the lifetime of the Undo action.
 
 ## Scope
 
@@ -121,18 +119,7 @@ A success toast names the target collection:
 - Single: **Moved “Netflix” to Personal**
 - Bulk: **Moved 3 subscriptions to Personal**
 
-The toast includes an **Undo** action and remains visible for 8 seconds.
-
-### Undo
-
-Undo restores every moved subscription to its exact previous collection and category. It also deletes the categories the move created, unless a subscription references them by the time undo runs.
-
-- Success toast: **Moved back to Work**, naming the source collection.
-- Failure toast: **Could not undo move. Refresh and try again.**
-
-Undo is all-or-nothing. If any moved subscription was deleted, moved again, or recategorized since the move, undo must fail without changing anything.
-
-Other edits made since the move, such as renaming, repricing, or deactivating, do not block undo. Undo writes only `collectionId` and `categoryId`, so it keeps those edits.
+Moves cannot be undone. To reverse a move, the user moves the subscriptions back. Categories the move created remain in the target collection.
 
 ### Pending state
 
@@ -167,45 +154,11 @@ The operation must run in one transaction that:
 3. Rejects the move with `UserFacingError('Subscriptions changed. Refresh and try again.')` when any subscription is missing or already in the target collection.
 4. Resolves target categories through the shared category helper.
 5. Updates each subscription's `collectionId` and `categoryId`.
-6. Returns the updated subscriptions and the undo payload.
+6. Returns the updated subscriptions.
 
 The server function must use `requireAuthMiddleware` and `withUserFacingErrors`.
 
-Subscriptions in one request are not required to share a source collection. The undo payload records each subscription's previous state individually.
-
-### Undo payload
-
-```ts
-type MoveUndoPayload = {
-  targetCollectionId: string;
-  items: Array<{
-    subscriptionId: string;
-    previousCollectionId: string;
-    previousCategoryId: string | null;
-    movedCategoryId: string | null;
-  }>;
-  createdCategoryIds: string[];
-};
-```
-
-Constructing the payload from the before and after subscription state must be a pure function.
-
-### Undo operation
-
-A dedicated server function accepts the undo payload. The client supplies the payload, so the server must validate it rather than trust it.
-
-The operation must run in one transaction that:
-
-1. Locks the listed subscriptions `FOR UPDATE`.
-2. Verifies every subscription belongs to the user, is in `targetCollectionId`, and has `categoryId` equal to `movedCategoryId` using null-safe comparison. Otherwise it throws the **Subscriptions changed** `UserFacingError`.
-3. Verifies every `previousCollectionId` belongs to the user.
-4. Verifies every non-null `previousCategoryId` belongs to the user and to its `previousCollectionId`.
-5. Restores each subscription's `previousCollectionId` and `previousCategoryId`.
-6. Deletes each `createdCategoryIds` entry that belongs to the user, is in `targetCollectionId`, and is not referenced by any subscription.
-
-The input schema must require unique subscription IDs from 1 to 500 and unique created category IDs, with at most 500.
-
-Undo can delete only the authenticated user's own unused categories. A signed token or server-stored undo record is not required.
+Subscriptions in one request are not required to share a source collection.
 
 ### Category resolution helper
 
@@ -215,7 +168,7 @@ A shared helper, `findOrCreateCategoriesByName(tx, { userId, collectionId, names
 2. Select existing categories in the collection by `lower(name)` in one query.
 3. Insert missing categories with `onConflictDoNothing()` and `returning()`.
 4. Re-select any names whose insert lost a race with a concurrent insert.
-5. Return a case-insensitive name-to-category-ID mapping and the IDs of the categories this call created.
+5. Return a case-insensitive name-to-category-ID mapping.
 
 Import and seed must use this helper in place of their local `resolveCategoryId` closures. That consolidation is a separate commit from the move feature.
 
@@ -227,16 +180,16 @@ Name normalization and deduplication must be pure functions.
 
 ### Concurrency
 
-- Moves and undos lock subscription rows so concurrent moves, lifecycle changes, and the due-invoice job serialize against them.
+- Moves lock subscription rows so concurrent moves, lifecycle changes, and the due-invoice job serialize against them.
 - When the due-invoice job holds a subscription lock first, the invoice snapshots the source collection and the move waits.
 - When the move commits first, the job snapshots the target collection and category.
 
 ### Query caching
 
-After a successful move or undo, the client must invalidate:
+After a successful move, the client must invalidate:
 
 - `['subscriptions','list']`, covering both collections, every status, and every client-derived dashboard, projected-invoice, and sidebar value.
-- `['categories','list', targetCollectionId]`, because the move or undo may create or delete categories there.
+- `['categories','list', targetCollectionId]`, because the move may create categories there.
 
 Collection and recorded-invoice queries are unaffected and must not be invalidated.
 
@@ -247,7 +200,6 @@ Moves do not use optimistic updates.
 - The **Move to** submenu, its collection items, and the toolbar dropdown must be fully keyboard operable using the existing menu primitives.
 - Disabled **Move to** controls must remain keyboard-focusable and expose their disabled state through `aria-disabled`.
 - The single-collection tooltip must be reachable by keyboard focus, not only by hover.
-- Toast Undo actions must be keyboard reachable through the existing toast conventions.
 
 ## Non-goals
 
@@ -259,6 +211,7 @@ The first implementation does not include:
 - Changing a subscription's collection from the edit form
 - Moving recorded invoice history
 - Partial moves that succeed for some subscriptions and fail for others
+- Undoing a move from the success toast
 - Searching the target collection list
 - Database-backed integration tests
 
@@ -270,13 +223,11 @@ The implementation is complete when:
 2. Selecting a target moves the subscriptions immediately in one all-or-nothing transaction.
 3. Active and inactive subscriptions can be moved, and all fields other than collection and category are preserved.
 4. Categories carry over by case-insensitive name, and missing categories are created once in the target collection.
-5. No subscription references a category from another collection after a move, undo, or update.
+5. No subscription references a category from another collection after a move or update.
 6. Recorded invoices remain in the source collection's history.
-7. Success toasts name the target collection and offer Undo for 8 seconds.
-8. Undo restores the exact previous collection and category, and deletes only created categories that remain unused.
-9. Undo fails without changes when any moved subscription no longer has the collection and category the move gave it. Other edits do not block undo and are kept.
-10. Users with one collection see disabled **Move to** controls with a hover- and focus-accessible tooltip.
-11. The subscription update operation no longer accepts `collectionId`.
-12. Import and seed use the shared category resolution helper.
-13. Subscription and target category queries refresh after moves and undos.
-14. Name normalization, deduplication, and undo payload construction are covered by unit tests.
+7. Success toasts name the target collection. They do not offer Undo.
+8. Users with one collection see disabled **Move to** controls with a hover- and focus-accessible tooltip.
+9. The subscription update operation no longer accepts `collectionId`.
+10. Import and seed use the shared category resolution helper.
+11. Subscription and target category queries refresh after moves.
+12. Name normalization and deduplication are covered by unit tests.
