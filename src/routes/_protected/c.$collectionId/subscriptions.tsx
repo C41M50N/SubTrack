@@ -85,6 +85,7 @@ function RouteComponent() {
 
   const [createOpen, setCreateOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [importCollectionId, setImportCollectionId] = useState(collectionId);
   const [editTarget, setEditTarget] = useState<SubscriptionRecord | null>(null);
   const [deleteTargets, setDeleteTargets] = useState<SubscriptionRecord[]>([]);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -97,6 +98,13 @@ function RouteComponent() {
   >([]);
   const [reactivateOpen, setReactivateOpen] = useState(false);
   const data = view === 'active' ? activeSubscriptions : inactiveSubscriptions;
+
+  // This page stays mounted when navigating to another collection, such as
+  // with Back and Forward, so an open import closes instead of carrying over.
+  if (importCollectionId !== collectionId) {
+    setImportCollectionId(collectionId);
+    setImportOpen(false);
+  }
 
   const handleEdit = useCallback((subscription: SubscriptionRecord) => {
     setEditTarget(subscription);

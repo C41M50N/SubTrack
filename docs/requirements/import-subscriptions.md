@@ -52,6 +52,8 @@ When a collection has no subscriptions, the subscriptions table's empty state mu
 
 Every entry point opens the same wide dialog. The dialog title names the target collection. The dialog has two steps: upload, then review.
 
+An import stays bound to the collection it opened for. If the subscriptions page navigates to another collection while the dialog is open, such as with Back or Forward, the dialog closes. Closing the dialog or leaving the page cancels any pending smart import run.
+
 ## Upload step
 
 ### Drop zone
@@ -193,6 +195,7 @@ While the agent runs, the dialog shows one indeterminate state with the copy **R
 | Run fails or times out       | Error message with **Retry**. Files stay attached                                                       | No                  |
 | Run succeeds with zero items | Stay on the upload step with **We couldn't find any subscriptions in these files.** Files stay attached | Yes                 |
 | User cancels                 | The run is aborted and the dialog returns to the upload step                                            | No                  |
+| Review can't load            | The found rows are kept. An error message with **Try again** reloads the collection without a new run   | Yes                 |
 
 Every run counts as an attempt. See [Usage limits](#usage-limits).
 

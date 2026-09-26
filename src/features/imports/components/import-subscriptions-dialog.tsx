@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useRef, useState } from 'react';
+import { CircleAlertIcon } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import {
@@ -74,26 +75,37 @@ type ImportSubscriptionsDialogProps = {
  * smart import, from statements, receipts, and screenshots. Nothing is saved
  * until the user confirms the reviewed rows.
  */
-export function ImportSubscriptionsDialog(
-  props: ImportSubscriptionsDialogProps,
-) {
-  // Every open starts a fresh import. The key only changes on open, so the
-  // dialog stays mounted through its close animation.
-  const [session, setSession] = useState(0);
-  const [wasOpen, setWasOpen] = useState(props.open);
+export function ImportSubscriptionsDialog({
+  collection,
+  open,
+  onOpenChange,
+}: ImportSubscriptionsDialogProps) {
+  // Every open starts a fresh import bound to the collection it opened for, so
+  // its rows, duplicate checks, and categories can't end up imported into
+  // another collection. The session only changes on open, so the dialog stays
+  // mounted through its close animation.
+  const [session, setSession] = useState({ id: 0, collection });
+  const [wasOpen, setWasOpen] = useState(open);
 
-  if (props.open !== wasOpen) {
-    setWasOpen(props.open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
 
-    if (props.open) {
-      setSession((current) => current + 1);
+    if (open) {
+      setSession((current) => ({ id: current.id + 1, collection }));
     }
   }
 
-  return <ImportDialog key={session} {...props} />;
+  return (
+    <ImportDialog
+      key={session.id}
+      collection={session.collection}
+      open={open}
+      onOpenChange={onOpenChange}
+    />
+  );
 }
 
-type Step = 'upload' | 'running' | 'review';
+type Step = 'upload' | 'running' | 'reviewFailed' | 'review';
 
 const RUNNING_MESSAGE =
   'Reading your files and looking up merchants. This can take a minute or two.';
@@ -121,10 +133,29 @@ function ImportDialog({
   const [reviewContext, setReviewContext] = useState<ReviewContext | null>(
     null,
   );
+  // Found rows kept when the review couldn't load, so retrying doesn't need
+  // another smart import run.
+  const [unreviewed, setUnreviewed] = useState<ImportCandidate[] | null>(null);
+  const [loadingReview, setLoadingReview] = useState(false);
   const [confirmingDiscard, setConfirmingDiscard] = useState(false);
   const runRef = useRef<AbortController | null>(null);
   // Async steps check this so nothing continues, or uploads, after closing.
   const closedRef = useRef(false);
+
+  // Also stops work when the parent closes the dialog or it unmounts, such as
+  // after navigating away mid-run.
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    closedRef.current = false;
+
+    return () => {
+      closedRef.current = true;
+      runRef.current?.abort();
+    };
+  }, [open]);
 
   const smartImportAvailability = getAvailability(status);
 
@@ -151,23 +182,35 @@ function ImportDialog({
     candidates: ImportCandidate[],
     signal?: AbortSignal,
   ) {
-    // Fetched fresh so duplicates and new categories reflect earlier imports.
-    const [subscriptions, categories] = await Promise.all([
-      queryClient.fetchQuery(
-        subscriptionsQueryOptions({ collectionId: collection.id }),
-      ),
-      queryClient.fetchQuery(categoriesQueryOptions(collection.id)),
-    ]);
+    let context: ReviewContext;
+
+    try {
+      // Fetched fresh so duplicates and new categories reflect earlier imports.
+      const [subscriptions, categories] = await Promise.all([
+        queryClient.fetchQuery(
+          subscriptionsQueryOptions({ collectionId: collection.id }),
+        ),
+        queryClient.fetchQuery(categoriesQueryOptions(collection.id)),
+      ]);
+
+      context = {
+        subscriptions,
+        categories: categories.map((category) => category.name),
+      };
+    } catch {
+      if (!closedRef.current && !signal?.aborted) {
+        setUnreviewed(candidates);
+        setStep('reviewFailed');
+      }
+
+      return;
+    }
 
     if (closedRef.current || signal?.aborted) {
       return;
     }
 
-    const context: ReviewContext = {
-      subscriptions,
-      categories: categories.map((category) => category.name),
-    };
-
+    setUnreviewed(null);
     setReviewContext(context);
     setReview(createReviewState(candidates, context));
     setStep('review');
@@ -203,14 +246,7 @@ function ImportDialog({
       return;
     }
 
-    try {
-      await openReview(candidates);
-    } catch {
-      setNotice({
-        tone: 'error',
-        message: 'Couldn’t load this collection. Refresh and try again.',
-      });
-    }
+    await openReview(candidates);
   }
 
   async function checkPageCount(files: File[]): Promise<string | null> {
@@ -305,18 +341,7 @@ function ImportDialog({
         return;
       }
 
-      try {
-        await openReview(response.candidates, controller.signal);
-      } catch {
-        if (!controller.signal.aborted) {
-          setNotice({
-            tone: 'error',
-            message:
-              'Couldn’t load this collection to review the results. Refresh and try again.',
-          });
-          setStep('upload');
-        }
-      }
+      await openReview(response.candidates, controller.signal);
     } finally {
       // A newer run may have started after this one was cancelled.
       if (runRef.current === controller) {
@@ -366,6 +391,16 @@ function ImportDialog({
     runRef.current?.abort();
     runRef.current = null;
     setStep('upload');
+  }
+
+  async function handleRetryReview() {
+    if (!unreviewed) {
+      return;
+    }
+
+    setLoadingReview(true);
+    await openReview(unreviewed);
+    setLoadingReview(false);
   }
 
   function handleImport(items: ImportSubscriptionItem[]) {
@@ -441,6 +476,26 @@ function ImportDialog({
           </div>
         )}
 
+        {step === 'reviewFailed' && unreviewed && (
+          <div
+            role="alert"
+            className="flex min-h-72 flex-col items-center justify-center gap-5 px-6 pb-10 text-center"
+          >
+            <CircleAlertIcon className="size-6 text-destructive" aria-hidden />
+            <p className="max-w-sm text-pretty">
+              {formatReviewFailedMessage(unreviewed.length, collection.name)}
+            </p>
+            {/* The control that led here is gone, so focus moves here. */}
+            <Button
+              autoFocus
+              disabled={loadingReview}
+              onClick={() => void handleRetryReview()}
+            >
+              {loadingReview ? 'Loading…' : 'Try again'}
+            </Button>
+          </div>
+        )}
+
         {step === 'review' && review && reviewContext && (
           <ImportReviewStep
             collectionId={collection.id}
@@ -485,6 +540,12 @@ function ImportDialog({
       </DialogContent>
     </Dialog>
   );
+}
+
+function formatReviewFailedMessage(count: number, collectionName: string) {
+  const found = count === 1 ? '1 subscription' : `${count} subscriptions`;
+
+  return `Found ${found}, but couldn’t load ${collectionName} to review the results. Try again to continue.`;
 }
 
 function getAvailability(
