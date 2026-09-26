@@ -36,6 +36,10 @@ Mobile layouts are not supported.
 
 ## Entry points
 
+### Subscriptions page header
+
+The subscriptions page header must contain an **Import** button next to **Add subscription**. It uses the outline variant and `UploadIcon`, so manual entry stays the primary action. It is available in the Active and Inactive views, whether or not the collection has subscriptions. The target collection is the current collection.
+
 ### Collection options menu
 
 The collection options menu must contain an **Import subscriptions** item next to the **Export** submenu. The target collection is the collection whose menu was opened.
@@ -46,7 +50,7 @@ When a collection has no subscriptions, the subscriptions table's empty state mu
 
 ### Import dialog
 
-Both entry points open the same wide dialog. The dialog title names the target collection. The dialog has two steps: upload, then review.
+Every entry point opens the same wide dialog. The dialog title names the target collection. The dialog has two steps: upload, then review.
 
 ## Upload step
 
@@ -410,7 +414,7 @@ The first implementation does not include:
 
 The implementation is complete when:
 
-1. The collection options menu and the empty collection state open the import dialog for the right collection.
+1. The subscriptions page header, the collection options menu, and the empty collection state open the import dialog for the right collection.
 2. One drop zone routes export files to file import and PDFs or images to smart import, and rejects mixed or oversized selections.
 3. File import handles malformed rows without rejecting the file, and uncategorized exports round-trip.
 4. Smart import runs one GPT-6 Sol agent with web search and returns grouped rows with reasons and descriptors.
