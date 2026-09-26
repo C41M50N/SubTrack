@@ -37,6 +37,7 @@ import {
   useDuplicateCollection,
 } from '@/features/collections/mutations';
 import { collectionsQueryOptions } from '@/features/collections/queries';
+import { ImportSubscriptionsDialog } from '@/features/imports/components/import-subscriptions-dialog';
 import type { SubscriptionTransferFormat } from '@/features/subscriptions/export';
 
 type CollectionTarget = { id: string; name: string };
@@ -56,6 +57,11 @@ export function CollectionSwitcher() {
   const [deleteTarget, setDeleteTarget] = useState<CollectionTarget | null>(
     null,
   );
+  // Kept after closing so the dialog can finish its close animation.
+  const [importTarget, setImportTarget] = useState<CollectionTarget | null>(
+    null,
+  );
+  const [isImportOpen, setIsImportOpen] = useState(false);
 
   const activeCollection = collections.find(
     (collection) => collection.id === collectionId,
@@ -170,6 +176,13 @@ export function CollectionSwitcher() {
                       })
                     }
                     onDuplicate={() => handleDuplicate(collection)}
+                    onImport={() => {
+                      setImportTarget({
+                        id: collection.id,
+                        name: collection.name,
+                      });
+                      setIsImportOpen(true);
+                    }}
                     onExport={(format) => handleExport(collection, format)}
                     onDelete={() =>
                       setDeleteTarget({
@@ -203,6 +216,14 @@ export function CollectionSwitcher() {
         }}
         collection={renameTarget}
       />
+
+      {importTarget && (
+        <ImportSubscriptionsDialog
+          collection={importTarget}
+          open={isImportOpen}
+          onOpenChange={setIsImportOpen}
+        />
+      )}
 
       <AlertDialog
         open={deleteTarget !== null}

@@ -11,8 +11,10 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
+import { UploadIcon } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 
+import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Table,
@@ -34,6 +36,7 @@ import { SubscriptionsTableToolbar } from '@/features/subscriptions/components/s
 import type { SubscriptionRecord } from '@/features/subscriptions/queries';
 import type { SubscriptionView } from '@/features/subscriptions/search';
 import { getDefaultSubscriptionSorting } from '@/features/subscriptions/table-state';
+import { cn } from '@/lib/utils';
 
 type UseSubscriptionsTableOptions = Omit<
   SubscriptionColumnActions,
@@ -133,6 +136,7 @@ type SubscriptionsTableProps = {
   onBulkDeactivate: () => void;
   onBulkReactivate: () => void;
   onBulkDelete: () => void;
+  onImport: () => void;
 };
 
 export function SubscriptionsTable({
@@ -148,13 +152,17 @@ export function SubscriptionsTable({
   onBulkDeactivate,
   onBulkReactivate,
   onBulkDelete,
+  onImport,
 }: SubscriptionsTableProps) {
   const rows = table.getRowModel().rows;
   const columnCount = table.getAllLeafColumns().length;
   const hasSubscriptions = table.getCoreRowModel().rows.length > 0;
+  const isCollectionEmpty = activeCount + inactiveCount === 0;
   let emptyMessage = 'No subscriptions match your filters.';
 
-  if (!hasSubscriptions) {
+  if (isCollectionEmpty) {
+    emptyMessage = 'No subscriptions in this collection yet.';
+  } else if (!hasSubscriptions) {
     emptyMessage =
       view === 'active'
         ? 'No active subscriptions.'
@@ -204,9 +212,20 @@ export function SubscriptionsTable({
               <TableRow className="hover:bg-transparent">
                 <TableCell
                   colSpan={columnCount}
-                  className="h-24 text-center text-muted-foreground"
+                  className={cn(
+                    'text-center text-muted-foreground',
+                    isCollectionEmpty ? 'h-40' : 'h-24',
+                  )}
                 >
-                  {emptyMessage}
+                  <div className="flex flex-col items-center gap-3">
+                    <p>{emptyMessage}</p>
+                    {isCollectionEmpty && (
+                      <Button variant="outline" size="sm" onClick={onImport}>
+                        <UploadIcon data-icon="inline-start" />
+                        Import subscriptions
+                      </Button>
+                    )}
+                  </div>
                 </TableCell>
               </TableRow>
             ) : (

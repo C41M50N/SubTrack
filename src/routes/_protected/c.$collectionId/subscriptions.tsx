@@ -9,6 +9,7 @@ import {
   collectionsQueryOptions,
   type CollectionRecord,
 } from '@/features/collections/queries';
+import { ImportSubscriptionsDialog } from '@/features/imports/components/import-subscriptions-dialog';
 import { CostMetrics } from '@/features/subscriptions/components/cost-metrics';
 import { DeactivateSubscriptionDialog } from '@/features/subscriptions/components/deactivate-subscription-dialog';
 import { DeleteSubscriptionDialog } from '@/features/subscriptions/components/delete-subscription-dialog';
@@ -72,6 +73,9 @@ function RouteComponent() {
     categoriesQueryOptions(collectionId),
   );
   const { data: collections } = useSuspenseQuery(collectionsQueryOptions());
+  const collection = collections.find(
+    (candidate) => candidate.id === collectionId,
+  );
   // The collections query is already ordered by name.
   const moveTargets = useMemo(
     () => collections.filter((collection) => collection.id !== collectionId),
@@ -80,6 +84,7 @@ function RouteComponent() {
   const { move, isPending: isMovePending } = useMoveSubscriptionsWithFeedback();
 
   const [createOpen, setCreateOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<SubscriptionRecord | null>(null);
   const [deleteTargets, setDeleteTargets] = useState<SubscriptionRecord[]>([]);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -201,10 +206,19 @@ function RouteComponent() {
             onBulkDeactivate={handleBulkDeactivate}
             onBulkReactivate={handleBulkReactivate}
             onBulkDelete={handleBulkDelete}
+            onImport={() => setImportOpen(true)}
           />
         </div>
         {view === 'active' && <MonthlyBreakdown items={baseItems} />}
       </div>
+
+      {collection && (
+        <ImportSubscriptionsDialog
+          collection={{ id: collection.id, name: collection.name }}
+          open={importOpen}
+          onOpenChange={setImportOpen}
+        />
+      )}
 
       <SubscriptionFormDialog
         open={createOpen}

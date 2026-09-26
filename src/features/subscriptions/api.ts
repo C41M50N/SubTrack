@@ -1,7 +1,6 @@
 import { createServerFn } from '@tanstack/react-start';
 
 import { requireAuthMiddleware } from '@/features/auth/middleware';
-import { parseSubscriptionImport } from '@/features/subscriptions/import';
 import {
   clearSubscriptionsInputSchema,
   createSubscriptionInputSchema,
@@ -84,9 +83,13 @@ export const importSubscriptions = createServerFn({ method: 'POST' })
   .middleware([requireAuthMiddleware])
   .validator(importSubscriptionsInputSchema)
   .handler(async ({ context: { auth }, data }) => {
-    const rows = parseSubscriptionImport({ content: data.content, format: data.format });
-
-    return importMySubscriptions({ userId: auth.userId, rows });
+    return withUserFacingErrors('Failed to import. Try again.', () =>
+      importMySubscriptions({
+        userId: auth.userId,
+        collectionId: data.collectionId,
+        items: data.items,
+      }),
+    );
   });
 
 export const seedSubscriptions = createServerFn({ method: 'POST' })

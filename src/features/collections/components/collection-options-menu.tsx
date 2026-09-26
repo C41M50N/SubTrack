@@ -4,6 +4,7 @@ import {
   EllipsisIcon,
   TextCursorIcon,
   Trash2Icon,
+  UploadIcon,
 } from 'lucide-react';
 
 import { MenuActionItem } from '@/components/menu-action-item';
@@ -23,6 +24,7 @@ import type { SubscriptionTransferFormat } from '@/features/subscriptions/export
 interface CollectionOptionsMenuProps {
   onRename: () => void;
   onDuplicate: () => void;
+  onImport: () => void;
   onExport: (format: SubscriptionTransferFormat) => void;
   onDelete: () => void;
 }
@@ -30,6 +32,7 @@ interface CollectionOptionsMenuProps {
 export function CollectionOptionsMenu({
   onRename,
   onDuplicate,
+  onImport,
   onExport,
   onDelete,
 }: CollectionOptionsMenuProps) {
@@ -48,13 +51,16 @@ export function CollectionOptionsMenu({
       >
         <EllipsisIcon className="size-4" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-44" align="start" side="right">
+      <DropdownMenuContent className="w-52" align="start" side="right">
         <DropdownMenuGroup>
           <DropdownMenuItem onClick={onRename}>
             <MenuActionItem icon={TextCursorIcon} label="Rename" />
           </DropdownMenuItem>
           <DropdownMenuItem onClick={onDuplicate}>
             <MenuActionItem icon={CopyIcon} label="Duplicate" />
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={onImport}>
+            <MenuActionItem icon={UploadIcon} label="Import subscriptions" />
           </DropdownMenuItem>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger onClick={(e) => e.stopPropagation()}>

@@ -1,10 +1,10 @@
-import { and, asc, desc, eq, getTableColumns, inArray, sql } from 'drizzle-orm';
+import { and, asc, eq, getTableColumns, inArray, sql } from 'drizzle-orm';
 
 import { toCategoryNameKey } from '@/features/categories/names';
 import { assertCategoryInCollection, findOrCreateCategoriesByName } from '@/features/categories/server';
 import { getCollectionFilter, getMyCollection } from '@/features/collections/server';
 import { getImportedDeactivatedAt } from '@/features/subscriptions/import';
-import type { SubscriptionImportRow } from '@/features/subscriptions/schema';
+import type { ImportSubscriptionItem } from '@/features/subscriptions/schema';
 import { buildSeedSubscriptions } from '@/features/subscriptions/seed-data';
 import { getNextInvoiceDateOnOrAfter } from '@/jobs/invoice-schedule';
 import { db } from '@/lib/db';
@@ -152,97 +152,59 @@ export async function updateMySubscription(input: {
   });
 }
 
-export async function importMySubscriptions(input: { userId: string; rows: SubscriptionImportRow[] }) {
+/**
+ * Writes reviewed import items into one collection, all or nothing. Category
+ * names are resolved in the collection, creating the ones that don't exist.
+ */
+export async function importMySubscriptions(input: {
+  userId: string;
+  collectionId: string;
+  items: ImportSubscriptionItem[];
+}) {
   return db.transaction(async (tx) => {
-    const importedAt = new Date();
-    // Collection names are unique per user case-insensitively, so key the cache
-    // and existing-name lookups by the lowercased name.
-    const collectionIdByName = new Map<string, string>();
-    let collectionsCreated = 0;
+    const [collection] = await tx
+      .select({ id: collectionTable.id })
+      .from(collectionTable)
+      .where(getCollectionFilter(input.userId, input.collectionId))
+      .limit(1);
 
-    for (const row of input.rows) {
-      const nameKey = row.collection.toLowerCase();
-
-      if (collectionIdByName.has(nameKey)) {
-        continue;
-      }
-
-      const [existing] = await tx
-        .select({ id: collectionTable.id })
-        .from(collectionTable)
-        .where(and(eq(collectionTable.userId, input.userId), sql`lower(${collectionTable.name}) = ${nameKey}`))
-        .orderBy(desc(collectionTable.updatedAt))
-        .limit(1);
-
-      if (existing) {
-        collectionIdByName.set(nameKey, existing.id);
-        continue;
-      }
-
-      const [created] = await tx
-        .insert(collectionTable)
-        .values({ userId: input.userId, name: row.collection })
-        .returning({ id: collectionTable.id });
-
-      collectionIdByName.set(nameKey, created.id);
-      collectionsCreated += 1;
+    if (!collection) {
+      throw new Error('Collection not found');
     }
 
-    const rowsWithCollection = input.rows.map((row) => {
-      const collectionId = collectionIdByName.get(row.collection.toLowerCase());
-
-      if (!collectionId) {
-        throw new Error('Failed to resolve collection during import');
-      }
-
-      return { row, collectionId };
+    const importedAt = new Date();
+    const { categoryIdByKey, createdCount } = await findOrCreateCategoriesByName(tx, {
+      userId: input.userId,
+      collectionId: input.collectionId,
+      names: input.items.flatMap((item) => item.category ?? []),
     });
 
-    // Categories are collection-scoped, so resolve each collection's category
-    // names together, reusing existing categories or creating them.
-    const categoryNamesByCollectionId = new Map<string, string[]>();
+    const values = input.items.map((item) => {
+      const categoryId = item.category === null ? null : categoryIdByKey.get(toCategoryNameKey(item.category));
 
-    for (const { row, collectionId } of rowsWithCollection) {
-      const names = categoryNamesByCollectionId.get(collectionId) ?? [];
-      names.push(row.category);
-      categoryNamesByCollectionId.set(collectionId, names);
-    }
-
-    const categoryIdByKeyByCollectionId = new Map<string, Map<string, string>>();
-
-    for (const [collectionId, names] of categoryNamesByCollectionId) {
-      const { categoryIdByKey } = await findOrCreateCategoriesByName(tx, { userId: input.userId, collectionId, names });
-      categoryIdByKeyByCollectionId.set(collectionId, categoryIdByKey);
-    }
-
-    const values = rowsWithCollection.map(({ row, collectionId }) => {
-      const categoryId = categoryIdByKeyByCollectionId.get(collectionId)?.get(toCategoryNameKey(row.category));
-
-      if (!categoryId) {
+      if (categoryId === undefined) {
         throw new Error('Failed to resolve category during import');
       }
 
       return {
         userId: input.userId,
-        name: row.name,
-        status: row.status,
-        iconRef: row.iconRef,
+        collectionId: input.collectionId,
+        name: item.name,
+        status: item.status,
+        iconRef: item.iconRef,
         categoryId,
-        costAmount: row.costAmountCents,
-        costFrequency: row.costFrequency,
-        nextInvoiceDate: row.nextInvoiceDate,
-        deactivatedAt: getImportedDeactivatedAt(row, importedAt),
-        collectionId,
+        costAmount: item.costAmount,
+        costFrequency: item.costFrequency,
+        nextInvoiceDate: item.nextInvoiceDate,
+        deactivatedAt: getImportedDeactivatedAt(item, importedAt),
       };
     });
 
-    if (values.length > 0) {
-      await tx.insert(subscriptionTable).values(values);
-    }
+    await tx.insert(subscriptionTable).values(values);
 
     return {
-      collectionsCreated,
-      subscriptionsImported: input.rows.length,
+      subscriptionsImported: values.length,
+      categoriesCreated: createdCount,
     };
   });
 }

@@ -96,7 +96,8 @@ export async function createMyCategory(input: { userId: string; collectionId: st
  * exist yet. Runs inside the caller's transaction so created categories roll
  * back with it.
  *
- * `categoryIdByKey` is keyed by `toCategoryNameKey(name)`.
+ * `categoryIdByKey` is keyed by `toCategoryNameKey(name)`. `createdCount` is
+ * how many categories this call inserted.
  */
 export async function findOrCreateCategoriesByName(
   tx: DbTransaction,
@@ -104,9 +105,10 @@ export async function findOrCreateCategoriesByName(
 ) {
   const names = dedupeCategoryNames(input.names);
   const categoryIdByKey = new Map<string, string>();
+  let createdCount = 0;
 
   if (names.length === 0) {
-    return { categoryIdByKey };
+    return { categoryIdByKey, createdCount };
   }
 
   const selectByKeys = (keys: string[]) =>
@@ -139,6 +141,7 @@ export async function findOrCreateCategoriesByName(
       .returning({ id: categoryTable.id, name: categoryTable.name });
 
     addToMapping(created);
+    createdCount = created.length;
 
     // A concurrent insert may have won the race for some names; those rows
     // exist now, so read them back.
@@ -153,7 +156,7 @@ export async function findOrCreateCategoriesByName(
     }
   }
 
-  return { categoryIdByKey };
+  return { categoryIdByKey, createdCount };
 }
 
 /** Throws unless the category exists and belongs to this user's collection. */

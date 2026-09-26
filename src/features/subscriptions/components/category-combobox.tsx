@@ -11,11 +11,13 @@ import {
 } from '@/components/ui/combobox';
 import type { CategoryRecord } from '@/features/categories/queries';
 
+export type CategoryOption = Pick<CategoryRecord, 'id' | 'name'>;
+
 type CategoryComboboxProps = {
   value: string | null;
   onChange: (categoryId: string | null) => void;
   onCreate: (name: string) => void;
-  categories: CategoryRecord[];
+  categories: CategoryOption[];
   id?: string;
   disabled?: boolean;
   invalid?: boolean;

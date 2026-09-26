@@ -22,6 +22,15 @@
   --font-heading: 'Manrope', ui-sans-serif, system-ui, sans-serif;
   --font-mono:
     'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+
+  /* Briefly marks a table row that just changed, then fades to its usual background. */
+  --animate-row-highlight: row-highlight 1.6s ease-out;
+
+  @keyframes row-highlight {
+    from {
+      background-color: color-mix(in oklch, var(--primary) 18%, transparent);
+    }
+  }
 }
 
 * {

@@ -12,3 +12,6 @@ env.d.ts
 .vinxi
 __unconfig*
 todos.json
+
+# Real statements for smart import evaluation. Never commit these.
+fixtures/private/
