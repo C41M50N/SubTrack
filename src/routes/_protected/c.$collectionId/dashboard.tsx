@@ -106,42 +106,38 @@ function DashboardPage() {
           />
 
           <div className="grid items-start gap-6 lg:grid-cols-3">
-            <SpendTrendChart
-              points={trend}
-              isLoading={historyQuery.isPending}
-              isError={historyQuery.isError}
-              onRetry={() => void historyQuery.refetch()}
-            />
-            <CategoryBreakdown entries={categories} />
-          </div>
-
-          {/* On roomy viewports the row absorbs whatever height is left, floored so
-              short screens fall back to page scrolling. The basis must be a
-              length, not `flex-1`'s 0%: a percentage against the page's
-              indefinite height resolves to the lists' full content height and
-              would inflate the page's minimum height. */}
-          <div className="grid items-start gap-6 md:grid-cols-2 roomy:min-h-80 roomy:flex-[1_1_0px] roomy:items-stretch">
-            <InvoiceListCard
-              title="Upcoming invoices"
-              description={`Expected in the next ${UPCOMING_LIST_DAYS} days`}
-              view="upcoming"
-              collectionId={collectionId}
-              invoices={upcoming}
-              emptyMessage={`No invoices expected in the next ${UPCOMING_LIST_DAYS} days.`}
-              now={now}
-            />
-            <InvoiceListCard
-              title="Recently recorded"
-              description="The latest invoices SubTrack has recorded"
-              view="history"
-              collectionId={collectionId}
-              invoices={recent}
-              emptyMessage="No invoices have been recorded yet."
-              isLoading={historyQuery.isPending}
-              isError={historyQuery.isError}
-              onRetry={() => void historyQuery.refetch()}
-              now={now}
-            />
+            <div className="flex min-w-0 flex-col gap-6 lg:col-span-2">
+              <SpendTrendChart
+                points={trend}
+                isLoading={historyQuery.isPending}
+                isError={historyQuery.isError}
+                onRetry={() => void historyQuery.refetch()}
+              />
+              <InvoiceListCard
+                title="Upcoming invoices"
+                description={`Expected in the next ${UPCOMING_LIST_DAYS} days`}
+                view="upcoming"
+                collectionId={collectionId}
+                invoices={upcoming}
+                emptyMessage={`No invoices expected in the next ${UPCOMING_LIST_DAYS} days.`}
+                now={now}
+              />
+            </div>
+            <div className="flex min-w-0 flex-col gap-6">
+              <CategoryBreakdown entries={categories} />
+              <InvoiceListCard
+                title="Recently recorded"
+                description="The latest invoices SubTrack has recorded"
+                view="history"
+                collectionId={collectionId}
+                invoices={recent}
+                emptyMessage="No invoices have been recorded yet."
+                isLoading={historyQuery.isPending}
+                isError={historyQuery.isError}
+                onRetry={() => void historyQuery.refetch()}
+                now={now}
+              />
+            </div>
           </div>
         </>
       )}

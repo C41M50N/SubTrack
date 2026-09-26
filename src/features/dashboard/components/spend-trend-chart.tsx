@@ -67,13 +67,35 @@ export function SpendTrendChart({
   isError,
   onRetry,
 }: SpendTrendChartProps) {
+  const hasRecordedSpend = points.some((point) => point.recordedCents > 0);
+  const hasCurrentProjection = points.some(
+    (point) => point.status === 'current' && point.projectedCents > 0,
+  );
+  const visiblePoints = hasRecordedSpend
+    ? points
+    : points.filter(
+        (point) =>
+          point.status === 'future' ||
+          (point.status === 'current' && point.projectedCents > 0),
+      );
+
   return (
-    <Card className="gap-0 py-0 lg:col-span-2">
+    <Card className="gap-0 py-0">
       <CardHeader className="border-b py-4">
         <CardTitle className="text-base">Spend over time</CardTitle>
         <CardDescription>
-          Recorded invoices for the past {TREND_MONTHS_BEFORE} months and
-          projected invoices for the next {TREND_MONTHS_AFTER}
+          {hasRecordedSpend || isLoading || isError ? (
+            <>
+              Recorded invoices for the past {TREND_MONTHS_BEFORE} months and
+              projected invoices for the next {TREND_MONTHS_AFTER}
+            </>
+          ) : (
+            <>
+              Projected invoices for{' '}
+              {hasCurrentProjection ? 'this month and the next' : 'the next'}{' '}
+              {TREND_MONTHS_AFTER} months
+            </>
+          )}
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-4 pb-3">
@@ -100,7 +122,7 @@ export function SpendTrendChart({
             >
               <BarChart
                 accessibilityLayer
-                data={points}
+                data={visiblePoints}
                 margin={{ top: 4, right: 4, bottom: 0, left: 4 }}
                 barCategoryGap="30%"
               >
@@ -129,14 +151,16 @@ export function SpendTrendChart({
                   align="right"
                   content={<SpendLegend />}
                 />
-                <Bar
-                  dataKey="recordedCents"
-                  stackId="spend"
-                  fill="var(--color-recordedCents)"
-                  maxBarSize={MAX_BAR_PX}
-                  shape={<RecordedBar />}
-                  isAnimationActive={false}
-                />
+                {hasRecordedSpend && (
+                  <Bar
+                    dataKey="recordedCents"
+                    stackId="spend"
+                    fill="var(--color-recordedCents)"
+                    maxBarSize={MAX_BAR_PX}
+                    shape={<RecordedBar />}
+                    isAnimationActive={false}
+                  />
+                )}
                 <Bar
                   dataKey="projectedCents"
                   stackId="spend"
@@ -147,7 +171,7 @@ export function SpendTrendChart({
                 />
               </BarChart>
             </ChartContainer>
-            <SpendTable points={points} />
+            <SpendTable points={visiblePoints} />
           </>
         )}
       </CardContent>
