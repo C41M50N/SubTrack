@@ -40,8 +40,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useCreateCategory } from '@/features/categories/mutations';
-import type { CategoryRecord } from '@/features/categories/queries';
-import { CategoryCombobox } from '@/features/subscriptions/components/category-combobox';
+import {
+  CategoryCombobox,
+  type CategoryOption,
+} from '@/features/subscriptions/components/category-combobox';
 import { IconPicker } from '@/features/subscriptions/components/icon-picker';
 import {
   formatCentsForInput,
@@ -61,7 +63,10 @@ import {
   MAX_COST_AMOUNT_CENTS,
   updateSubscriptionInputSchema,
 } from '@/features/subscriptions/schema';
-import type { SubscriptionCostFrequency } from '@/features/subscriptions/server';
+import type {
+  SubscriptionCostFrequency,
+  SubscriptionStatus,
+} from '@/features/subscriptions/server';
 import { cn } from '@/lib/utils';
 
 const FREQUENCY_OPTIONS: SubscriptionCostFrequency[] = [
@@ -70,13 +75,54 @@ const FREQUENCY_OPTIONS: SubscriptionCostFrequency[] = [
   'yearly',
   'biennially',
 ];
+
+/** Values a form opens with. Any of them may be missing or invalid. */
+export type SubscriptionFormPrefill = {
+  name: string;
+  iconRef: string;
+  categoryId: string | null;
+  costAmount: number | null;
+  costFrequency: SubscriptionCostFrequency | null;
+  nextInvoiceDate: string | null;
+};
+
+export type SubscriptionFormValues = {
+  name: string;
+  iconRef: string;
+  categoryId: string | null;
+  costAmount: number;
+  costFrequency: SubscriptionCostFrequency;
+  nextInvoiceDate: string;
+};
+
+/**
+ * Edits a subscription that isn't saved yet, such as an import row. Saving
+ * validates with the usual rules and hands the values back without writing to
+ * the database. New categories stay local too.
+ */
+export type SubscriptionFormReviewMode = {
+  prefill: SubscriptionFormPrefill;
+  status: SubscriptionStatus;
+  /** Adds a category and returns the option ID to select, or why it can't. */
+  onCreateCategory: (name: string) => { id: string } | { error: string };
+  /** Returns validation issues to keep the form open, or null once saved. */
+  onSave: (values: SubscriptionFormValues) => ValidationIssues | null;
+};
+
+type ValidationIssues = {
+  issues: Array<{ path: PropertyKey[]; message: string }>;
+};
+
 type SubscriptionFormDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   collectionId: string;
   subscription?: SubscriptionRecord | null;
-  categories: CategoryRecord[];
+  review?: SubscriptionFormReviewMode;
+  categories: CategoryOption[];
   onCreated?: () => void;
+  /** Where focus goes when the dialog closes. Defaults to the trigger. */
+  finalFocus?: React.ComponentProps<typeof DialogContent>['finalFocus'];
 };
 
 type FormState = {
@@ -99,15 +145,29 @@ function emptyForm(): FormState {
   };
 }
 
-function formFromSubscription(subscription: SubscriptionRecord): FormState {
+function formFromPrefill(prefill: SubscriptionFormPrefill): FormState {
   return {
-    name: subscription.name,
-    iconRef: subscription.iconRef,
-    categoryId: subscription.categoryId,
-    cost: formatCentsForInput(subscription.costAmount),
-    costFrequency: subscription.costFrequency,
-    nextInvoiceDate: subscription.nextInvoiceDate,
+    name: prefill.name,
+    iconRef: prefill.iconRef,
+    categoryId: prefill.categoryId,
+    cost:
+      prefill.costAmount === null
+        ? ''
+        : formatCentsForInput(prefill.costAmount),
+    costFrequency: prefill.costFrequency ?? 'monthly',
+    nextInvoiceDate: prefill.nextInvoiceDate ?? '',
   };
+}
+
+function getInitialForm(
+  subscription: SubscriptionRecord | null | undefined,
+  prefill: SubscriptionFormPrefill | undefined,
+): FormState {
+  if (prefill) {
+    return formFromPrefill(prefill);
+  }
+
+  return subscription ? formFromPrefill(subscription) : emptyForm();
 }
 
 export function SubscriptionFormDialog({
@@ -115,10 +175,16 @@ export function SubscriptionFormDialog({
   onOpenChange,
   collectionId,
   subscription,
+  review,
   categories,
   onCreated,
+  finalFocus,
 }: SubscriptionFormDialogProps) {
-  const isEdit = Boolean(subscription);
+  const isEdit = Boolean(subscription) || Boolean(review);
+  const status = review ? review.status : subscription?.status;
+  // Review mode re-renders with new callbacks as pending categories change, so
+  // only a new prefill resets the form.
+  const prefill = review?.prefill;
   const createSubscription = useCreateSubscription();
   const updateSubscription = useUpdateSubscription();
   const createCategory = useCreateCategory();
@@ -135,9 +201,9 @@ export function SubscriptionFormDialog({
       return;
     }
 
-    setForm(subscription ? formFromSubscription(subscription) : emptyForm());
+    setForm(getInitialForm(subscription, prefill));
     setErrors({});
-  }, [open, subscription]);
+  }, [open, subscription, prefill]);
 
   function update<Key extends keyof FormState>(
     key: Key,
@@ -159,6 +225,18 @@ export function SubscriptionFormDialog({
   }
 
   function handleCreateCategory(name: string) {
+    if (review) {
+      const result = review.onCreateCategory(name);
+
+      if ('error' in result) {
+        setErrors((previous) => ({ ...previous, categoryId: result.error }));
+      } else {
+        update('categoryId', result.id);
+      }
+
+      return;
+    }
+
     createCategory.mutate(
       { collectionId, name },
       {
@@ -187,6 +265,41 @@ export function SubscriptionFormDialog({
     // The null check also narrows costAmount to a number for the parses below.
     if (costAmount === null || Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
+      return;
+    }
+
+    if (review) {
+      const parsed = createSubscriptionInputSchema.safeParse({
+        name: form.name,
+        collectionId,
+        iconRef: form.iconRef,
+        categoryId: form.categoryId,
+        costAmount,
+        costFrequency: form.costFrequency,
+        nextInvoiceDate: form.nextInvoiceDate,
+      });
+
+      if (!parsed.success) {
+        applyZodErrors(parsed.error, setErrors);
+        return;
+      }
+
+      const saveErrors = review.onSave({
+        name: parsed.data.name,
+        iconRef: parsed.data.iconRef,
+        categoryId: parsed.data.categoryId,
+        costAmount: parsed.data.costAmount,
+        costFrequency: parsed.data.costFrequency,
+        nextInvoiceDate: parsed.data.nextInvoiceDate,
+      });
+
+      if (saveErrors) {
+        applyZodErrors(saveErrors, setErrors);
+        return;
+      }
+
+      onOpenChange(false);
+
       return;
     }
 
@@ -244,16 +357,18 @@ export function SubscriptionFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg" finalFocus={finalFocus}>
         <form onSubmit={handleSubmit} className="grid gap-6">
           <DialogHeader>
             <DialogTitle>
               {isEdit ? 'Edit subscription' : 'Add subscription'}
             </DialogTitle>
             <DialogDescription>
-              {isEdit
-                ? 'Update the details for this subscription.'
-                : 'Track a new subscription in this collection.'}
+              {review
+                ? 'Changes apply to this import. Nothing is saved until you import.'
+                : isEdit
+                  ? 'Update the details for this subscription.'
+                  : 'Track a new subscription in this collection.'}
             </DialogDescription>
           </DialogHeader>
 
@@ -396,7 +511,7 @@ export function SubscriptionFormDialog({
                 />
               </PopoverContent>
             </Popover>
-            {subscription?.status === 'inactive' && (
+            {status === 'inactive' && (
               <FieldDescription>
                 Used to calculate the next invoice when reactivated.
               </FieldDescription>
@@ -426,7 +541,7 @@ export function SubscriptionFormDialog({
 }
 
 function applyZodErrors(
-  error: { issues: Array<{ path: PropertyKey[]; message: string }> },
+  error: ValidationIssues,
   setErrors: (errors: Partial<Record<keyof FormState, string>>) => void,
 ) {
   const nextErrors: Partial<Record<keyof FormState, string>> = {};
@@ -436,6 +551,12 @@ function applyZodErrors(
 
     if (field === 'costAmount') {
       nextErrors.cost = issue.message;
+      continue;
+    }
+
+    // Review mode validates the category by name.
+    if (field === 'category') {
+      nextErrors.categoryId = issue.message;
       continue;
     }
 

@@ -50,6 +50,13 @@
       "when": 1790140872305,
       "tag": "0006_whole_ser_duncan",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790419263052,
+      "tag": "0007_gifted_mongoose",
+      "breakpoints": true
     }
   ]
 }

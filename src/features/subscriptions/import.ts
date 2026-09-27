@@ -1,19 +1,20 @@
 import Papa from 'papaparse';
 
 import {
+  type ImportSubscriptionItem,
+  isDeactivatedAtInFuture,
   type SubscriptionImportRow,
   subscriptionImportEnvelopeSchema,
   subscriptionImportRowSchema,
 } from '@/features/subscriptions/schema';
+import { UserFacingError } from '@/lib/errors';
 
 export type SubscriptionTransferFormat = 'json' | 'csv';
 
-const FUTURE_TIMESTAMP_TOLERANCE_MS = 5 * 60 * 1000;
-
-// Maps exported CSV headers to import row keys.
+// Maps exported CSV headers to import row keys. The `collection` column is
+// ignored because every row is imported into the chosen collection.
 const csvHeaderToField: Record<string, keyof SubscriptionImportRow> = {
   name: 'name',
-  collection: 'collection',
   status: 'status',
   category: 'category',
   icon_ref: 'iconRef',
@@ -38,19 +39,19 @@ function parseJsonRows(content: string): unknown[] {
   try {
     parsed = JSON.parse(content);
   } catch {
-    throw new Error('Import file is not valid JSON.');
+    throw new Error('This file isn’t valid JSON.');
   }
 
   const envelope = subscriptionImportEnvelopeSchema.safeParse(parsed);
 
   if (!envelope.success) {
-    throw new Error('Import file is not a valid SubTrack subscriptions export.');
+    throw new Error('This file isn’t a SubTrack subscriptions export.');
   }
 
   return envelope.data.subscriptions;
 }
 
-function parseCsvRows(content: string): unknown[] {
+function parseCsvRows(content: string): Record<string, string>[] {
   const result = Papa.parse<Record<string, string>>(content, {
     header: true,
     skipEmptyLines: 'greedy',
@@ -61,7 +62,7 @@ function parseCsvRows(content: string): unknown[] {
   const missing = requiredCsvHeaders.filter((header) => !headers.includes(header));
 
   if (missing.length > 0) {
-    throw new Error(`Import file is missing required columns: ${missing.join(', ')}.`);
+    throw new Error(`This file is missing required columns: ${missing.join(', ')}.`);
   }
 
   return result.data.map((row) => {
@@ -83,46 +84,69 @@ function parseCsvRows(content: string): unknown[] {
   });
 }
 
+export type InvalidSubscriptionImportRow = {
+  /** The row as it appears in the file, keyed like `SubscriptionImportRow`. */
+  values: Record<string, unknown>;
+  /** The row's first validation error. */
+  error: string;
+};
+
+export type ParsedSubscriptionImport = {
+  rows: SubscriptionImportRow[];
+  invalidRows: InvalidSubscriptionImportRow[];
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/**
+ * Parses a SubTrack JSON or CSV export into valid and invalid rows.
+ *
+ * Throws only when the file itself is unusable: malformed JSON, a JSON
+ * envelope that isn't a SubTrack export, or a CSV missing required columns.
+ * A bad row is returned with its first error so it can be fixed in review.
+ */
 export function parseSubscriptionImport(input: {
   content: string;
   format?: SubscriptionTransferFormat;
-}): SubscriptionImportRow[] {
+}): ParsedSubscriptionImport {
   const format = input.format ?? inferFormat(input.content);
   const rawRows = format === 'json' ? parseJsonRows(input.content) : parseCsvRows(input.content);
 
   const rows: SubscriptionImportRow[] = [];
-  const errors: string[] = [];
+  const invalidRows: InvalidSubscriptionImportRow[] = [];
 
-  rawRows.forEach((rawRow, index) => {
+  for (const rawRow of rawRows) {
+    if (!isRecord(rawRow)) {
+      invalidRows.push({ values: {}, error: 'This row isn’t a subscription' });
+      continue;
+    }
+
     const result = subscriptionImportRowSchema.safeParse(rawRow);
 
     if (result.success) {
       rows.push(result.data);
-      return;
+    } else {
+      invalidRows.push({ values: rawRow, error: result.error.issues[0]?.message ?? 'This row is invalid' });
     }
-
-    const issue = result.error.issues[0];
-    // Row 1 is the first data row (header row is not counted).
-    errors.push(`Row ${index + 1}: ${issue ? `${issue.path.join('.')} ${issue.message}`.trim() : 'invalid'}`);
-  });
-
-  if (errors.length > 0) {
-    throw new Error(`Import failed. Fix these rows and try again:\n${errors.join('\n')}`);
   }
 
-  return rows;
+  return { rows, invalidRows };
 }
 
-export function getImportedDeactivatedAt(row: SubscriptionImportRow, importedAt: Date): Date | null {
-  if (row.status === 'active') {
+export function getImportedDeactivatedAt(
+  item: Pick<ImportSubscriptionItem, 'status' | 'deactivatedAt'>,
+  importedAt: Date,
+): Date | null {
+  if (item.status === 'active') {
     return null;
   }
 
-  const deactivatedAt = row.deactivatedAt ? new Date(row.deactivatedAt) : importedAt;
-  const latestAllowed = new Date(importedAt.getTime() + FUTURE_TIMESTAMP_TOLERANCE_MS);
+  const deactivatedAt = item.deactivatedAt ? new Date(item.deactivatedAt) : importedAt;
 
-  if (deactivatedAt > latestAllowed) {
-    throw new Error('Deactivation time cannot be in the future');
+  if (item.deactivatedAt && isDeactivatedAtInFuture(item.deactivatedAt, importedAt)) {
+    throw new UserFacingError('Deactivation time can’t be in the future');
   }
 
   return deactivatedAt;

@@ -8,6 +8,7 @@ import {
   createSubscription,
   deactivateSubscriptions,
   deleteSubscriptions,
+  importSubscriptions,
   moveSubscriptions,
   reactivateSubscriptions,
   seedSubscriptions,
@@ -15,10 +16,15 @@ import {
   updateSubscription,
 } from '@/features/subscriptions/api';
 import { subscriptionsListQueryKey } from '@/features/subscriptions/queries';
-import type { createSubscriptionInputSchema, updateSubscriptionInputSchema } from '@/features/subscriptions/schema';
+import type {
+  createSubscriptionInputSchema,
+  importSubscriptionsInputSchema,
+  updateSubscriptionInputSchema,
+} from '@/features/subscriptions/schema';
 
 export type CreateSubscriptionInput = z.infer<typeof createSubscriptionInputSchema>;
 export type UpdateSubscriptionInput = z.infer<typeof updateSubscriptionInputSchema>;
+export type ImportSubscriptionsInput = z.infer<typeof importSubscriptionsInputSchema>;
 
 export function useCreateSubscription() {
   const queryClient = useQueryClient();
@@ -85,6 +91,20 @@ export function useMoveSubscriptions() {
 
   return useMutation({
     mutationFn: (input: { subscriptionIds: string[]; collectionId: string }) => moveSubscriptions({ data: input }),
+    onSuccess: (_result, input) =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: subscriptionsListQueryKey }),
+        queryClient.invalidateQueries({ queryKey: categoriesQueryOptions(input.collectionId).queryKey }),
+      ]),
+  });
+}
+
+// An import adds subscriptions to one collection and may create categories in it.
+export function useImportSubscriptions() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: ImportSubscriptionsInput) => importSubscriptions({ data: input }),
     onSuccess: (_result, input) =>
       Promise.all([
         queryClient.invalidateQueries({ queryKey: subscriptionsListQueryKey }),

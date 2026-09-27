@@ -9,26 +9,22 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as ProtectedRouteRouteImport } from './routes/_protected/route'
-import { Route as AboutRouteImport } from './routes/about'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as ProtectedRouteRouteImport } from './routes/_protected/route'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProtectedDashboardRouteImport } from './routes/_protected/dashboard'
-import { Route as ProtectedCCollectionIdRouteRouteImport } from './routes/_protected/c.$collectionId/route'
-import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiSubscriptionsExportRouteImport } from './routes/api/subscriptions/export'
-import { Route as ProtectedCCollectionIdDashboardRouteImport } from './routes/_protected/c.$collectionId/dashboard'
-import { Route as ProtectedCCollectionIdInvoicesRouteImport } from './routes/_protected/c.$collectionId/invoices'
-import { Route as ProtectedCCollectionIdSettingsRouteImport } from './routes/_protected/c.$collectionId/settings'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ProtectedCCollectionIdRouteRouteImport } from './routes/_protected/c.$collectionId/route'
 import { Route as ProtectedCCollectionIdSubscriptionsRouteImport } from './routes/_protected/c.$collectionId/subscriptions'
+import { Route as ProtectedCCollectionIdSettingsRouteImport } from './routes/_protected/c.$collectionId/settings'
+import { Route as ProtectedCCollectionIdInvoicesRouteImport } from './routes/_protected/c.$collectionId/invoices'
+import { Route as ProtectedCCollectionIdDashboardRouteImport } from './routes/_protected/c.$collectionId/dashboard'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProtectedRouteRoute = ProtectedRouteRouteImport.update({
-  id: '/_protected',
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -36,9 +32,13 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
+const ProtectedRouteRoute = ProtectedRouteRouteImport.update({
+  id: '/_protected',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProtectedDashboardRoute = ProtectedDashboardRouteImport.update({
@@ -46,32 +46,26 @@ const ProtectedDashboardRoute = ProtectedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => ProtectedRouteRoute,
 } as any)
+const ApiSubscriptionsExportRoute = ApiSubscriptionsExportRouteImport.update({
+  id: '/api/subscriptions/export',
+  path: '/api/subscriptions/export',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProtectedCCollectionIdRouteRoute =
   ProtectedCCollectionIdRouteRouteImport.update({
     id: '/c/$collectionId',
     path: '/c/$collectionId',
     getParentRoute: () => ProtectedRouteRoute,
   } as any)
-const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
-  id: '/api/auth/$',
-  path: '/api/auth/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiSubscriptionsExportRoute = ApiSubscriptionsExportRouteImport.update({
-  id: '/api/subscriptions/export',
-  path: '/api/subscriptions/export',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProtectedCCollectionIdDashboardRoute =
-  ProtectedCCollectionIdDashboardRouteImport.update({
-    id: '/dashboard',
-    path: '/dashboard',
-    getParentRoute: () => ProtectedCCollectionIdRouteRoute,
-  } as any)
-const ProtectedCCollectionIdInvoicesRoute =
-  ProtectedCCollectionIdInvoicesRouteImport.update({
-    id: '/invoices',
-    path: '/invoices',
+const ProtectedCCollectionIdSubscriptionsRoute =
+  ProtectedCCollectionIdSubscriptionsRouteImport.update({
+    id: '/subscriptions',
+    path: '/subscriptions',
     getParentRoute: () => ProtectedCCollectionIdRouteRoute,
   } as any)
 const ProtectedCCollectionIdSettingsRoute =
@@ -80,10 +74,16 @@ const ProtectedCCollectionIdSettingsRoute =
     path: '/settings',
     getParentRoute: () => ProtectedCCollectionIdRouteRoute,
   } as any)
-const ProtectedCCollectionIdSubscriptionsRoute =
-  ProtectedCCollectionIdSubscriptionsRouteImport.update({
-    id: '/subscriptions',
-    path: '/subscriptions',
+const ProtectedCCollectionIdInvoicesRoute =
+  ProtectedCCollectionIdInvoicesRouteImport.update({
+    id: '/invoices',
+    path: '/invoices',
+    getParentRoute: () => ProtectedCCollectionIdRouteRoute,
+  } as any)
+const ProtectedCCollectionIdDashboardRoute =
+  ProtectedCCollectionIdDashboardRouteImport.update({
+    id: '/dashboard',
+    path: '/dashboard',
     getParentRoute: () => ProtectedCCollectionIdRouteRoute,
   } as any)
 
@@ -182,18 +182,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_protected': {
-      id: '/_protected'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof ProtectedRouteRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -203,11 +196,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
+    '/_protected': {
+      id: '/_protected'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof ProtectedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_protected/dashboard': {
@@ -217,12 +217,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedDashboardRouteImport
       parentRoute: typeof ProtectedRouteRoute
     }
-    '/_protected/c/$collectionId': {
-      id: '/_protected/c/$collectionId'
-      path: '/c/$collectionId'
-      fullPath: '/c/$collectionId'
-      preLoaderRoute: typeof ProtectedCCollectionIdRouteRouteImport
-      parentRoute: typeof ProtectedRouteRoute
+    '/api/subscriptions/export': {
+      id: '/api/subscriptions/export'
+      path: '/api/subscriptions/export'
+      fullPath: '/api/subscriptions/export'
+      preLoaderRoute: typeof ApiSubscriptionsExportRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -231,25 +231,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/subscriptions/export': {
-      id: '/api/subscriptions/export'
-      path: '/api/subscriptions/export'
-      fullPath: '/api/subscriptions/export'
-      preLoaderRoute: typeof ApiSubscriptionsExportRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_protected/c/$collectionId': {
+      id: '/_protected/c/$collectionId'
+      path: '/c/$collectionId'
+      fullPath: '/c/$collectionId'
+      preLoaderRoute: typeof ProtectedCCollectionIdRouteRouteImport
+      parentRoute: typeof ProtectedRouteRoute
     }
-    '/_protected/c/$collectionId/dashboard': {
-      id: '/_protected/c/$collectionId/dashboard'
-      path: '/dashboard'
-      fullPath: '/c/$collectionId/dashboard'
-      preLoaderRoute: typeof ProtectedCCollectionIdDashboardRouteImport
-      parentRoute: typeof ProtectedCCollectionIdRouteRoute
-    }
-    '/_protected/c/$collectionId/invoices': {
-      id: '/_protected/c/$collectionId/invoices'
-      path: '/invoices'
-      fullPath: '/c/$collectionId/invoices'
-      preLoaderRoute: typeof ProtectedCCollectionIdInvoicesRouteImport
+    '/_protected/c/$collectionId/subscriptions': {
+      id: '/_protected/c/$collectionId/subscriptions'
+      path: '/subscriptions'
+      fullPath: '/c/$collectionId/subscriptions'
+      preLoaderRoute: typeof ProtectedCCollectionIdSubscriptionsRouteImport
       parentRoute: typeof ProtectedCCollectionIdRouteRoute
     }
     '/_protected/c/$collectionId/settings': {
@@ -259,11 +252,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedCCollectionIdSettingsRouteImport
       parentRoute: typeof ProtectedCCollectionIdRouteRoute
     }
-    '/_protected/c/$collectionId/subscriptions': {
-      id: '/_protected/c/$collectionId/subscriptions'
-      path: '/subscriptions'
-      fullPath: '/c/$collectionId/subscriptions'
-      preLoaderRoute: typeof ProtectedCCollectionIdSubscriptionsRouteImport
+    '/_protected/c/$collectionId/invoices': {
+      id: '/_protected/c/$collectionId/invoices'
+      path: '/invoices'
+      fullPath: '/c/$collectionId/invoices'
+      preLoaderRoute: typeof ProtectedCCollectionIdInvoicesRouteImport
+      parentRoute: typeof ProtectedCCollectionIdRouteRoute
+    }
+    '/_protected/c/$collectionId/dashboard': {
+      id: '/_protected/c/$collectionId/dashboard'
+      path: '/dashboard'
+      fullPath: '/c/$collectionId/dashboard'
+      preLoaderRoute: typeof ProtectedCCollectionIdDashboardRouteImport
       parentRoute: typeof ProtectedCCollectionIdRouteRoute
     }
   }

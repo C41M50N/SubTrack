@@ -1,6 +1,6 @@
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { PlusIcon } from 'lucide-react';
+import { PlusIcon, UploadIcon } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import {
   collectionsQueryOptions,
   type CollectionRecord,
 } from '@/features/collections/queries';
+import { ImportSubscriptionsDialog } from '@/features/imports/components/import-subscriptions-dialog';
 import { CostMetrics } from '@/features/subscriptions/components/cost-metrics';
 import { DeactivateSubscriptionDialog } from '@/features/subscriptions/components/deactivate-subscription-dialog';
 import { DeleteSubscriptionDialog } from '@/features/subscriptions/components/delete-subscription-dialog';
@@ -72,6 +73,9 @@ function RouteComponent() {
     categoriesQueryOptions(collectionId),
   );
   const { data: collections } = useSuspenseQuery(collectionsQueryOptions());
+  const collection = collections.find(
+    (candidate) => candidate.id === collectionId,
+  );
   // The collections query is already ordered by name.
   const moveTargets = useMemo(
     () => collections.filter((collection) => collection.id !== collectionId),
@@ -80,6 +84,8 @@ function RouteComponent() {
   const { move, isPending: isMovePending } = useMoveSubscriptionsWithFeedback();
 
   const [createOpen, setCreateOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  const [importCollectionId, setImportCollectionId] = useState(collectionId);
   const [editTarget, setEditTarget] = useState<SubscriptionRecord | null>(null);
   const [deleteTargets, setDeleteTargets] = useState<SubscriptionRecord[]>([]);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -92,6 +98,13 @@ function RouteComponent() {
   >([]);
   const [reactivateOpen, setReactivateOpen] = useState(false);
   const data = view === 'active' ? activeSubscriptions : inactiveSubscriptions;
+
+  // This page stays mounted when navigating to another collection, such as
+  // with Back and Forward, so an open import closes instead of carrying over.
+  if (importCollectionId !== collectionId) {
+    setImportCollectionId(collectionId);
+    setImportOpen(false);
+  }
 
   const handleEdit = useCallback((subscription: SubscriptionRecord) => {
     setEditTarget(subscription);
@@ -169,10 +182,16 @@ function RouteComponent() {
             Track spending across this collection.
           </p>
         </div>
-        <Button onClick={() => setCreateOpen(true)}>
-          <PlusIcon className="size-4" />
-          Add subscription
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setImportOpen(true)}>
+            <UploadIcon data-icon="inline-start" />
+            Import
+          </Button>
+          <Button onClick={() => setCreateOpen(true)}>
+            <PlusIcon data-icon="inline-start" />
+            Add subscription
+          </Button>
+        </div>
       </header>
 
       {view === 'active' && (
@@ -201,10 +220,19 @@ function RouteComponent() {
             onBulkDeactivate={handleBulkDeactivate}
             onBulkReactivate={handleBulkReactivate}
             onBulkDelete={handleBulkDelete}
+            onImport={() => setImportOpen(true)}
           />
         </div>
         {view === 'active' && <MonthlyBreakdown items={baseItems} />}
       </div>
+
+      {collection && (
+        <ImportSubscriptionsDialog
+          collection={{ id: collection.id, name: collection.name }}
+          open={importOpen}
+          onOpenChange={setImportOpen}
+        />
+      )}
 
       <SubscriptionFormDialog
         open={createOpen}
