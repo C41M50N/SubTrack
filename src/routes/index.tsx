@@ -40,6 +40,10 @@ function App() {
 
   return (
     <main className="mx-auto w-full max-w-5xl px-6 py-12 sm:px-8">
+      <h1 className="mb-3 text-3xl font-bold">EverySub</h1>
+      <p className="mb-6 text-base text-muted-foreground">
+        See what your subscriptions cost and what is coming up next.
+      </p>
       {session ? (
         <Button
           className="inline-flex"

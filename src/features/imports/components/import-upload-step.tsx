@@ -188,8 +188,8 @@ function DropZone({ smartImport, checking, onSelectFiles }: DropZoneProps) {
         </p>
         <p id={hintId} className="text-pretty text-muted-foreground">
           {smartImport.enabled
-            ? 'A SubTrack JSON or CSV export, or up to 5 statements, receipts, or screenshots as PDF, PNG, JPEG, or WebP.'
-            : 'A SubTrack JSON or CSV export.'}
+            ? 'An EverySub JSON or CSV export, or up to 5 statements, receipts, or screenshots as PDF, PNG, JPEG, or WebP.'
+            : 'An EverySub JSON or CSV export.'}
         </p>
         {!smartImport.enabled && smartImport.reason === 'limited' && (
           <p className="text-pretty text-muted-foreground tabular-nums">

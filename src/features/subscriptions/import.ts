@@ -45,7 +45,7 @@ function parseJsonRows(content: string): unknown[] {
   const envelope = subscriptionImportEnvelopeSchema.safeParse(parsed);
 
   if (!envelope.success) {
-    throw new Error('This file isn’t a SubTrack subscriptions export.');
+    throw new Error('This file isn’t an EverySub subscriptions export.');
   }
 
   return envelope.data.subscriptions;
@@ -101,10 +101,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 /**
- * Parses a SubTrack JSON or CSV export into valid and invalid rows.
+ * Parses an EverySub JSON or CSV export into valid and invalid rows.
  *
  * Throws only when the file itself is unusable: malformed JSON, a JSON
- * envelope that isn't a SubTrack export, or a CSV missing required columns.
+ * envelope that isn't an EverySub export, or a CSV missing required columns.
  * A bad row is returned with its first error so it can be fixed in review.
  */
 export function parseSubscriptionImport(input: {

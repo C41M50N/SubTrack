@@ -46,7 +46,7 @@ export function AppSidebar() {
       <SidebarHeader className="pt-3 pb-1 w-full bg-sidebar">
         <div className="flex w-full items-center justify-between pl-3 pr-1.5">
           <Link to="/c/$collectionId/dashboard" params={{ collectionId }}>
-            <h1 className="text-lg font-bold">SubTrack</h1>
+            <h1 className="text-lg font-bold">EverySub</h1>
           </Link>
           <Button size="icon" variant="ghost" className="p-4 rounded-full">
             <Avatar className="size-8">

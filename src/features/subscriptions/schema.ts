@@ -125,7 +125,7 @@ const importDeactivatedAtSchema = z.preprocess(
     .nullish(),
 );
 
-// One row of a SubTrack export file. The export's `collection` field is ignored
+// One row of an EverySub export file. The export's `collection` field is ignored
 // because every row is imported into the chosen collection.
 export const subscriptionImportRowSchema = z.object({
   name: subscriptionNameSchema,
@@ -142,7 +142,7 @@ export type SubscriptionImportRow = z.infer<typeof subscriptionImportRowSchema>;
 
 // Rows are validated one by one so a bad row doesn't reject the whole file.
 export const subscriptionImportEnvelopeSchema = z.object({
-  type: z.literal('subtrack.subscriptions'),
+  type: z.literal('everysub.subscriptions'),
   version: z.literal(1),
   subscriptions: z.array(z.unknown()),
 });

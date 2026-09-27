@@ -1,107 +1,86 @@
-**T**anStack Start + **B**etter Auth + **D**rizzle Starter
+# EverySub
 
-A practical starter for building a TanStack Start app with authentication, database ORM, and modern styling.
+EverySub helps you see what your subscriptions cost, when they renew, and how those charges add up. It brings subscription details, upcoming invoices, recorded billing history, and spending trends into one place.
 
-## Who this is for
+The project is in development and currently serves one person, while being built as an open source product and portfolio project. See [PRODUCT.md](PRODUCT.md) for the product direction and decision principles.
 
-- Devs evaluating TanStack Start with a real auth + DB setup
-- Teams that want a clean foundation without a heavy UI kit
-- Anyone who wants type-safe routing, typed data loaders, and a straightforward auth flow
+## What works today
 
-## What is included
+- Organize subscriptions in collections and categories. Add, edit, deactivate, reactivate, delete, and move them between collections.
+- Track weekly, monthly, yearly, and biennial billing schedules in USD. See effective monthly and yearly costs and the next expected charge.
+- Review collection dashboards with cost metrics, spending trends, category breakdowns, upcoming invoices, and recently recorded invoices.
+- Explore projected upcoming invoices and recorded invoice history separately. Recorded entries are schedule snapshots; EverySub does not verify payment.
+- Import and export subscriptions as JSON or CSV. An optional smart import finds candidates in statements, receipts, and screenshots, then lets you review them before saving.
 
-- TanStack Start + Router file-based routing
-- TanStack Query wired into router SSR (not used by default to keep the template lean)
-- Better Auth with Google provider and server handler route
-- Drizzle ORM schema + migrations wiring for PostgreSQL
-- Tailwind CSS v4 setup
-- Portless local HTTPS URLs for dev (`https://tbd.localhost`)
-- Oxlint for linting
-- Oxfmt for formatting
-- Protected routes + login flow
+## Stack
 
-## Quick start
+TanStack Start and Router, React, TanStack Query, Better Auth with Google sign-in, Drizzle ORM and PostgreSQL, Tailwind CSS, and optional OpenAI-powered import. Bun runs the local scripts. Portless provides local HTTPS.
+
+## Local setup
+
+Install dependencies and create `.env.local` in the project root. [`.env.schema`](.env.schema) defines the required and optional variables.
 
 ```bash
 bun install
+```
+
+```dotenv
+DATABASE_URL=
+BETTER_AUTH_SECRET=
+BETTER_AUTH_URL=https://dev.everysub.com
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+
+# Optional: enables smart import
+OPENAI_API_KEY=
+# Optional: subscription brand icons
+LOGO_DEV_SECRET_KEY=
+LOGO_DEV_PUBLISHABLE_KEY=
+```
+
+Set the Google OAuth callback URL to `https://dev.everysub.com/api/auth/callback/google`. Apply the existing Drizzle migrations to your local database with `bun run db:migrate`.
+
+```bash
 bun run dev
 ```
 
-The dev script runs Vite through `portless`, so the app is available at `https://tbd.localhost` instead of a fixed `localhost:<port>` URL. On first run, `portless` may prompt to trust its local certificate and start the local proxy.
-
-## Environment variables
-
-Create a `.env.local` file in the project root (see `.env.schema`):
-
-```
-DATABASE_URL=
-BETTER_AUTH_SECRET=
-BETTER_AUTH_URL=
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-```
-
-`.env.schema` is the source of truth for env vars and is used by varlock to generate `env.d.ts`.
-
-## Auth setup
-
-- Auth handler lives at `/api/auth/*`.
-- Update your OAuth callback URLs to match your local and production origins (for Google locally: `https://tbd.localhost/api/auth/callback/google`).
-- Server auth code is in `src/features/auth/server.ts`.
-- Client auth code is in `src/features/auth/client.ts`.
-- Server function auth middleware is in `src/features/auth/middleware.ts`.
-
-## Database + Drizzle
-
-The schema entry point is `src/lib/db/schema.ts`.
+The app runs at **https://dev.everysub.com**. The dev script requests `.com` (alongside `.dev` and `.localhost`) and registers `dev.everysub`. Portless manages the local HTTPS certificate and hosts entry. If an existing Portless proxy was started without `.com` support, restart it from an interactive terminal before running the app:
 
 ```bash
-bun run db:generate
-bun run db:migrate
-bun run db:push
-bun run db:studio
+bunx portless proxy stop
+bunx portless proxy start --tld com --tld dev --tld localhost
 ```
+
+Portless may ask for your system password because the HTTPS proxy uses port 443. Restarting the shared proxy may briefly disconnect other local Portless apps.
 
 ## Scripts
 
-- Dev server: `bun run dev`
-- Production build: `bun run build`
-- Lint: `bun run lint`
-- Lint with fixes: `bun run lint:fix`
-- Format: `bun run fmt`
-- Format (check only): `bun run fmt:check`
-- Tests: `bun run test`
-- Generate Drizzle migrations: `bun run db:generate`
-- Run Drizzle migrations: `bun run db:migrate`
-- Push schema changes: `bun run db:push`
-- Open Drizzle Studio: `bun run db:studio`
+| Command                    | Purpose                                    |
+| -------------------------- | ------------------------------------------ |
+| `bun run dev`              | Start the local HTTPS app                  |
+| `bun run build`            | Build the production app                   |
+| `bun run start`            | Serve the production build                 |
+| `bun run test`             | Run Vitest tests                           |
+| `bun run lint`             | Run Oxlint                                 |
+| `bun run fmt:check`        | Check formatting with Oxfmt                |
+| `bun run db:migrate`       | Apply existing Drizzle migrations          |
+| `bun run db:push`          | Push the current schema during development |
+| `bun run db:studio`        | Open Drizzle Studio                        |
+| `bun run invoices:process` | Process due invoice snapshots              |
+| `bun run import:eval`      | Run the smart import evaluation script     |
 
-Linting is configured in `.oxlintrc.json` and formatting is configured in `.oxfmtrc.json`.
+`db:generate` exists for authoring migrations, but should only be run when explicitly requested by the project owner.
 
-## Project structure
+## Project map
 
-- `src/features/auth`: auth server/client/session/middleware helpers
-- `src/lib/db`: Drizzle client + schema
-- `src/router.tsx`: router setup, including TanStack Query SSR integration
-- `src/routes`: file-based routes (including protected routes)
-- `src/styles.css`: Tailwind setup
-- `docs/tech-stack`: stack notes and conventions
+- [`src/features`](src/features) contains the subscription, collection, invoice, dashboard, auth, and import features.
+- [`src/routes`](src/routes) contains public and collection-scoped app routes and API endpoints.
+- [`src/lib/db`](src/lib/db) holds the Drizzle schema and database client; [`drizzle`](drizzle) holds migrations.
+- [`docs/requirements`](docs/requirements) captures detailed behavior for invoices and imports.
+- [`fixtures/synthetic-statement.pdf`](fixtures/synthetic-statement.pdf) is fictional data for smart import demos and testing.
 
-## Next steps
+## Current limits
 
-- Setup Shadcn/ui: `bunx --bun shadcn@latest init`
-- Add your own routes in `src/routes`
-- Add additional OAuth providers in `src/features/auth/server.ts`
-- Create your app schema in `src/lib/db/schema.ts`
+The app supports USD only; multi-currency support remains open. Renewal reminders are part of the product direction but are not implemented yet.
 
-## Learn more
-
-- TanStack Start: https://tanstack.com/start
-- TanStack Router: https://tanstack.com/router
-- TanStack Query: https://tanstack.com/query
-- Better Auth: https://better-auth.com
-- Drizzle ORM: https://orm.drizzle.team
-- Tailwind CSS: https://tailwindcss.com
-- Portless: https://portless.sh
-- Oxlint: https://oxc.rs/docs/guide/usage/linter.html
-- Oxfmt: https://oxc.rs/docs/guide/usage/formatter.html
+Smart import is available only when `OPENAI_API_KEY` is configured. Uploaded files are sent to OpenAI for extraction and are not stored by EverySub. Import suggestions require review before saving.

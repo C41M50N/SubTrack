@@ -38,7 +38,7 @@ describe('parseSubscriptionImport', () => {
 
   it('accepts exports without deactivatedAt', () => {
     const legacyJson = JSON.stringify({
-      type: 'subtrack.subscriptions',
+      type: 'everysub.subscriptions',
       version: 1,
       subscriptions: [{ ...baseRecord, deactivatedAt: undefined }],
     });
@@ -83,7 +83,7 @@ describe('parseSubscriptionImport', () => {
   });
 
   it('flags JSON rows that are not objects', () => {
-    const json = JSON.stringify({ type: 'subtrack.subscriptions', version: 1, subscriptions: ['Netflix'] });
+    const json = JSON.stringify({ type: 'everysub.subscriptions', version: 1, subscriptions: ['Netflix'] });
 
     expect(parseSubscriptionImport({ content: json }).invalidRows).toEqual([
       { values: {}, error: 'This row isn’t a subscription' },
@@ -101,7 +101,7 @@ describe('parseSubscriptionImport', () => {
   it('rejects the whole file only when the file itself is unusable', () => {
     expect(() => parseSubscriptionImport({ content: '{ not json', format: 'json' })).toThrow('isn’t valid JSON');
     expect(() => parseSubscriptionImport({ content: '{"type":"other"}' })).toThrow(
-      'isn’t a SubTrack subscriptions export',
+      'isn’t an EverySub subscriptions export',
     );
     expect(() => parseSubscriptionImport({ content: 'name,status\nNetflix,active' })).toThrow(
       'missing required columns: category, icon_ref',

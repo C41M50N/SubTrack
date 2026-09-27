@@ -8,7 +8,7 @@ Approved for implementation.
 
 Importing lets users add many subscriptions to a collection at once instead of entering them one by one. It enables users to:
 
-- Re-import a SubTrack JSON or CSV export into a collection.
+- Re-import an EverySub JSON or CSV export into a collection.
 - Upload bank statements, receipts, or screenshots and have AI find the subscriptions in them.
 - Review everything before it is saved, choosing exactly which subscriptions to import and fixing any that are wrong.
 
@@ -17,7 +17,7 @@ Both entry points lead to the same review step and the same import operation. No
 ## Terminology
 
 - **Target collection:** The collection the import writes to.
-- **File import:** An import from a SubTrack JSON or CSV export file.
+- **File import:** An import from an EverySub JSON or CSV export file.
 - **Smart import:** An import from PDFs or images, parsed by an AI agent.
 - **Review step:** The step where the user selects, deselects, and edits rows before importing.
 - **Row group:** One of three sections in the review step: **Ready**, **Needs review**, or **Needs fixes**.
@@ -107,7 +107,7 @@ Export files are parsed on the client with `parseSubscriptionImport`. The parser
 The whole file is rejected, and the dialog stays on the upload step, only when:
 
 - The JSON is malformed.
-- The JSON envelope is not a SubTrack subscriptions export.
+- The JSON envelope is not an EverySub subscriptions export.
 - The CSV is missing required columns.
 
 ### Row handling

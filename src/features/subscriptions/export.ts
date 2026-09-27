@@ -55,7 +55,7 @@ export function serializeSubscriptionsToJson(
 ): string {
   return JSON.stringify(
     {
-      type: 'subtrack.subscriptions',
+      type: 'everysub.subscriptions',
       version: 1,
       exportedAt: exportedAt.toISOString(),
       scope,
@@ -99,12 +99,12 @@ export function buildExportFilename(input: {
   const datePart = formatExportDate(input.date);
 
   if (input.scope === 'all') {
-    return `subtrack-subscriptions-all-${datePart}.${input.format}`;
+    return `everysub-subscriptions-all-${datePart}.${input.format}`;
   }
 
   const slug = slugify(input.scope.collectionName, { lower: true, strict: true }) || input.scope.collectionId;
 
-  return `subtrack-subscriptions-collection-${slug}-${datePart}.${input.format}`;
+  return `everysub-subscriptions-collection-${slug}-${datePart}.${input.format}`;
 }
 
 export function exportContentType(format: SubscriptionTransferFormat): string {

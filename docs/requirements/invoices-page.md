@@ -6,14 +6,14 @@ Approved for implementation.
 
 ## Purpose
 
-The Invoices page is the collection-scoped billing timeline for SubTrack. It enables users to:
+The Invoices page is the collection-scoped billing timeline for EverySub. It enables users to:
 
 - Understand which subscription invoices have already been recorded.
 - See which subscription invoices are expected next.
 - Inspect billing activity by month and by day.
 - Understand the total financial impact of invoices in the active period.
 
-The page must distinguish recorded invoice history from projected upcoming invoices. It must not imply that SubTrack has confirmed whether an invoice was paid.
+The page must distinguish recorded invoice history from projected upcoming invoices. It must not imply that EverySub has confirmed whether an invoice was paid.
 
 ## Terminology
 
@@ -386,5 +386,5 @@ The implementation is complete when:
 12. Selecting a calendar day updates the agenda without narrowing the table.
 13. Recorded history continues to render from snapshots after source subscription changes or deletion.
 14. Empty, loading, and error states are view-specific and recoverable where applicable.
-15. The page conforms to the established SubTrack visual system and responsive layout conventions.
+15. The page conforms to the established EverySub visual system and responsive layout conventions.
 16. Projection, aggregation, date-boundary, sorting, and route-search behavior are covered by automated tests.

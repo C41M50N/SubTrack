@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as AboutRouteImport } from './routes/about'
 import { Route as ProtectedRouteRouteImport } from './routes/_protected/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProtectedDashboardRouteImport } from './routes/_protected/dashboard'
@@ -25,11 +24,6 @@ import { Route as ProtectedCCollectionIdDashboardRouteImport } from './routes/_p
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProtectedRouteRoute = ProtectedRouteRouteImport.update({
@@ -89,7 +83,6 @@ const ProtectedCCollectionIdDashboardRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
   '/login': typeof LoginRoute
   '/dashboard': typeof ProtectedDashboardRoute
   '/c/$collectionId': typeof ProtectedCCollectionIdRouteRouteWithChildren
@@ -102,7 +95,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
   '/login': typeof LoginRoute
   '/dashboard': typeof ProtectedDashboardRoute
   '/c/$collectionId': typeof ProtectedCCollectionIdRouteRouteWithChildren
@@ -117,7 +109,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_protected': typeof ProtectedRouteRouteWithChildren
-  '/about': typeof AboutRoute
   '/login': typeof LoginRoute
   '/_protected/dashboard': typeof ProtectedDashboardRoute
   '/_protected/c/$collectionId': typeof ProtectedCCollectionIdRouteRouteWithChildren
@@ -132,7 +123,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/about'
     | '/login'
     | '/dashboard'
     | '/c/$collectionId'
@@ -145,7 +135,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/about'
     | '/login'
     | '/dashboard'
     | '/c/$collectionId'
@@ -159,7 +148,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_protected'
-    | '/about'
     | '/login'
     | '/_protected/dashboard'
     | '/_protected/c/$collectionId'
@@ -174,7 +162,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProtectedRouteRoute: typeof ProtectedRouteRouteWithChildren
-  AboutRoute: typeof AboutRoute
   LoginRoute: typeof LoginRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiSubscriptionsExportRoute: typeof ApiSubscriptionsExportRoute
@@ -187,13 +174,6 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_protected': {
@@ -308,7 +288,6 @@ const ProtectedRouteRouteWithChildren = ProtectedRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProtectedRouteRoute: ProtectedRouteRouteWithChildren,
-  AboutRoute: AboutRoute,
   LoginRoute: LoginRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiSubscriptionsExportRoute: ApiSubscriptionsExportRoute,
