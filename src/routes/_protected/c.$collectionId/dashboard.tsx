@@ -127,7 +127,7 @@ function DashboardPage() {
               <CategoryBreakdown entries={categories} />
               <InvoiceListCard
                 title="Recently recorded"
-                description="The latest invoices SubTrack has recorded"
+                description="The latest invoices EverySub has recorded"
                 view="history"
                 collectionId={collectionId}
                 invoices={recent}

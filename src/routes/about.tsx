@@ -12,12 +12,12 @@ function About() {
           About
         </p>
         <h1 className="mb-3 text-3xl font-bold text-slate-900 sm:text-4xl">
-          A small starter with room to grow.
+          Keep your subscriptions in view.
         </h1>
         <p className="m-0 max-w-3xl text-base leading-7 text-slate-600">
-          TanStack Start gives you type-safe routing, server functions, and
-          modern SSR defaults. Use this as a clean foundation, then layer in
-          your own routes, styling, and add-ons.
+          EverySub brings your subscription costs, upcoming renewals, and
+          recorded billing history into one place. Organize subscriptions in
+          collections and see how they add up over time.
         </p>
       </section>
     </main>

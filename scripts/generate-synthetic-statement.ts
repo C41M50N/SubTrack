@@ -101,7 +101,7 @@ function renderPage(rows: Transaction[], pageNumber: number, pageCount: number):
   });
 
   commands.push(
-    text(MARGIN, 60, 'Synthetic statement for SubTrack demos. No real account, person, or transaction.', { size: 8 }),
+    text(MARGIN, 60, 'Synthetic statement for EverySub demos. No real account, person, or transaction.', { size: 8 }),
   );
 
   return commands.join('\n');

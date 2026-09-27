@@ -71,7 +71,7 @@ type ImportSubscriptionsDialogProps = {
 };
 
 /**
- * Imports subscriptions into one collection from a SubTrack export or, with
+ * Imports subscriptions into one collection from an EverySub export or, with
  * smart import, from statements, receipts, and screenshots. Nothing is saved
  * until the user confirms the reviewed rows.
  */
@@ -432,7 +432,7 @@ function ImportDialog({
           <DialogDescription>
             {step === 'review'
               ? 'Choose what to import and fix anything that’s wrong. Nothing is saved until you import.'
-              : 'Upload a SubTrack export, or find subscriptions in statements, receipts, and screenshots.'}
+              : 'Upload an EverySub export, or find subscriptions in statements, receipts, and screenshots.'}
           </DialogDescription>
         </DialogHeader>
 

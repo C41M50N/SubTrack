@@ -70,7 +70,7 @@ function Login() {
           Sign in to continue
         </h1>
         <p className="mb-6 text-base leading-7 text-slate-600">
-          Use your Google account to access protected routes.
+          Use your Google account to access EverySub.
         </p>
         <Button
           onClick={handleGoogleSignIn}
