@@ -129,6 +129,19 @@ The normal reminder date is the expected invoice date minus the user's lead time
 - A user can send a sample-data test to a generic or Discord destination before routing live notifications. The sample is clearly labeled as a test and contains no real subscription details.
 - Deleting a destination shows the collections and notification types that currently route to it, then removes all those routes. No further notifications go to the deleted destination.
 
+### Email creation and delivery with Resend
+
+- Keep the renewal-reminder and monthly-overview email templates as **React Email components in the EverySub codebase**. Render their variable-length collection and subscription lists from the same eligible notification data used by the webhook and Discord formats. Resend-hosted Templates are not used for these messages.
+- Use **Resend** to send the rendered notification emails. Send only to the user's current verified account email when a collection routes that notification type to email.
+- Configure a sender address on a domain verified in Resend. Add server-only `RESEND_API_KEY`, `RESEND_FROM_ADDRESS`, and `RESEND_WEBHOOK_SECRET` entries to the project's environment schema when implementing email delivery. Never expose the API key or webhook secret to the browser or commit them.
+- Provide a branded HTML message and a readable plain-text alternative for reminders and overviews. The subject and preview text identify the expected renewal or the months covered without implying that payment was confirmed.
+- Keep representative local preview fixtures for a single reminder, several collections, an overview with one empty section, and an overview with a long itemized list. Verify the rendered HTML and plain-text content at narrow and wide email widths.
+- If Resend is not configured or the sending domain is not ready, email routing must be unavailable with a clear setup state. Discord and generic webhook routes remain usable.
+- Use a Resend idempotency key for an identical email request retried after a timeout. Resend retains keys for 24 hours and rejects reuse of a key with a changed payload, so durable local delivery state is still required. If current privacy or routing choices change the email body before a retry, retire the old request and use a new request identity after revalidation; do not resend the old body.
+- Store the Resend email ID returned by an accepted send and distinguish **accepted by Resend** from **delivered to the recipient** in internal state and user-facing health.
+- Receive the Resend delivery events needed to detect delivery, permanent bounce, complaint, suppression, and failure. Verify the provider's webhook signature against the raw request body, deduplicate events, and update only the matching email delivery. Pause email sending when the recipient address is permanently rejected or suppressed.
+- Do not enable open or click tracking for these notification emails. Use provider delivery events rather than recipient activity to assess delivery health.
+
 ### Collection settings
 
 - Each collection independently selects zero or more destinations for reminders and zero or more for monthly overviews.
@@ -150,6 +163,9 @@ The normal reminder date is the expected invoice date minus the user's lead time
 
 ## Delivery reliability and feedback
 
+- Persist user timing preferences, destinations, collection routes, subscription inclusion, and enough invoice-level privacy state to preserve inclusion after subscription deletion. Enforce user ownership and collection ownership on reads and writes.
+- Persist a logical notification event and per-destination delivery state so multiple workers and job reruns cannot claim the same send concurrently. Use a stable uniqueness rule for each destination and reminder occurrence or monthly period. Do not hold a database transaction open across an external network request.
+- Compute each user's local date and 9 a.m. due time from the stored IANA time zone rather than the database session time zone. A shared recurring job may process all users; it must run often enough to reach 9 a.m. in time zones with non-hour UTC offsets.
 - A transient network failure, rate limit, or temporary server rejection receives up to **four retries after the initial attempt**, with increasing delays and jitter over roughly one hour. Honor a destination's `Retry-After` instruction when applicable.
 - A clear permanent rejection pauses the affected destination promptly. Temporary failures exhaust retries for the current event; pause the destination after three consecutive events that exhaust their retries, and reset that count after a successful delivery. Other destinations continue independently.
 - A paused destination does not accumulate a bulk replay. Re-enabling it resumes future notifications; a still-relevant missed reminder or monthly overview may be sent only under the catch-up rules above.
@@ -198,3 +214,6 @@ The implementation is complete when:
 13. Temporary delivery failures retry with backoff, permanent failures pause the destination, and failure status is visible without leaking secrets or using an unselected fallback.
 14. Job reruns and retries do not resend after confirmed success; webhook consumers have a stable event ID for deduplication when acceptance is uncertain.
 15. Automated tests cover lead-time boundaries, weekly recurrence, local month boundaries and daylight saving, collection routing and moves, deletion and privacy history, catch-up and duplicate prevention, payload filtering, and delivery failure behavior.
+16. Code-owned React Email templates render varied collection and subscription lists as HTML and readable text; Resend sends them from a verified sender with server-only credentials and request idempotency during retries.
+17. Verified Resend delivery events update email health, and permanent rejection or suppression pauses email without interrupting other destinations.
+18. Email preview fixtures cover short and long content, empty sections, and narrow layouts without exposing real subscription data.
