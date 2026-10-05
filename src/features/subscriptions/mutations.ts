@@ -3,6 +3,7 @@ import type { z } from 'zod';
 
 import { categoriesListQueryKey, categoriesQueryOptions } from '@/features/categories/queries';
 import { collectionsListQueryKey } from '@/features/collections/queries';
+import { notificationsQueryKey } from '@/features/notifications/queries';
 import {
   clearSubscriptions,
   createSubscription,
@@ -26,14 +27,20 @@ export type CreateSubscriptionInput = z.infer<typeof createSubscriptionInputSche
 export type UpdateSubscriptionInput = z.infer<typeof updateSubscriptionInputSchema>;
 export type ImportSubscriptionsInput = z.infer<typeof importSubscriptionsInputSchema>;
 
+// Subscription changes also change the notification inclusion lists.
+function invalidateSubscriptionViews(queryClient: ReturnType<typeof useQueryClient>) {
+  return Promise.all([
+    queryClient.invalidateQueries({ queryKey: subscriptionsListQueryKey }),
+    queryClient.invalidateQueries({ queryKey: notificationsQueryKey }),
+  ]);
+}
+
 export function useCreateSubscription() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (input: CreateSubscriptionInput) => createSubscription({ data: input }),
-    onSuccess: () => {
-      return queryClient.invalidateQueries({ queryKey: subscriptionsListQueryKey });
-    },
+    onSuccess: () => invalidateSubscriptionViews(queryClient),
   });
 }
 
@@ -42,9 +49,7 @@ export function useUpdateSubscription() {
 
   return useMutation({
     mutationFn: (input: UpdateSubscriptionInput) => updateSubscription({ data: input }),
-    onSuccess: () => {
-      return queryClient.invalidateQueries({ queryKey: subscriptionsListQueryKey });
-    },
+    onSuccess: () => invalidateSubscriptionViews(queryClient),
   });
 }
 
@@ -53,9 +58,7 @@ export function useDeleteSubscriptions() {
 
   return useMutation({
     mutationFn: (subscriptionIds: string[]) => deleteSubscriptions({ data: { subscriptionIds } }),
-    onSuccess: () => {
-      return queryClient.invalidateQueries({ queryKey: subscriptionsListQueryKey });
-    },
+    onSuccess: () => invalidateSubscriptionViews(queryClient),
   });
 }
 
@@ -64,7 +67,7 @@ function useLifecycleMutation<Variables, Result>(mutationFn: (variables: Variabl
 
   return useMutation({
     mutationFn,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: subscriptionsListQueryKey }),
+    onSuccess: () => invalidateSubscriptionViews(queryClient),
   });
 }
 
@@ -93,7 +96,7 @@ export function useMoveSubscriptions() {
     mutationFn: (input: { subscriptionIds: string[]; collectionId: string }) => moveSubscriptions({ data: input }),
     onSuccess: (_result, input) =>
       Promise.all([
-        queryClient.invalidateQueries({ queryKey: subscriptionsListQueryKey }),
+        invalidateSubscriptionViews(queryClient),
         queryClient.invalidateQueries({ queryKey: categoriesQueryOptions(input.collectionId).queryKey }),
       ]),
   });
@@ -107,7 +110,7 @@ export function useImportSubscriptions() {
     mutationFn: (input: ImportSubscriptionsInput) => importSubscriptions({ data: input }),
     onSuccess: (_result, input) =>
       Promise.all([
-        queryClient.invalidateQueries({ queryKey: subscriptionsListQueryKey }),
+        invalidateSubscriptionViews(queryClient),
         queryClient.invalidateQueries({ queryKey: categoriesQueryOptions(input.collectionId).queryKey }),
       ]),
   });

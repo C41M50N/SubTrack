@@ -47,6 +47,7 @@ export const createSubscription = createServerFn({ method: 'POST' })
       costAmount: data.costAmount,
       costFrequency: data.costFrequency,
       nextInvoiceDate: data.nextInvoiceDate,
+      notificationsIncluded: data.notificationsIncluded,
     });
   });
 
@@ -63,6 +64,7 @@ export const updateSubscription = createServerFn({ method: 'POST' })
       costAmount: data.costAmount,
       costFrequency: data.costFrequency,
       nextInvoiceDate: data.nextInvoiceDate,
+      notificationsIncluded: data.notificationsIncluded,
     });
   });
 

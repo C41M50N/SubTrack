@@ -1,5 +1,17 @@
 import { sql } from 'drizzle-orm';
-import { check, date, foreignKey, index, integer, pgEnum, pgTable, text, timestamp, unique } from 'drizzle-orm/pg-core';
+import {
+  boolean,
+  check,
+  date,
+  foreignKey,
+  index,
+  integer,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  unique,
+} from 'drizzle-orm/pg-core';
 
 import { generateId } from '@/lib/data-utils';
 import { user } from '@/lib/db/auth-schema';
@@ -34,6 +46,13 @@ export const subscriptionTable = pgTable(
     costAmount: integer('cost_amount').notNull(), // in cents
     costFrequency: subscriptionCostFrequencyEnum('cost_frequency').notNull(),
     nextInvoiceDate: date('next_invoice_date', { mode: 'string' }).notNull(),
+    // Whether this subscription's details may appear in outbound notifications.
+    // Recorded invoices mirror this value so it survives deletion.
+    notificationsIncluded: boolean('notifications_included').notNull().default(true),
+    // The earliest reminder send time this subscription's current schedule can
+    // use. Creating, rescheduling, reactivating, including, or moving it resets
+    // this, so a reminder time that already passed is never caught up.
+    remindersEligibleAt: timestamp('reminders_eligible_at', { withTimezone: true }).defaultNow().notNull(),
     collectionId: text('collection_id')
       .notNull()
       .references(() => collectionTable.id, { onDelete: 'cascade' }),

@@ -189,6 +189,7 @@ export async function duplicateMyCollection(input: { userId: string; collectionI
           costAmount: subscription.costAmount,
           costFrequency: subscription.costFrequency,
           nextInvoiceDate: subscription.nextInvoiceDate,
+          notificationsIncluded: subscription.notificationsIncluded,
           collectionId: collection.id,
         })),
       );

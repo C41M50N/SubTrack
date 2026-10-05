@@ -1,5 +1,16 @@
 import { sql } from 'drizzle-orm';
-import { check, date, foreignKey, index, integer, pgTable, text, timestamp, unique } from 'drizzle-orm/pg-core';
+import {
+  boolean,
+  check,
+  date,
+  foreignKey,
+  index,
+  integer,
+  pgTable,
+  text,
+  timestamp,
+  unique,
+} from 'drizzle-orm/pg-core';
 
 import { generateId } from '@/lib/data-utils';
 import { user } from '@/lib/db/auth-schema';
@@ -29,6 +40,9 @@ export const subscriptionInvoiceTable = pgTable(
     category: text('category').notNull(),
     amount: integer('amount').notNull(), // in cents
     invoiceDate: date('invoice_date', { mode: 'string' }).notNull(),
+    // Mirrors the subscription's current inclusion choice while it exists, and
+    // keeps its final choice after deletion.
+    notificationsIncluded: boolean('notifications_included').notNull().default(true),
     createdAt: timestamp('created_at').defaultNow().notNull(),
   },
   (table) => [

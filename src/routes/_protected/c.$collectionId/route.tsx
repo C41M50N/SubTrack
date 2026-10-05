@@ -3,6 +3,7 @@ import { Outlet, createFileRoute, redirect } from '@tanstack/react-router';
 import { AppSidebar } from '@/components/app-sidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { collectionsQueryOptions } from '@/features/collections/queries';
+import { NotificationAttentionAlert } from '@/features/notifications/components/notification-attention-alert';
 
 export const Route = createFileRoute('/_protected/c/$collectionId')({
   loader: async ({ context, params }) => {
@@ -39,8 +40,19 @@ function CollectionLayout() {
     <SidebarProvider className="h-svh overflow-hidden">
       <AppSidebar />
       <main className="flex min-w-0 flex-1 flex-col overflow-y-auto">
+        <AttentionBanner />
         <Outlet />
       </main>
     </SidebarProvider>
+  );
+}
+
+// Destinations that stopped delivering are flagged on every page, since
+// notifications fail silently otherwise.
+function AttentionBanner() {
+  return (
+    <div className="px-6 pt-6 empty:hidden">
+      <NotificationAttentionAlert />
+    </div>
   );
 }

@@ -11,10 +11,11 @@ The project is in development and currently serves one person, while being built
 - Review collection dashboards with cost metrics, spending trends, category breakdowns, upcoming invoices, and recently recorded invoices.
 - Explore projected upcoming invoices and recorded invoice history separately. Recorded entries are schedule snapshots; EverySub does not verify payment.
 - Import and export subscriptions as JSON or CSV. An optional smart import finds candidates in statements, receipts, and screenshots, then lets you review them before saving.
+- Get renewal reminders and a monthly overview by email, Discord, or a signed webhook. Each collection chooses where its notifications go, and each subscription can be excluded from them.
 
 ## Stack
 
-TanStack Start and Router, React, TanStack Query, Better Auth with Google sign-in, Drizzle ORM and PostgreSQL, Tailwind CSS, and optional OpenAI-powered import. Bun runs the local scripts. Portless provides local HTTPS.
+TanStack Start and Router, React, TanStack Query, Better Auth with Google sign-in, Drizzle ORM and PostgreSQL, Tailwind CSS, optional OpenAI-powered import, and React Email with Resend for notification emails. Bun runs the local scripts. Portless provides local HTTPS.
 
 ## Local setup
 
@@ -36,6 +37,11 @@ OPENAI_API_KEY=
 # Optional: subscription brand icons
 LOGO_DEV_SECRET_KEY=
 LOGO_DEV_PUBLISHABLE_KEY=
+
+# Optional: enables email notifications
+RESEND_API_KEY=
+RESEND_FROM_ADDRESS="EverySub <notifications@mail.example.com>"
+RESEND_WEBHOOK_SECRET=
 ```
 
 Set the Google OAuth callback URL to `https://dev.everysub.com/api/auth/callback/google`. Apply the existing Drizzle migrations to your local database with `bun run db:migrate`.
@@ -66,21 +72,46 @@ Portless may ask for your system password because the HTTPS proxy uses port 443.
 | `bun run db:migrate`       | Apply existing Drizzle migrations          |
 | `bun run db:push`          | Push the current schema during development |
 | `bun run db:studio`        | Open Drizzle Studio                        |
-| `bun run invoices:process` | Process due invoice snapshots              |
+| `bun run jobs:run`         | Record due invoices and send notifications |
+| `bun run invoices:process` | Record due invoice snapshots only          |
+| `bun run email:dev`        | Preview notification emails                |
 | `bun run import:eval`      | Run the smart import evaluation script     |
 
 `db:generate` exists for authoring migrations, but should only be run when explicitly requested by the project owner.
 
+## Notifications
+
+Notifications are scheduled by one recurring job, `bun run jobs:run`, which [`railway/invoice-cron.json`](railway/invoice-cron.json) runs every five minutes. Each run records due invoices in each user's time zone, creates the reminders and overviews whose 9 a.m. local send time has arrived, and delivers them with retries. Five minutes is frequent enough to reach 9 a.m. in time zones offset by 30 or 45 minutes and to space retries over about an hour.
+
+Email needs a [Resend](https://resend.com) account:
+
+1. Verify the sending domain in Resend and set `RESEND_FROM_ADDRESS` to an address on it. Leave open and click tracking off for that domain; EverySub keeps email unavailable while either is on.
+2. Create an API key for `RESEND_API_KEY`. A full-access key lets EverySub confirm the domain is ready; a sending-only key works too.
+3. Add a Resend webhook pointing to `https://<your-host>/api/webhooks/resend` with the `email.sent`, `email.delivered`, `email.delivery_delayed`, `email.bounced`, `email.complained`, `email.failed`, and `email.suppressed` events. Put its signing secret in `RESEND_WEBHOOK_SECRET`.
+
+Without Resend, email is shown as unavailable and Discord and webhook destinations keep working. The generic webhook contract and signature verification are documented in [`docs/notifications/webhooks.md`](docs/notifications/webhooks.md). `bun run email:dev` previews the email templates against fictional fixtures, with mobile and desktop widths and the plain-text version.
+
+## Tests
+
+`bun run test` runs the unit tests. The notification integration tests also need a disposable local PostgreSQL database with the current schema. They truncate every table, so they refuse to run against anything but `localhost`:
+
+```bash
+DATABASE_URL=postgresql://postgres@localhost:5432/everysub_test bun run db:push
+TEST_DATABASE_URL=postgresql://postgres@localhost:5432/everysub_test bun run test
+```
+
 ## Project map
 
-- [`src/features`](src/features) contains the subscription, collection, invoice, dashboard, auth, and import features.
-- [`src/routes`](src/routes) contains public and collection-scoped app routes and API endpoints.
+- [`src/features`](src/features) contains the subscription, collection, invoice, dashboard, auth, import, and notification features.
+- [`src/routes`](src/routes) contains public, account, and collection-scoped app routes and API endpoints.
+- [`src/jobs`](src/jobs) holds the scheduled job that records invoices and sends notifications.
 - [`src/lib/db`](src/lib/db) holds the Drizzle schema and database client; [`drizzle`](drizzle) holds migrations.
-- [`docs/requirements`](docs/requirements) captures detailed behavior for invoices and imports.
+- [`docs/requirements`](docs/requirements) captures detailed behavior for invoices, imports, and notifications.
+- [`docs/notifications`](docs/notifications) documents the webhook contract for notification receivers.
 - [`fixtures/synthetic-statement.pdf`](fixtures/synthetic-statement.pdf) is fictional data for smart import demos and testing.
 
 ## Current limits
 
-The app supports USD only; multi-currency support remains open. Renewal reminders are part of the product direction but are not implemented yet.
+The app supports USD only; multi-currency support remains open. Email notifications go only to the account's verified address, and there's no in-app notification inbox.
 
 Smart import is available only when `OPENAI_API_KEY` is configured. Uploaded files are sent to OpenAI for extraction and are not stored by EverySub. Import suggestions require review before saving.
