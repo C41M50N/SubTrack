@@ -2,7 +2,8 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
-@import '@fontsource-variable/inter';
+/* Includes the optical size axis, so large type renders with Inter's display cut. */
+@import '@fontsource-variable/inter/opsz.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -31,6 +32,97 @@
       background-color: color-mix(in oklch, var(--primary) 18%, transparent);
     }
   }
+
+  /* Entrances and interactions settle with `reveal`; `spring` overshoots slightly. */
+  --ease-reveal: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Marketing palette for the landing page, which is light-only by design.
+     App screens keep using the semantic theme tokens. */
+  --color-ink: #14171c;
+  --color-ink-soft: #3f4650;
+  --color-ink-muted: #5a626d;
+  --color-brand: #176aab;
+  --color-brand-strong: #145c94;
+  --color-brand-wash: #eaf3fa;
+  --color-brand-bright: #4fb3ea;
+  --color-surface: #f3f5f7;
+  --color-line: #e3e7eb;
+  --color-line-soft: #eef0f3;
+
+  /* Landing page motion. Use these behind `motion-safe:`. */
+  --animate-product-rise: product-rise 800ms var(--ease-reveal) 120ms both;
+  --animate-terminal-caret: terminal-caret 1s steps(1) infinite;
+  --animate-dot-pulse: dot-pulse 600ms ease-in-out infinite;
+  /* Motion and fade run on separate clocks so the card is opaque well before
+     the spring settles. The element's resting `rotate` comes from `--tilt`. */
+  --animate-card-in: card-in 600ms var(--ease-spring) both, card-fade-in 250ms var(--ease-reveal) both;
+
+  @keyframes product-rise {
+    from {
+      opacity: 0;
+      translate: 0 32px;
+    }
+  }
+
+  @keyframes terminal-caret {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes dot-pulse {
+    50% {
+      opacity: 0.4;
+    }
+  }
+
+  @keyframes card-in {
+    from {
+      translate: 0 16px;
+      rotate: 0deg;
+      scale: 0.96;
+    }
+    to {
+      translate: 0 0;
+      rotate: var(--tilt);
+      scale: 1;
+    }
+  }
+
+  @keyframes card-fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+}
+
+/*
+ * Scrolls a track that holds its items twice, at 30px/s for 360px-wide items.
+ * Set `--count` to the number of items in one copy. This is a utility rather
+ * than an `--animate-*` token so that `paused` variants always win over it.
+ */
+@utility animate-marquee {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: marquee calc(var(--count) * 12s) linear infinite;
+  }
+}
+
+@keyframes marquee {
+  to {
+    translate: -50% 0;
+  }
+}
+
+/* The deep blue panel behind the product shot and the closing call to action. */
+@utility bg-brand-glow {
+  background-color: var(--color-brand);
+  background-image: radial-gradient(
+    ellipse 120% 90% at 50% 0% in oklab,
+    oklab(60.1% -0.055 -0.124) 0%,
+    oklab(51.1% -0.047 -0.118) 55%,
+    oklab(45.6% -0.042 -0.106) 100%
+  );
 }
 
 * {

@@ -1,62 +1,45 @@
-import { Link, createFileRoute } from '@tanstack/react-router';
-import { useState } from 'react';
+import { createFileRoute } from '@tanstack/react-router';
 
-import { Button } from '@/components/ui/button';
-import { authClient } from '@/features/auth/client';
-import { getSession } from '@/features/auth/session';
+import { Benefits } from '@/features/landing/components/benefits';
+import { CtaSection } from '@/features/landing/components/cta-section';
+import { Faq } from '@/features/landing/components/faq';
+import { Hero } from '@/features/landing/components/hero';
+import { McpSection } from '@/features/landing/components/mcp-section';
+import { Pricing } from '@/features/landing/components/pricing';
+import { ServicesStrip } from '@/features/landing/components/services-strip';
+import { SiteFooter } from '@/features/landing/components/site-footer';
+import { SiteHeader } from '@/features/landing/components/site-header';
+import { Testimonials } from '@/features/landing/components/testimonials';
 
 export const Route = createFileRoute('/')({
-  beforeLoad: async () => {
-    const session = await getSession();
-
-    return { session };
-  },
-  component: App,
+  head: () => ({
+    meta: [
+      {
+        name: 'description',
+        content:
+          'EverySub keeps every subscription’s cost, renewal date, and billing history in one place, so you know what you pay for before it renews.',
+      },
+    ],
+  }),
+  component: LandingPage,
 });
 
-function App() {
-  const { session } = Route.useRouteContext();
-  const [isSigningOut, setIsSigningOut] = useState(false);
-
-  const handleSignOut = async () => {
-    if (isSigningOut) {
-      return;
-    }
-
-    setIsSigningOut(true);
-
-    try {
-      await authClient.signOut({
-        fetchOptions: {
-          onSuccess: () => {
-            window.location.assign('/');
-          },
-        },
-      });
-    } finally {
-      setIsSigningOut(false);
-    }
-  };
-
+/** The public marketing page. It's light-only, whatever the app theme. */
+function LandingPage() {
   return (
-    <main className="mx-auto w-full max-w-5xl px-6 py-12 sm:px-8">
-      <h1 className="mb-3 text-3xl font-bold">EverySub</h1>
-      <p className="mb-6 text-base text-muted-foreground">
-        See what your subscriptions cost and what is coming up next.
-      </p>
-      {session ? (
-        <Button
-          className="inline-flex"
-          onClick={handleSignOut}
-          disabled={isSigningOut}
-        >
-          {isSigningOut ? 'Logging out...' : 'Log out'}
-        </Button>
-      ) : (
-        <Link to="/login">
-          <Button className="inline-flex">Sign In</Button>
-        </Link>
-      )}
-    </main>
+    <div className="relative flex min-h-screen flex-col items-center bg-white text-ink scheme-light">
+      <SiteHeader />
+      <main className="flex w-full flex-col items-center">
+        <Hero />
+        <ServicesStrip />
+        <Benefits />
+        <McpSection />
+        <Pricing />
+        <Testimonials />
+        <Faq />
+        <CtaSection />
+      </main>
+      <SiteFooter />
+    </div>
   );
 }

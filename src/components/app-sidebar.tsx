@@ -4,14 +4,25 @@ import {
   BellIcon,
   FileTextIcon,
   LayoutDashboardIcon,
+  LogOutIcon,
   SettingsIcon,
   WalletIcon,
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { CollectionSwitcher } from '@/components/collection-switcher';
+import { MenuActionItem } from '@/components/menu-action-item';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Sidebar,
   SidebarContent,
@@ -21,6 +32,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { authClient } from '@/features/auth/client';
 import { notificationDestinationsQueryOptions } from '@/features/notifications/queries';
 import { subscriptionsQueryOptions } from '@/features/subscriptions/queries';
 
@@ -46,6 +58,17 @@ export function AppSidebar() {
     user.image ??
     `https://api.dicebear.com/10.x/initials/svg?seed=${encodeURIComponent(userName)}`;
 
+  const handleSignOut = async () => {
+    const { error } = await authClient.signOut();
+
+    if (error) {
+      toast.error('Couldn’t log out. Try again.');
+      return;
+    }
+
+    window.location.assign('/');
+  };
+
   return (
     <Sidebar
       side="left"
@@ -58,12 +81,33 @@ export function AppSidebar() {
           <Link to="/c/$collectionId/dashboard" params={{ collectionId }}>
             <h1 className="text-lg font-bold">EverySub</h1>
           </Link>
-          <Button size="icon" variant="ghost" className="p-4 rounded-full">
-            <Avatar className="size-8">
-              <AvatarImage src={userAvatarUrl} alt={`${userName} avatar`} />
-              <AvatarFallback>--</AvatarFallback>
-            </Avatar>
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              aria-label="Account"
+              render={
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="p-4 rounded-full"
+                />
+              }
+            >
+              <Avatar className="size-8">
+                <AvatarImage src={userAvatarUrl} alt={`${userName} avatar`} />
+                <AvatarFallback>--</AvatarFallback>
+              </Avatar>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="truncate">
+                  {user.email}
+                </DropdownMenuLabel>
+                <DropdownMenuItem onClick={handleSignOut}>
+                  <MenuActionItem icon={LogOutIcon} label="Log out" />
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </SidebarHeader>
       <SidebarHeader className="w-full mb-2">

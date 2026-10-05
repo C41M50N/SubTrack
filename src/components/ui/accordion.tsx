@@ -1,5 +1,4 @@
 import { Accordion as AccordionPrimitive } from '@base-ui/react/accordion';
-import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
@@ -39,14 +38,15 @@ function AccordionTrigger({
         {...props}
       >
         {children}
-        <ChevronDownIcon
+        {/* A plus whose vertical bar turns flat into a minus while open. */}
+        <span
           data-slot="accordion-trigger-icon"
-          className="pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:hidden"
-        />
-        <ChevronUpIcon
-          data-slot="accordion-trigger-icon"
-          className="pointer-events-none hidden shrink-0 group-aria-expanded/accordion-trigger:inline"
-        />
+          aria-hidden
+          className="pointer-events-none relative shrink-0"
+        >
+          <span className="absolute inset-0 m-auto h-[1.5px] w-3 rounded-full bg-current" />
+          <span className="absolute inset-0 m-auto h-[1.5px] w-3 rotate-90 rounded-full bg-current transition-[rotate] duration-200 ease-reveal group-data-panel-open/accordion-trigger:rotate-180 motion-reduce:transition-none" />
+        </span>
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
   );
@@ -60,12 +60,14 @@ function AccordionContent({
   return (
     <AccordionPrimitive.Panel
       data-slot="accordion-content"
-      className="overflow-hidden text-sm data-open:animate-accordion-down data-closed:animate-accordion-up"
+      className="group/accordion-panel overflow-hidden text-sm ease-reveal motion-safe:data-open:animate-accordion-down motion-safe:data-closed:animate-accordion-up"
       {...props}
     >
       <div
         className={cn(
-          'h-(--accordion-panel-height) pt-0 pb-4 data-ending-style:h-0 data-starting-style:h-0 [&_a]:underline [&_a]:underline-offset-3 [&_a]:hover:text-foreground [&_p:not(:last-child)]:mb-4',
+          // The answer fades in just after the panel starts to open, and out
+          // quickly as it starts to close.
+          'h-(--accordion-panel-height) pt-0 pb-4 transition-opacity delay-50 duration-150 ease-reveal group-data-starting-style/accordion-panel:opacity-0 group-data-ending-style/accordion-panel:opacity-0 group-data-ending-style/accordion-panel:delay-0 group-data-ending-style/accordion-panel:duration-100 data-ending-style:h-0 data-starting-style:h-0 motion-reduce:transition-none [&_a]:underline [&_a]:underline-offset-3 [&_a]:hover:text-foreground [&_p:not(:last-child)]:mb-4',
           className,
         )}
       >
