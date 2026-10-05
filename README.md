@@ -87,9 +87,9 @@ Email needs a [Resend](https://resend.com) account:
 
 1. Verify the sending domain in Resend and set `RESEND_FROM_ADDRESS` to an address on it. Leave open and click tracking off for that domain; EverySub keeps email unavailable while either is on.
 2. Create an API key for `RESEND_API_KEY`. A full-access key lets EverySub confirm the domain is ready; a sending-only key works too.
-3. Add a Resend webhook pointing to `https://<your-host>/api/webhooks/resend` with the `email.sent`, `email.delivered`, `email.delivery_delayed`, `email.bounced`, `email.complained`, `email.failed`, and `email.suppressed` events. Put its signing secret in `RESEND_WEBHOOK_SECRET`.
+3. Add a Resend webhook pointing to `https://<your-host>/api/webhooks/resend` with the `email.sent`, `email.delivered`, `email.delivery_delayed`, `email.bounced`, `email.complained`, `email.failed`, and `email.suppressed` events. Put its signing secret in `RESEND_WEBHOOK_SECRET`. Email stays unavailable without it, because bounces and complaints couldn't pause sending.
 
-Without Resend, email is shown as unavailable and Discord and webhook destinations keep working. The generic webhook contract and signature verification are documented in [`docs/notifications/webhooks.md`](docs/notifications/webhooks.md). `bun run email:dev` previews the email templates against fictional fixtures, with mobile and desktop widths and the plain-text version.
+Until all three are set, email is shown as unavailable and Discord and webhook destinations keep working. The generic webhook contract and signature verification are documented in [`docs/notifications/webhooks.md`](docs/notifications/webhooks.md). `bun run email:dev` previews the email templates against fictional fixtures, with mobile and desktop widths and the plain-text version.
 
 ## Tests
 

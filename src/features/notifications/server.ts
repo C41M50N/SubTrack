@@ -394,21 +394,42 @@ export async function setMyDestinationPaused(input: { userId: string; destinatio
  * while it's updated, even if the secret is rotated again in the meantime.
  */
 export async function rotateMySigningSecret(input: { userId: string; destinationId: string }) {
-  const destination = await getOwnedDestination(input.userId, input.destinationId);
+  // Rotations are serialized so each one retires the secret it replaces.
+  return db.transaction(async (tx) => {
+    const [destination] = await tx
+      .select()
+      .from(notificationDestinationTable)
+      .where(
+        and(
+          eq(notificationDestinationTable.userId, input.userId),
+          eq(notificationDestinationTable.id, input.destinationId),
+        ),
+      )
+      .limit(1)
+      .for('update');
 
-  if (destination.type !== 'webhook' || !destination.signingSecret) {
-    throw new UserFacingError('Only webhook destinations have a signing secret');
-  }
+    if (!destination) {
+      throw new Error('Destination not found');
+    }
 
-  const signingSecret = generateSigningSecret();
-  const retiredSigningSecrets = retireSecret(destination.retiredSigningSecrets, destination.signingSecret, new Date());
+    if (destination.type !== 'webhook' || !destination.signingSecret) {
+      throw new UserFacingError('Only webhook destinations have a signing secret');
+    }
 
-  await db
-    .update(notificationDestinationTable)
-    .set({ signingSecret, retiredSigningSecrets })
-    .where(eq(notificationDestinationTable.id, destination.id));
+    const signingSecret = generateSigningSecret();
+    const retiredSigningSecrets = retireSecret(
+      destination.retiredSigningSecrets,
+      destination.signingSecret,
+      new Date(),
+    );
 
-  return { signingSecret, previousSecretExpiresAt: latestExpiry(retiredSigningSecrets) };
+    await tx
+      .update(notificationDestinationTable)
+      .set({ signingSecret, retiredSigningSecrets })
+      .where(eq(notificationDestinationTable.id, destination.id));
+
+    return { signingSecret, previousSecretExpiresAt: latestExpiry(retiredSigningSecrets) };
+  });
 }
 
 /** Deletes a destination and every route to it. Pending sends to it are dropped with it. */

@@ -143,7 +143,6 @@ async function recordOutcome(input: {
   result: SendResult;
   resolution: AttemptResolution;
   requestKey: string;
-  consecutiveFailedEvents: number;
   startedAt: Date;
   now: Date;
 }) {
@@ -183,11 +182,23 @@ async function recordOutcome(input: {
       await releaseReminderClaims(tx, event.id);
     }
 
+    // Read the count under a row lock: other workers may be recording
+    // outcomes for the same destination at the same time.
+    const [destination] = await tx
+      .select({ consecutiveFailedEvents: notificationDestinationTable.consecutiveFailedEvents })
+      .from(notificationDestinationTable)
+      .where(eq(notificationDestinationTable.id, event.destinationId))
+      .for('update');
+
+    if (!destination) {
+      return;
+    }
+
     await tx
       .update(notificationDestinationTable)
       .set(
         getDestinationHealthUpdate({
-          consecutiveFailedEvents: input.consecutiveFailedEvents,
+          consecutiveFailedEvents: destination.consecutiveFailedEvents,
           resolution,
           result,
           now,
@@ -299,7 +310,6 @@ async function attemptEvent(event: ClaimedEvent, clock: () => Date): Promise<Att
     result,
     resolution,
     requestKey: prepared.requestKey,
-    consecutiveFailedEvents: destination.consecutiveFailedEvents,
     startedAt,
     now,
   });

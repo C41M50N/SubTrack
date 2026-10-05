@@ -279,6 +279,32 @@ describe.skipIf(!isLocalDatabase)('notification delivery (database)', () => {
       expect((await getEvents())[0]).toMatchObject({ status: 'failed', attemptCount: 5 });
       expect(await getDestination()).toMatchObject({ consecutiveFailedEvents: 3, pauseReason: 'failing' });
     });
+
+    it('counts every exhausted event when two workers fail at once', async () => {
+      await seed({ kinds: ['renewal_reminder', 'monthly_overview'] });
+      await addSubscription({ id: 'a', nextInvoiceDate: '2026-10-04' });
+      await db
+        .update(schema.notificationDestinationTable)
+        .set({ consecutiveFailedEvents: 1 })
+        .where(eq(schema.notificationDestinationTable.id, 'dest-1'));
+      postToWebhook.mockImplementation(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        return unavailable;
+      });
+
+      const now = new Date('2026-10-01T13:05:00Z');
+      await scheduleDueNotifications({ now });
+      // Both events are on their last attempt.
+      await db.update(schema.notificationEventTable).set({ attemptCount: 4 });
+      await Promise.all([
+        deliverDueNotifications({ clock: () => now, limit: 1 }),
+        deliverDueNotifications({ clock: () => now, limit: 1 }),
+      ]);
+
+      expect(postToWebhook).toHaveBeenCalledTimes(2);
+      expect((await getEvents()).map((event) => event.status)).toEqual(['failed', 'failed']);
+      expect(await getDestination()).toMatchObject({ consecutiveFailedEvents: 3, pauseReason: 'failing' });
+    });
   });
 
   describe('monthly overview', () => {
@@ -549,6 +575,18 @@ describe.skipIf(!isLocalDatabase)('notification delivery (database)', () => {
       const signatures = postToWebhook.mock.calls[0][0].headers['webhook-signature'].split(' ');
 
       expect(signatures).toHaveLength(3);
+    });
+
+    it('keeps every secret from concurrent rotations', async () => {
+      await seed();
+      const original = (await getDestination()).signingSecret;
+      const rotate = () => server.rotateMySigningSecret({ userId: 'user-1', destinationId: 'dest-1' });
+      const results = await Promise.all(Array.from({ length: 4 }, rotate));
+      const after = await getDestination();
+      const signing = [after.signingSecret, ...after.retiredSigningSecrets.map((entry) => entry.secret)];
+
+      expect(signing).toHaveLength(5);
+      expect(signing).toEqual(expect.arrayContaining([original, ...results.map((result) => result.signingSecret)]));
     });
 
     it('sends tests with sample data only, at most once every few seconds', async () => {

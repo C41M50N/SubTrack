@@ -105,7 +105,8 @@ export async function getEmailAvailability(): Promise<EmailAvailability> {
   const config = getConfig();
   const resend = getClient();
 
-  if (!config || !resend) {
+  // Without delivery events, a bounce or complaint couldn't pause sending.
+  if (!config || !resend || !getResendWebhookSecret()) {
     return unavailable('not_configured', 'Email delivery isn’t set up on this EverySub server.');
   }
 
