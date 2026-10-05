@@ -8,7 +8,7 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 
 const config = defineConfig({
   server: {
-    allowedHosts: ['dev.everysub.com'],
+    allowedHosts: ['dev.everysub.app'],
   },
   plugins: [
     devtools(),

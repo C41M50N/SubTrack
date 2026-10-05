@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "prepare": "if [ -e .git ]; then git config core.hooksPath .githooks; fi",
-    "dev": "PORTLESS_TLD=com,dev portless dev.everysub vite dev",
+    "dev": "PORTLESS_TLD=com,dev,app portless dev.everysub vite dev",
     "build": "vite build",
     "start": "varlock run -- srvx serve --prod --dir . --static dist/client --entry dist/server/server.js",
     "lint": "oxlint",
