@@ -93,12 +93,7 @@ Until all three are set, email is shown as unavailable and Discord and webhook d
 
 ## Tests
 
-`bun run test` runs the unit tests. The notification integration tests also need a disposable local PostgreSQL database with the current schema. They truncate every table, so they refuse to run against anything but `localhost`:
-
-```bash
-DATABASE_URL=postgresql://postgres@localhost:5432/everysub_test bun run db:push
-TEST_DATABASE_URL=postgresql://postgres@localhost:5432/everysub_test bun run test
-```
+`bun run test` runs the unit tests. There are no database-backed tests yet, so notification event claiming and row locking, persistence across job reruns, and concurrent job runs have no automated coverage. That stays open until the project has a managed test database with migrations applied in CI.
 
 ## Project map
 

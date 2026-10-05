@@ -1,12 +1,20 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildOverviewContent, buildReminderContent, isContentEmpty } from '@/features/notifications/content';
-import { buildDiscordMessage, DISCORD_LIMITS, escapeDiscordText } from '@/features/notifications/discord-message';
+import {
+  buildOverviewContent,
+  buildReminderContent,
+  isContentEmpty,
+  type NewMonthItem,
+  type NotificationContent,
+  type ProjectedInvoiceItem,
+  type RecordedInvoiceItem,
+  type ReminderItem,
+} from '@/features/notifications/content';
+import { buildDiscordMessage, type DiscordMessage } from '@/features/notifications/discord-message';
 import { renderNotificationEmail } from '@/features/notifications/email/render';
-import { buildSampleOverview, buildSampleReminder } from '@/features/notifications/samples';
 import { buildOverviewItems, listDueReminderOccurrences } from '@/features/notifications/schedule';
 import { getDueReminderSlot, getOverviewPeriod } from '@/features/notifications/time';
-import { buildWebhookPayload, WEBHOOK_SCHEMA_VERSION } from '@/features/notifications/webhook-payload';
+import { buildWebhookPayload } from '@/features/notifications/webhook-payload';
 
 const TIME_ZONE = 'America/New_York';
 const LONG_AGO = new Date('2026-01-01T00:00:00Z');
@@ -26,18 +34,95 @@ function meta(localDate: string) {
   };
 }
 
-/** Every format a destination can receive, as text, for leak checks. */
-async function renderEverywhere(content: Parameters<typeof buildWebhookPayload>[0]) {
+function reminderItem(overrides: Partial<ReminderItem> = {}): ReminderItem {
+  return {
+    subscriptionId: 'sub-video',
+    collectionId: 'personal',
+    name: 'Streamline Video',
+    iconRef: 'example.com',
+    expectedDate: '2026-10-07',
+    amountCents: 1599,
+    ...overrides,
+  };
+}
+
+function recordedItem(overrides: Partial<RecordedInvoiceItem> = {}): RecordedInvoiceItem {
+  return {
+    source: 'recorded',
+    invoiceId: 'inv-oct',
+    subscriptionId: 'sub-video',
+    collectionId: 'personal',
+    name: 'Streamline Video',
+    iconRef: 'example.com',
+    category: 'Streaming',
+    date: '2026-10-01',
+    amountCents: 1599,
+    ...overrides,
+  };
+}
+
+function projectedItem(overrides: Partial<ProjectedInvoiceItem> = {}): ProjectedInvoiceItem {
+  return {
+    source: 'projected',
+    subscriptionId: 'sub-music',
+    collectionId: 'work',
+    name: 'Tunebox Family',
+    iconRef: 'example.com',
+    category: 'Music',
+    date: '2026-10-12',
+    amountCents: 1699,
+    ...overrides,
+  };
+}
+
+function reminder(items: ReminderItem[], names: ReadonlyMap<string, string> = collectionNames) {
+  return buildReminderContent({ meta: meta('2026-10-04'), leadDays: 3, items, collectionNames: names });
+}
+
+function overview(
+  previousItems: RecordedInvoiceItem[],
+  newMonthItems: NewMonthItem[],
+  names: ReadonlyMap<string, string> = collectionNames,
+) {
+  return buildOverviewContent({
+    meta: meta('2026-10-01'),
+    month: '2026-10',
+    previousMonth: '2026-09',
+    previousItems,
+    newMonthItems,
+    collectionNames: names,
+  });
+}
+
+/** One deleted subscription's invoice last month, then one recorded and one projected item. */
+function smallOverview() {
+  return overview(
+    [
+      recordedItem({
+        invoiceId: 'inv-sep',
+        subscriptionId: null,
+        name: 'Daily Grind News',
+        category: 'News',
+        date: '2026-09-10',
+        amountCents: 499,
+      }),
+    ],
+    [recordedItem(), projectedItem()],
+  );
+}
+
+/** Every format a destination can receive, as text. */
+async function renderEverywhere(content: NotificationContent) {
   const email = await renderNotificationEmail(content, { manageUrl: 'https://everysub.example/settings' });
 
-  return [
-    JSON.stringify(buildWebhookPayload(content, destination)),
-    JSON.stringify(buildDiscordMessage(content)),
-    email.subject,
-    email.previewText,
-    email.html,
-    email.text,
-  ];
+  return {
+    webhook: JSON.stringify(buildWebhookPayload(content, destination)),
+    discord: JSON.stringify(buildDiscordMessage(content)),
+    emailSubject: email.subject,
+    emailPreview: email.previewText,
+    emailHtml: email.html,
+    emailText: email.text,
+  };
 }
 
 describe('payload filtering', () => {
@@ -73,13 +158,20 @@ describe('payload filtering', () => {
       items: occurrences,
       collectionNames,
     });
+    const formats = await renderEverywhere(content);
 
     expect(content.totalCents).toBe(1000);
 
-    for (const rendered of await renderEverywhere(content)) {
-      expect(rendered).not.toContain('Private Excluded Service');
-      expect(rendered).not.toContain('sub-private-excluded');
-      expect(rendered).not.toContain('99.00');
+    for (const rendered of Object.values(formats)) {
+      expect(rendered).not.toMatch(/Private Excluded Service|sub-private-excluded|99\.00|9900/);
+    }
+
+    for (const rendered of [formats.webhook, formats.discord, formats.emailHtml, formats.emailText]) {
+      expect(rendered).toContain('Included Service');
+    }
+
+    for (const rendered of [formats.discord, formats.emailHtml, formats.emailText]) {
+      expect(rendered).toContain('$10.00');
     }
   });
 
@@ -130,188 +222,312 @@ describe('payload filtering', () => {
       newMonthItems,
       collectionNames,
     });
+    const formats = await renderEverywhere(content);
 
     expect(content.previousMonth).toMatchObject({ itemCount: 1, subtotalCents: 1200 });
 
-    for (const rendered of await renderEverywhere(content)) {
-      expect(rendered).not.toMatch(/Excluded Snapshot|Unrouted Work Snapshot|inv-hidden|inv-work/);
+    for (const rendered of Object.values(formats)) {
+      expect(rendered).not.toMatch(/Excluded Snapshot|Unrouted Work Snapshot|inv-hidden|inv-work|44\.00|55\.00/);
+    }
+
+    for (const rendered of [formats.webhook, formats.discord, formats.emailHtml, formats.emailText]) {
+      expect(rendered).toContain('Kept Snapshot');
+    }
+
+    for (const rendered of [formats.discord, formats.emailHtml, formats.emailText]) {
+      expect(rendered).toContain('$12.00');
     }
   });
 });
 
 describe('generic webhook payload', () => {
-  it('describes a reminder with stable IDs, cents, and currency', () => {
-    const content = buildSampleReminder({
-      eventId: 'evt_1',
-      test: false,
-      timeZone: TIME_ZONE,
-      localDate: '2026-10-04',
-      itemCount: 2,
-    });
-    const payload = buildWebhookPayload(content, destination);
+  it('describes a reminder with stable IDs, dates, and cents', () => {
+    const content = reminder([
+      reminderItem(),
+      reminderItem({
+        subscriptionId: 'sub-ci',
+        collectionId: 'work',
+        name: 'Shipyard CI',
+        expectedDate: '2026-10-06',
+        amountCents: 2900,
+      }),
+    ]);
 
-    expect(payload).toMatchObject({
-      schemaVersion: WEBHOOK_SCHEMA_VERSION,
-      id: 'evt_1',
+    expect(buildWebhookPayload(content, destination)).toEqual({
+      schemaVersion: 1,
+      id: 'evt_test',
       type: 'renewal_reminder',
       test: false,
-      destination,
+      destination: { id: 'dest-1', name: 'Home server' },
       schedule: { localDate: '2026-10-04', timeZone: TIME_ZONE, scheduledFor: '2026-10-04T13:00:00.000Z' },
-    });
-    expect(payload.data).toMatchObject({ leadDays: 3, currency: 'USD', itemCount: 2, totalExpectedAmountCents: 3298 });
-
-    const [firstCollection] = 'collections' in payload.data ? payload.data.collections : [];
-
-    expect(firstCollection.items[0]).toEqual({
-      subscriptionId: expect.any(String),
-      collectionId: firstCollection.id,
-      name: expect.any(String),
-      expectedInvoiceDate: expect.stringMatching(/^2026-10-0\d$/),
-      expectedAmountCents: expect.any(Number),
-      currency: 'USD',
+      data: {
+        leadDays: 3,
+        currency: 'USD',
+        itemCount: 2,
+        totalExpectedAmountCents: 4499,
+        collections: [
+          {
+            id: 'personal',
+            name: 'Personal',
+            itemCount: 1,
+            subtotalExpectedAmountCents: 1599,
+            items: [
+              {
+                subscriptionId: 'sub-video',
+                collectionId: 'personal',
+                name: 'Streamline Video',
+                expectedInvoiceDate: '2026-10-07',
+                expectedAmountCents: 1599,
+                currency: 'USD',
+              },
+            ],
+          },
+          {
+            id: 'work',
+            name: 'Work',
+            itemCount: 1,
+            subtotalExpectedAmountCents: 2900,
+            items: [
+              {
+                subscriptionId: 'sub-ci',
+                collectionId: 'work',
+                name: 'Shipyard CI',
+                expectedInvoiceDate: '2026-10-06',
+                expectedAmountCents: 2900,
+                currency: 'USD',
+              },
+            ],
+          },
+        ],
+      },
     });
   });
 
-  it('separates recorded and projected new-month items', () => {
-    const content = buildSampleOverview({ eventId: 'evt_2', test: false, timeZone: TIME_ZONE, month: '2026-10' });
-    const payload = buildWebhookPayload(content, destination);
-
-    if (!('newMonth' in payload.data)) {
-      throw new Error('Expected an overview payload');
-    }
-
-    const items = payload.data.newMonth.collections.flatMap((group) => group.items);
-    const recorded = items.find((item) => item.source === 'recorded');
-    const projected = items.find((item) => item.source === 'projected');
-
-    expect(recorded).toMatchObject({ id: recorded?.invoiceId, invoiceId: expect.any(String) });
-    expect(projected).toMatchObject({ id: `${projected?.subscriptionId}:${projected?.date}` });
-    expect(projected).not.toHaveProperty('invoiceId');
-    expect(payload.data.previousMonth.basis).toBe('recorded_scheduled_invoices');
-    expect(payload.data.newMonth).toMatchObject({ recordedCount: 1, projectedCount: 5 });
+  it('describes an overview with invoice IDs for recorded items and subscription IDs for projections', () => {
+    expect(buildWebhookPayload(smallOverview(), destination)).toEqual({
+      schemaVersion: 1,
+      id: 'evt_test',
+      type: 'monthly_overview',
+      test: false,
+      destination: { id: 'dest-1', name: 'Home server' },
+      schedule: { localDate: '2026-10-01', timeZone: TIME_ZONE, scheduledFor: '2026-10-01T13:00:00.000Z' },
+      data: {
+        currency: 'USD',
+        previousMonth: {
+          month: '2026-09',
+          basis: 'recorded_scheduled_invoices',
+          itemCount: 1,
+          subtotalAmountCents: 499,
+          collections: [
+            {
+              id: 'personal',
+              name: 'Personal',
+              itemCount: 1,
+              subtotalAmountCents: 499,
+              items: [
+                {
+                  invoiceId: 'inv-sep',
+                  subscriptionId: null,
+                  collectionId: 'personal',
+                  name: 'Daily Grind News',
+                  iconRef: 'example.com',
+                  category: 'News',
+                  invoiceDate: '2026-09-10',
+                  amountCents: 499,
+                  currency: 'USD',
+                },
+              ],
+            },
+          ],
+        },
+        newMonth: {
+          month: '2026-10',
+          basis: 'expected_schedule',
+          itemCount: 2,
+          recordedCount: 1,
+          projectedCount: 1,
+          subtotalExpectedAmountCents: 3298,
+          collections: [
+            {
+              id: 'personal',
+              name: 'Personal',
+              itemCount: 1,
+              subtotalExpectedAmountCents: 1599,
+              items: [
+                {
+                  id: 'inv-oct',
+                  source: 'recorded',
+                  invoiceId: 'inv-oct',
+                  subscriptionId: 'sub-video',
+                  collectionId: 'personal',
+                  name: 'Streamline Video',
+                  iconRef: 'example.com',
+                  category: 'Streaming',
+                  date: '2026-10-01',
+                  expectedAmountCents: 1599,
+                  currency: 'USD',
+                },
+              ],
+            },
+            {
+              id: 'work',
+              name: 'Work',
+              itemCount: 1,
+              subtotalExpectedAmountCents: 1699,
+              items: [
+                {
+                  id: 'sub-music:2026-10-12',
+                  source: 'projected',
+                  subscriptionId: 'sub-music',
+                  collectionId: 'work',
+                  name: 'Tunebox Family',
+                  iconRef: 'example.com',
+                  category: 'Music',
+                  date: '2026-10-12',
+                  expectedAmountCents: 1699,
+                  currency: 'USD',
+                },
+              ],
+            },
+          ],
+        },
+      },
+    });
   });
 });
 
 describe('Discord message', () => {
+  // Discord's documented embed limits:
+  // https://docs.discord.com/developers/resources/message#embed-limits
+  function expectWithinDiscordLimits({ embeds }: DiscordMessage) {
+    const characters = embeds.reduce(
+      (total, embed) =>
+        total +
+        embed.title.length +
+        embed.description.length +
+        (embed.footer?.text.length ?? 0) +
+        embed.fields.reduce((sum, field) => sum + field.name.length + field.value.length, 0),
+      0,
+    );
+
+    // The 6,000-character limit applies to all embeds in a message combined.
+    expect(characters).toBeLessThanOrEqual(6000);
+    expect(embeds.length).toBeLessThanOrEqual(10);
+
+    for (const embed of embeds) {
+      expect(embed.title.length).toBeLessThanOrEqual(256);
+      expect(embed.description.length).toBeLessThanOrEqual(4096);
+      expect(embed.footer?.text.length ?? 0).toBeLessThanOrEqual(2048);
+      expect(embed.fields.length).toBeLessThanOrEqual(25);
+
+      for (const field of embed.fields) {
+        expect(field.name.length).toBeLessThanOrEqual(256);
+        expect(field.value.length).toBeLessThanOrEqual(1024);
+      }
+    }
+  }
+
+  /** Items spread across many collections, with names long enough to overflow a message. */
+  function manyItems<TItem extends { collectionId: string }>(count: number, build: (index: number) => TItem) {
+    const items = Array.from({ length: count }, (_, index) => build(index));
+    const names = new Map(items.map((item) => [item.collectionId, `Collection ${item.collectionId}`]));
+
+    return { items, names };
+  }
+
   it('never pings anyone and escapes markdown in names', () => {
-    const content = buildReminderContent({
-      meta: meta('2026-10-04'),
-      leadDays: 3,
-      items: [
-        {
-          subscriptionId: 's',
-          collectionId: 'personal',
-          name: '@everyone **bold** `code`',
-          iconRef: 'example.com',
-          expectedDate: '2026-10-07',
-          amountCents: 100,
-        },
-      ],
-      collectionNames,
-    });
-    const message = buildDiscordMessage(content);
+    const message = buildDiscordMessage(reminder([reminderItem({ name: '@everyone **bold** `code`' })]));
 
     expect(message.allowed_mentions).toEqual({ parse: [] });
-    expect(message.embeds[0].fields[0].value).toContain(escapeDiscordText('@everyone **bold** `code`'));
-    expect(escapeDiscordText('**bold**')).toBe('\\*\\*bold\\*\\*');
+    expect(message.embeds[0].fields[0].value).toContain('@everyone \\*\\*bold\\*\\* \\`code\\`');
   });
 
-  it('stays within Discord’s limits for a long list while keeping full totals', () => {
-    const items = Array.from({ length: 300 }, (_, index) => ({
-      subscriptionId: `sub-${index}`,
-      collectionId: `collection-${index % 40}`,
-      name: `Subscription with a fairly long descriptive name ${index}`,
-      iconRef: 'example.com',
-      expectedDate: '2026-10-07',
-      amountCents: 1000,
-    }));
-    const names = new Map(items.map((item) => [item.collectionId, `Collection ${item.collectionId}`]));
-    const content = buildReminderContent({ meta: meta('2026-10-04'), leadDays: 3, items, collectionNames: names });
-    const [embed] = buildDiscordMessage(content).embeds;
-    const length =
-      embed.title.length +
-      embed.description.length +
-      (embed.footer?.text.length ?? 0) +
-      embed.fields.reduce((total, field) => total + field.name.length + field.value.length, 0);
+  it('fits a long reminder within Discord’s limits while keeping full totals', () => {
+    const { items, names } = manyItems(300, (index) =>
+      reminderItem({
+        subscriptionId: `sub-${index}`,
+        collectionId: `collection-${index % 40}`,
+        name: `Subscription with a fairly long descriptive name ${index}`,
+        amountCents: 1000,
+      }),
+    );
+    const message = buildDiscordMessage(reminder(items, names));
 
-    expect(length).toBeLessThanOrEqual(DISCORD_LIMITS.embedTotal);
-    expect(embed.fields.length).toBeLessThanOrEqual(DISCORD_LIMITS.fieldsPerEmbed);
-    expect(embed.fields.every((field) => field.value.length <= DISCORD_LIMITS.fieldValue)).toBe(true);
-    expect(embed.description).toContain('300 expected charges · $3,000.00');
+    expectWithinDiscordLimits(message);
+    expect(message.embeds[0].description).toMatch(/300 expected charges.*\$3,000\.00/);
+    expect(JSON.stringify(message)).toContain('Subscription with a fairly long descriptive name 0');
   });
 
-  it('labels each new-month item as recorded or projected, with its category', () => {
-    const content = buildSampleOverview({ eventId: 'evt', test: false, timeZone: TIME_ZONE, month: '2026-10' });
-    const values = buildDiscordMessage(content)
-      .embeds[2].fields.map((field) => field.value)
-      .join('\n');
+  it('fits a long overview within Discord’s limits across all its embeds while keeping full totals', () => {
+    const previous = manyItems(120, (index) =>
+      recordedItem({
+        invoiceId: `inv-sep-${index}`,
+        collectionId: `collection-${index % 30}`,
+        name: `Previous subscription with a fairly long descriptive name ${index}`,
+        date: '2026-09-15',
+        amountCents: 1000,
+      }),
+    );
+    const upcoming = manyItems(180, (index) =>
+      projectedItem({
+        subscriptionId: `sub-${index}`,
+        collectionId: `collection-${index % 30}`,
+        name: `Upcoming subscription with a fairly long descriptive name ${index}`,
+        amountCents: 1000,
+      }),
+    );
+    const message = buildDiscordMessage(
+      overview(previous.items, upcoming.items, new Map([...previous.names, ...upcoming.names])),
+    );
+    const descriptions = message.embeds.map((embed) => embed.description).join('\n');
 
-    expect(values).toContain('_Recorded · Streaming_');
-    expect(values).toContain('_Projected · Music_');
+    expectWithinDiscordLimits(message);
+    expect(descriptions).toMatch(/120 invoices.*\$1,200\.00/);
+    expect(descriptions).toMatch(/180 invoices.*\$1,800\.00/);
+    expect(JSON.stringify(message)).toContain('Previous subscription with a fairly long descriptive name 0');
+    expect(JSON.stringify(message)).toContain('Upcoming subscription with a fairly long descriptive name 0');
+  });
+
+  it('shows each overview item’s date, amount, and category, labeling new-month items recorded or projected', () => {
+    const lines = buildDiscordMessage(smallOverview()).embeds.flatMap((embed) =>
+      embed.fields.flatMap((field) => field.value.split('\n')),
+    );
+
+    expect(lines).toEqual([
+      expect.stringMatching(/Sep 10.*Daily Grind News.*\$4\.99.*News/),
+      expect.stringMatching(/Oct 1\b.*Streamline Video.*\$15\.99.*Recorded.*Streaming/),
+      expect.stringMatching(/Oct 12.*Tunebox Family.*\$16\.99.*Projected.*Music/),
+    ]);
   });
 });
 
 describe('content', () => {
   it('groups by collection name, then sorts items by date and name', () => {
-    const content = buildReminderContent({
-      meta: meta('2026-10-04'),
-      leadDays: 3,
-      items: [
-        {
-          subscriptionId: 'b',
-          collectionId: 'work',
-          name: 'B',
-          iconRef: '',
-          expectedDate: '2026-10-07',
-          amountCents: 200,
-        },
-        {
-          subscriptionId: 'a',
-          collectionId: 'personal',
-          name: 'Z',
-          iconRef: '',
-          expectedDate: '2026-10-06',
-          amountCents: 100,
-        },
-        {
-          subscriptionId: 'c',
-          collectionId: 'personal',
-          name: 'A',
-          iconRef: '',
-          expectedDate: '2026-10-06',
-          amountCents: 300,
-        },
+    // Collection IDs, insertion order, and item names all disagree with the expected order.
+    const content = reminder(
+      [
+        reminderItem({ subscriptionId: 'ci', collectionId: 'c-1', name: 'Shipyard CI', amountCents: 2900 }),
+        reminderItem({ subscriptionId: 'a', collectionId: 'c-2', name: 'Alpha', expectedDate: '2026-10-07' }),
+        reminderItem({ subscriptionId: 'z', collectionId: 'c-2', name: 'Zulu', expectedDate: '2026-10-05' }),
+        reminderItem({ subscriptionId: 'm', collectionId: 'c-2', name: 'Mike', expectedDate: '2026-10-05' }),
       ],
-      collectionNames,
-    });
+      new Map([
+        ['c-1', 'Work'],
+        ['c-2', 'Personal'],
+      ]),
+    );
 
     expect(content.collections.map((group) => [group.collectionName, group.itemCount, group.subtotalCents])).toEqual([
-      ['Personal', 2, 400],
-      ['Work', 1, 200],
+      ['Personal', 3, 4797],
+      ['Work', 1, 2900],
     ]);
-    expect(content.collections[0].items.map((item) => item.name)).toEqual(['A', 'Z']);
-    expect(content).toMatchObject({ itemCount: 3, totalCents: 600 });
+    expect(content.collections[0].items.map((item) => item.name)).toEqual(['Mike', 'Zulu', 'Alpha']);
+    expect(content).toMatchObject({ itemCount: 4, totalCents: 7697 });
   });
 
   it('treats an overview as empty only when both months are', () => {
-    const empty = buildSampleOverview({
-      eventId: 'e',
-      test: false,
-      timeZone: TIME_ZONE,
-      month: '2026-10',
-      previousCount: 0,
-      newMonthCount: 0,
-    });
-    const oneSection = buildSampleOverview({
-      eventId: 'e',
-      test: false,
-      timeZone: TIME_ZONE,
-      month: '2026-10',
-      previousCount: 0,
-      newMonthCount: 1,
-    });
-
-    expect(isContentEmpty(empty)).toBe(true);
-    expect(isContentEmpty(oneSection)).toBe(false);
+    expect(isContentEmpty(overview([], []))).toBe(true);
+    expect(isContentEmpty(overview([], [projectedItem()]))).toBe(false);
+    expect(isContentEmpty(overview([recordedItem({ date: '2026-09-10' })], []))).toBe(false);
   });
 });

@@ -2,10 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import {
   classifyWebhookResult,
-  FAILED_EVENTS_BEFORE_PAUSE,
   getDestinationHealthUpdate,
   getRetryDelayMs,
-  MAX_DELIVERY_ATTEMPTS,
   resolveAttempt,
   type SendResult,
 } from '@/features/notifications/delivery-policy';
@@ -63,7 +61,7 @@ describe('getRetryDelayMs', () => {
     const delays = [1, 2, 3, 4].map((attempt) => getRetryDelayMs(attempt, null, () => 0.5));
 
     expect(delays).toEqual([2, 6, 15, 35].map((minutes) => minutes * 60_000));
-    expect(getRetryDelayMs(MAX_DELIVERY_ATTEMPTS, null)).toBeNull();
+    expect(getRetryDelayMs(5, null, () => 0.5)).toBeNull();
   });
 
   it('spreads retries over roughly an hour with ±20% jitter', () => {
@@ -89,15 +87,17 @@ describe('resolveAttempt and destination health', () => {
   };
   const permanent: SendResult = { outcome: 'permanent_failure', message: 'The endpoint rejected the request (410).' };
 
-  it('retries a temporary failure until attempts run out', () => {
-    expect(resolveAttempt({ attemptNumber: 1, result: temporary, now, random: () => 0.5 })).toEqual({
-      status: 'retrying',
-      nextAttemptAt: new Date(now.getTime() + 2 * 60_000),
-    });
-    expect(resolveAttempt({ attemptNumber: MAX_DELIVERY_ATTEMPTS, result: temporary, now })).toEqual({
-      status: 'failed',
-      reason: 'exhausted',
-    });
+  it('retries a temporary failure four times, then gives up after the fifth attempt', () => {
+    const resolve = (attemptNumber: number) =>
+      resolveAttempt({ attemptNumber, result: temporary, now, random: () => 0.5 });
+
+    expect([1, 2, 3, 4].map(resolve)).toEqual(
+      [2, 6, 15, 35].map((minutes) => ({
+        status: 'retrying',
+        nextAttemptAt: new Date(now.getTime() + minutes * 60_000),
+      })),
+    );
+    expect(resolve(5)).toEqual({ status: 'failed', reason: 'exhausted' });
   });
 
   it('pauses a destination at once on a permanent rejection', () => {
@@ -119,25 +119,22 @@ describe('resolveAttempt and destination health', () => {
     expect(update).toEqual({ lastFailureAt: now, lastFailureMessage: temporary.message });
   });
 
-  it('pauses after three events in a row exhaust their retries', () => {
-    const resolution = resolveAttempt({ attemptNumber: MAX_DELIVERY_ATTEMPTS, result: temporary, now });
+  it('pauses only when a third event in a row exhausts its retries', () => {
+    const resolution = resolveAttempt({ attemptNumber: 5, result: temporary, now });
+    const afterEvent = (consecutiveFailedEvents: number) =>
+      getDestinationHealthUpdate({ consecutiveFailedEvents, resolution, result: temporary, now });
+    const failure = { lastFailureAt: now, lastFailureMessage: temporary.message };
 
-    expect(
-      getDestinationHealthUpdate({
-        consecutiveFailedEvents: FAILED_EVENTS_BEFORE_PAUSE - 2,
-        resolution,
-        result: temporary,
-        now,
-      }),
-    ).toMatchObject({ consecutiveFailedEvents: 2 });
-    expect(
-      getDestinationHealthUpdate({
-        consecutiveFailedEvents: FAILED_EVENTS_BEFORE_PAUSE - 1,
-        resolution,
-        result: temporary,
-        now,
-      }),
-    ).toMatchObject({ consecutiveFailedEvents: 3, pauseReason: 'failing', pausedAt: now });
+    expect(resolution).toEqual({ status: 'failed', reason: 'exhausted' });
+    expect(afterEvent(0)).toEqual({ ...failure, consecutiveFailedEvents: 1 });
+    expect(afterEvent(1)).toEqual({ ...failure, consecutiveFailedEvents: 2 });
+    expect(afterEvent(2)).toEqual({
+      ...failure,
+      consecutiveFailedEvents: 3,
+      pausedAt: now,
+      pauseReason: 'failing',
+      pauseMessage: expect.stringContaining(temporary.message),
+    });
   });
 
   it('resets the failure count after a success', () => {

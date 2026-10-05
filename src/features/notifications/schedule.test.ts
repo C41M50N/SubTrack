@@ -307,14 +307,34 @@ describe('buildOverviewItems', () => {
     expect(newMonthItems).toEqual([]);
   });
 
-  it('combines recorded and projected occurrences without duplicates', () => {
+  it('doesn’t project an occurrence recorded in an unrouted collection before a move', () => {
     const { newMonthItems } = build({
-      invoices: [invoice({ id: 'oct-1', subscriptionId: 'sub-weekly', invoiceDate: '2026-10-01', amount: 500 })],
+      collections: ['personal'],
+      // Recorded while the subscription was in Work, which isn't routed here.
+      invoices: [invoice({ id: 'oct-7', collectionId: 'work', invoiceDate: '2026-10-07' })],
+      // Since moved to Personal, with a next date that still includes October 7.
+      subscriptions: [overviewSubscription({ costFrequency: 'weekly', nextInvoiceDate: '2026-10-07' })],
+    });
+
+    expect(newMonthItems.map((item) => [item.source, item.date, item.collectionId])).toEqual([
+      ['projected', '2026-10-14', 'personal'],
+      ['projected', '2026-10-21', 'personal'],
+      ['projected', '2026-10-28', 'personal'],
+    ]);
+  });
+
+  it('combines recorded and projected weekly occurrences without projecting a recorded one again', () => {
+    const { newMonthItems } = build({
+      invoices: [
+        invoice({ id: 'oct-1', subscriptionId: 'sub-weekly', invoiceDate: '2026-10-01', amount: 500 }),
+        invoice({ id: 'oct-8', subscriptionId: 'sub-weekly', invoiceDate: '2026-10-08', amount: 500 }),
+      ],
       subscriptions: [
+        // A stale next date would otherwise project October 1 and 8 again.
         overviewSubscription({
           id: 'sub-weekly',
           costFrequency: 'weekly',
-          nextInvoiceDate: '2026-10-08',
+          nextInvoiceDate: '2026-10-01',
           costAmount: 500,
         }),
       ],
@@ -322,21 +342,11 @@ describe('buildOverviewItems', () => {
 
     expect(newMonthItems.map((item) => [item.source, item.date])).toEqual([
       ['recorded', '2026-10-01'],
-      ['projected', '2026-10-08'],
+      ['recorded', '2026-10-08'],
       ['projected', '2026-10-15'],
       ['projected', '2026-10-22'],
       ['projected', '2026-10-29'],
     ]);
-  });
-
-  it('never projects an occurrence that was already recorded', () => {
-    const { newMonthItems } = build({
-      invoices: [invoice({ id: 'oct-7', invoiceDate: '2026-10-07' })],
-      // A stale next date would otherwise project October 7 again.
-      subscriptions: [overviewSubscription({ nextInvoiceDate: '2026-10-07' })],
-    });
-
-    expect(newMonthItems.map((item) => item.source)).toEqual(['recorded']);
   });
 
   it('excludes inactive and excluded subscriptions from projections', () => {
