@@ -81,7 +81,7 @@ Portless may ask for your system password because the HTTPS proxy uses port 443.
 
 ## Notifications
 
-Notifications are scheduled by one recurring job, `bun run jobs:run`, which [`railway/invoice-cron.json`](railway/invoice-cron.json) runs every five minutes. Each run records due invoices in each user's time zone, creates the reminders and overviews whose 9 a.m. local send time has arrived, and delivers them with retries. Five minutes is frequent enough to reach 9 a.m. in time zones offset by 30 or 45 minutes and to space retries over about an hour.
+Notifications are scheduled by one recurring job, `bun run jobs:run`, which [Railway IaC](.railway/railway.ts) runs every five minutes. Each run records due invoices in each user's time zone, creates the reminders and overviews whose 9 a.m. local send time has arrived, and delivers them with retries. Five minutes is frequent enough to reach 9 a.m. in time zones offset by 30 or 45 minutes and to space retries over about an hour.
 
 Email needs a [Resend](https://resend.com) account:
 
@@ -94,6 +94,12 @@ Until all three are set, email is shown as unavailable and Discord and webhook d
 ## Tests
 
 `bun run test` runs the unit tests. There are no database-backed tests yet, so notification event claiming and row locking, persistence across job reruns, and concurrent job runs have no automated coverage. That stays open until the project has a managed test database with migrations applied in CI.
+
+## Deployment
+
+The SubTrack Railway project has separate `development` and `production` environments. [`.railway/railway.ts`](.railway/railway.ts) manages their Postgres, web app, scheduled jobs, and production domain. Both app services deploy from the `v3` Git branch. Production uses **https://everysub.app**; development uses **https://web-development-0c7f.up.railway.app**. The web app applies existing Drizzle migrations before deployment and checks database connectivity at `/api/health`.
+
+See [the Railway deployment guide](.railway/README.md) for configuration changes, secrets, domain setup, and verification.
 
 ## Project map
 

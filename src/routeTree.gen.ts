@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ProtectedRouteRouteImport } from './routes/_protected/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as ProtectedDashboardRouteImport } from './routes/_protected/dashboard'
 import { Route as ProtectedSettingsRouteRouteImport } from './routes/_protected/settings/route'
 import { Route as ApiWebhooksResendRouteImport } from './routes/api/webhooks/resend'
@@ -36,6 +37,11 @@ const ProtectedRouteRoute = ProtectedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProtectedDashboardRoute = ProtectedDashboardRouteImport.update({
@@ -105,6 +111,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/settings': typeof ProtectedSettingsRouteRouteWithChildren
   '/dashboard': typeof ProtectedDashboardRoute
+  '/api/health': typeof ApiHealthRoute
   '/c/$collectionId': typeof ProtectedCCollectionIdRouteRouteWithChildren
   '/settings/notifications': typeof ProtectedSettingsNotificationsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -120,6 +127,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/settings': typeof ProtectedSettingsRouteRouteWithChildren
   '/dashboard': typeof ProtectedDashboardRoute
+  '/api/health': typeof ApiHealthRoute
   '/c/$collectionId': typeof ProtectedCCollectionIdRouteRouteWithChildren
   '/settings/notifications': typeof ProtectedSettingsNotificationsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -137,6 +145,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_protected/settings': typeof ProtectedSettingsRouteRouteWithChildren
   '/_protected/dashboard': typeof ProtectedDashboardRoute
+  '/api/health': typeof ApiHealthRoute
   '/_protected/c/$collectionId': typeof ProtectedCCollectionIdRouteRouteWithChildren
   '/_protected/settings/notifications': typeof ProtectedSettingsNotificationsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -154,6 +163,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/settings'
     | '/dashboard'
+    | '/api/health'
     | '/c/$collectionId'
     | '/settings/notifications'
     | '/api/auth/$'
@@ -169,6 +179,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/settings'
     | '/dashboard'
+    | '/api/health'
     | '/c/$collectionId'
     | '/settings/notifications'
     | '/api/auth/$'
@@ -185,6 +196,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/_protected/settings'
     | '/_protected/dashboard'
+    | '/api/health'
     | '/_protected/c/$collectionId'
     | '/_protected/settings/notifications'
     | '/api/auth/$'
@@ -200,6 +212,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProtectedRouteRoute: typeof ProtectedRouteRouteWithChildren
   LoginRoute: typeof LoginRoute
+  ApiHealthRoute: typeof ApiHealthRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiSubscriptionsExportRoute: typeof ApiSubscriptionsExportRoute
   ApiWebhooksResendRoute: typeof ApiWebhooksResendRoute
@@ -226,6 +239,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_protected/dashboard': {
@@ -364,6 +384,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProtectedRouteRoute: ProtectedRouteRouteWithChildren,
   LoginRoute: LoginRoute,
+  ApiHealthRoute: ApiHealthRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiSubscriptionsExportRoute: ApiSubscriptionsExportRoute,
   ApiWebhooksResendRoute: ApiWebhooksResendRoute,
