@@ -57,6 +57,7 @@ export const createSubscriptionInputSchema = z.object({
   costAmount: costAmountSchema,
   costFrequency: subscriptionCostFrequencySchema,
   nextInvoiceDate: invoiceDateSchema,
+  notificationsIncluded: z.boolean().optional(),
 });
 
 export const updateSubscriptionInputSchema = z.object({
@@ -67,6 +68,7 @@ export const updateSubscriptionInputSchema = z.object({
   costAmount: costAmountSchema.optional(),
   costFrequency: subscriptionCostFrequencySchema.optional(),
   nextInvoiceDate: invoiceDateSchema.optional(),
+  notificationsIncluded: z.boolean().optional(),
 });
 
 const uniqueSubscriptionIdsSchema = z

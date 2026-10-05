@@ -20,7 +20,7 @@ EverySub should help a user answer three questions quickly: **What am I committe
 - **Projected and recorded invoices mean different things.** Upcoming invoices are projections from the current subscription schedule. Recorded invoices are snapshots made as scheduled dates become due, preserving the expected amount and date at that time. Neither is proof that a payment succeeded.
 - **Imports accelerate setup, with review.** Users can import EverySub JSON or CSV exports. When configured, smart import can find subscription candidates in PDF statements, receipts, and screenshots. The user reviews and selects candidates before they are saved.
 - **Exports keep the data portable.** Users can export subscriptions for one collection or all collections as JSON or CSV. Import places all rows into a chosen collection, even when the export includes collection names.
-- **Renewal awareness is user controlled.** Upcoming renewals are visible in the app. Timely reminders are a product direction, with the user choosing whether and when to receive them.
+- **Renewal awareness is user controlled.** Upcoming renewals are visible in the app. Users can also receive renewal reminders and a monthly overview by email, Discord, or webhook. Each collection chooses where its notifications go, and each subscription can be kept out of them.
 - **Cancellation decisions belong to the user.** EverySub can surface signals such as an approaching renewal or a rising cost without claiming to know whether a subscription is worth keeping.
 
 ## Decision principles
@@ -41,6 +41,8 @@ EverySub centers on subscription and collection management, spending summaries, 
 ## Boundaries and trust
 
 EverySub tracks expected subscription billing. It does not connect to subscription providers, cancel a subscription on the user's behalf, or verify that an invoice was paid. Subscription-provider sync is outside the product's direction. Manual entry and reviewed imports remain the core; any future bank connection must be optional and explicitly approved by the user. Invoice history records due schedule snapshots, not reconciled transactions.
+
+Notifications send subscription names, dates, and amounts only to destinations the user routes them to: email through Resend, Discord, or the user's own webhook. Excluded subscriptions never leave the app, and EverySub can't recall a message a destination already accepted.
 
 For smart import, the app sends selected files to OpenAI for extraction and does not store the uploaded files. Candidates are shown for review before being written as subscriptions. The app records smart import usage metadata, so product privacy claims should distinguish file content from operational metadata.
 

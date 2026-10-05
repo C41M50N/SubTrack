@@ -13,8 +13,11 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ProtectedRouteRouteImport } from './routes/_protected/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProtectedDashboardRouteImport } from './routes/_protected/dashboard'
+import { Route as ProtectedSettingsRouteRouteImport } from './routes/_protected/settings/route'
+import { Route as ApiWebhooksResendRouteImport } from './routes/api/webhooks/resend'
 import { Route as ApiSubscriptionsExportRouteImport } from './routes/api/subscriptions/export'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ProtectedSettingsNotificationsRouteImport } from './routes/_protected/settings/notifications'
 import { Route as ProtectedCCollectionIdRouteRouteImport } from './routes/_protected/c.$collectionId/route'
 import { Route as ProtectedCCollectionIdSubscriptionsRouteImport } from './routes/_protected/c.$collectionId/subscriptions'
 import { Route as ProtectedCCollectionIdSettingsRouteImport } from './routes/_protected/c.$collectionId/settings'
@@ -40,6 +43,16 @@ const ProtectedDashboardRoute = ProtectedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => ProtectedRouteRoute,
 } as any)
+const ProtectedSettingsRouteRoute = ProtectedSettingsRouteRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => ProtectedRouteRoute,
+} as any)
+const ApiWebhooksResendRoute = ApiWebhooksResendRouteImport.update({
+  id: '/api/webhooks/resend',
+  path: '/api/webhooks/resend',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiSubscriptionsExportRoute = ApiSubscriptionsExportRouteImport.update({
   id: '/api/subscriptions/export',
   path: '/api/subscriptions/export',
@@ -50,6 +63,12 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProtectedSettingsNotificationsRoute =
+  ProtectedSettingsNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => ProtectedSettingsRouteRoute,
+  } as any)
 const ProtectedCCollectionIdRouteRoute =
   ProtectedCCollectionIdRouteRouteImport.update({
     id: '/c/$collectionId',
@@ -84,10 +103,13 @@ const ProtectedCCollectionIdDashboardRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/settings': typeof ProtectedSettingsRouteRouteWithChildren
   '/dashboard': typeof ProtectedDashboardRoute
   '/c/$collectionId': typeof ProtectedCCollectionIdRouteRouteWithChildren
+  '/settings/notifications': typeof ProtectedSettingsNotificationsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/subscriptions/export': typeof ApiSubscriptionsExportRoute
+  '/api/webhooks/resend': typeof ApiWebhooksResendRoute
   '/c/$collectionId/dashboard': typeof ProtectedCCollectionIdDashboardRoute
   '/c/$collectionId/invoices': typeof ProtectedCCollectionIdInvoicesRoute
   '/c/$collectionId/settings': typeof ProtectedCCollectionIdSettingsRoute
@@ -96,10 +118,13 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/settings': typeof ProtectedSettingsRouteRouteWithChildren
   '/dashboard': typeof ProtectedDashboardRoute
   '/c/$collectionId': typeof ProtectedCCollectionIdRouteRouteWithChildren
+  '/settings/notifications': typeof ProtectedSettingsNotificationsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/subscriptions/export': typeof ApiSubscriptionsExportRoute
+  '/api/webhooks/resend': typeof ApiWebhooksResendRoute
   '/c/$collectionId/dashboard': typeof ProtectedCCollectionIdDashboardRoute
   '/c/$collectionId/invoices': typeof ProtectedCCollectionIdInvoicesRoute
   '/c/$collectionId/settings': typeof ProtectedCCollectionIdSettingsRoute
@@ -110,10 +135,13 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_protected': typeof ProtectedRouteRouteWithChildren
   '/login': typeof LoginRoute
+  '/_protected/settings': typeof ProtectedSettingsRouteRouteWithChildren
   '/_protected/dashboard': typeof ProtectedDashboardRoute
   '/_protected/c/$collectionId': typeof ProtectedCCollectionIdRouteRouteWithChildren
+  '/_protected/settings/notifications': typeof ProtectedSettingsNotificationsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/subscriptions/export': typeof ApiSubscriptionsExportRoute
+  '/api/webhooks/resend': typeof ApiWebhooksResendRoute
   '/_protected/c/$collectionId/dashboard': typeof ProtectedCCollectionIdDashboardRoute
   '/_protected/c/$collectionId/invoices': typeof ProtectedCCollectionIdInvoicesRoute
   '/_protected/c/$collectionId/settings': typeof ProtectedCCollectionIdSettingsRoute
@@ -124,10 +152,13 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/settings'
     | '/dashboard'
     | '/c/$collectionId'
+    | '/settings/notifications'
     | '/api/auth/$'
     | '/api/subscriptions/export'
+    | '/api/webhooks/resend'
     | '/c/$collectionId/dashboard'
     | '/c/$collectionId/invoices'
     | '/c/$collectionId/settings'
@@ -136,10 +167,13 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/settings'
     | '/dashboard'
     | '/c/$collectionId'
+    | '/settings/notifications'
     | '/api/auth/$'
     | '/api/subscriptions/export'
+    | '/api/webhooks/resend'
     | '/c/$collectionId/dashboard'
     | '/c/$collectionId/invoices'
     | '/c/$collectionId/settings'
@@ -149,10 +183,13 @@ export interface FileRouteTypes {
     | '/'
     | '/_protected'
     | '/login'
+    | '/_protected/settings'
     | '/_protected/dashboard'
     | '/_protected/c/$collectionId'
+    | '/_protected/settings/notifications'
     | '/api/auth/$'
     | '/api/subscriptions/export'
+    | '/api/webhooks/resend'
     | '/_protected/c/$collectionId/dashboard'
     | '/_protected/c/$collectionId/invoices'
     | '/_protected/c/$collectionId/settings'
@@ -165,6 +202,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiSubscriptionsExportRoute: typeof ApiSubscriptionsExportRoute
+  ApiWebhooksResendRoute: typeof ApiWebhooksResendRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -197,6 +235,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedDashboardRouteImport
       parentRoute: typeof ProtectedRouteRoute
     }
+    '/_protected/settings': {
+      id: '/_protected/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof ProtectedSettingsRouteRouteImport
+      parentRoute: typeof ProtectedRouteRoute
+    }
+    '/api/webhooks/resend': {
+      id: '/api/webhooks/resend'
+      path: '/api/webhooks/resend'
+      fullPath: '/api/webhooks/resend'
+      preLoaderRoute: typeof ApiWebhooksResendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/subscriptions/export': {
       id: '/api/subscriptions/export'
       path: '/api/subscriptions/export'
@@ -210,6 +262,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_protected/settings/notifications': {
+      id: '/_protected/settings/notifications'
+      path: '/notifications'
+      fullPath: '/settings/notifications'
+      preLoaderRoute: typeof ProtectedSettingsNotificationsRouteImport
+      parentRoute: typeof ProtectedSettingsRouteRoute
     }
     '/_protected/c/$collectionId': {
       id: '/_protected/c/$collectionId'
@@ -249,6 +308,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface ProtectedSettingsRouteRouteChildren {
+  ProtectedSettingsNotificationsRoute: typeof ProtectedSettingsNotificationsRoute
+}
+
+const ProtectedSettingsRouteRouteChildren: ProtectedSettingsRouteRouteChildren =
+  {
+    ProtectedSettingsNotificationsRoute: ProtectedSettingsNotificationsRoute,
+  }
+
+const ProtectedSettingsRouteRouteWithChildren =
+  ProtectedSettingsRouteRoute._addFileChildren(
+    ProtectedSettingsRouteRouteChildren,
+  )
+
 interface ProtectedCCollectionIdRouteRouteChildren {
   ProtectedCCollectionIdDashboardRoute: typeof ProtectedCCollectionIdDashboardRoute
   ProtectedCCollectionIdInvoicesRoute: typeof ProtectedCCollectionIdInvoicesRoute
@@ -271,11 +344,13 @@ const ProtectedCCollectionIdRouteRouteWithChildren =
   )
 
 interface ProtectedRouteRouteChildren {
+  ProtectedSettingsRouteRoute: typeof ProtectedSettingsRouteRouteWithChildren
   ProtectedDashboardRoute: typeof ProtectedDashboardRoute
   ProtectedCCollectionIdRouteRoute: typeof ProtectedCCollectionIdRouteRouteWithChildren
 }
 
 const ProtectedRouteRouteChildren: ProtectedRouteRouteChildren = {
+  ProtectedSettingsRouteRoute: ProtectedSettingsRouteRouteWithChildren,
   ProtectedDashboardRoute: ProtectedDashboardRoute,
   ProtectedCCollectionIdRouteRoute:
     ProtectedCCollectionIdRouteRouteWithChildren,
@@ -291,6 +366,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiSubscriptionsExportRoute: ApiSubscriptionsExportRoute,
+  ApiWebhooksResendRoute: ApiWebhooksResendRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

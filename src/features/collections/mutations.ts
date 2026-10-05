@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { createCollection, deleteCollection, duplicateCollection, renameCollection } from '@/features/collections/api';
 import { collectionsListQueryKey } from '@/features/collections/queries';
+import { notificationsQueryKey } from '@/features/notifications/queries';
 
 export function useCreateCollection() {
   const queryClient = useQueryClient();
@@ -21,11 +22,12 @@ export function useRenameCollection() {
 
   return useMutation({
     mutationFn: (input: { collectionId: string; name: string }) => renameCollection({ data: input }),
-    onSuccess: () => {
-      return queryClient.invalidateQueries({
-        queryKey: collectionsListQueryKey,
-      });
-    },
+    // Notification routes list collections by name.
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: collectionsListQueryKey }),
+        queryClient.invalidateQueries({ queryKey: notificationsQueryKey }),
+      ]),
   });
 }
 
@@ -47,10 +49,11 @@ export function useDeleteCollection() {
 
   return useMutation({
     mutationFn: (collectionId: string) => deleteCollection({ data: { collectionId } }),
-    onSuccess: () => {
-      return queryClient.invalidateQueries({
-        queryKey: collectionsListQueryKey,
-      });
-    },
+    // Notification routes list collections by name.
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: collectionsListQueryKey }),
+        queryClient.invalidateQueries({ queryKey: notificationsQueryKey }),
+      ]),
   });
 }

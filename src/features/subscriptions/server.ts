@@ -3,6 +3,8 @@ import { and, asc, eq, getTableColumns, inArray, sql } from 'drizzle-orm';
 import { toCategoryNameKey } from '@/features/categories/names';
 import { assertCategoryInCollection, findOrCreateCategoriesByName } from '@/features/categories/server';
 import { getCollectionFilter, getMyCollection } from '@/features/collections/server';
+import { applyInclusion } from '@/features/notifications/inclusion';
+import { getUserLocalDate } from '@/features/notifications/user-time-zone';
 import { getImportedDeactivatedAt } from '@/features/subscriptions/import';
 import type { ImportSubscriptionItem } from '@/features/subscriptions/schema';
 import { buildSeedSubscriptions } from '@/features/subscriptions/seed-data';
@@ -81,6 +83,7 @@ export async function createMySubscription(input: {
   costAmount: number;
   costFrequency: SubscriptionCostFrequency;
   nextInvoiceDate: string;
+  notificationsIncluded?: boolean;
 }) {
   await assertCollectionOwnership(input.userId, input.collectionId);
 
@@ -99,6 +102,7 @@ export async function createMySubscription(input: {
       costAmount: input.costAmount,
       costFrequency: input.costFrequency,
       nextInvoiceDate: input.nextInvoiceDate,
+      notificationsIncluded: input.notificationsIncluded ?? true,
     })
     .returning();
 
@@ -116,12 +120,17 @@ export async function updateMySubscription(input: {
   costAmount?: number;
   costFrequency?: SubscriptionCostFrequency;
   nextInvoiceDate?: string;
+  notificationsIncluded?: boolean;
 }) {
   return db.transaction(async (tx) => {
     // Lock the row so a concurrent move can't change its collection between the
     // category check and the update.
     const [current] = await tx
-      .select({ collectionId: subscriptionTable.collectionId })
+      .select({
+        collectionId: subscriptionTable.collectionId,
+        costFrequency: subscriptionTable.costFrequency,
+        nextInvoiceDate: subscriptionTable.nextInvoiceDate,
+      })
       .from(subscriptionTable)
       .where(getSubscriptionFilter(input.userId, input.subscriptionId))
       .for('update');
@@ -135,6 +144,19 @@ export async function updateMySubscription(input: {
       await assertCategoryInCollection(input.userId, current.collectionId, input.categoryId, tx);
     }
 
+    if (input.notificationsIncluded !== undefined) {
+      await applyInclusion(tx, {
+        userId: input.userId,
+        subscriptionIds: [input.subscriptionId],
+        included: input.notificationsIncluded,
+      });
+    }
+
+    // A new schedule only gets reminders whose send time is still ahead.
+    const rescheduled =
+      (input.nextInvoiceDate !== undefined && input.nextInvoiceDate !== current.nextInvoiceDate) ||
+      (input.costFrequency !== undefined && input.costFrequency !== current.costFrequency);
+
     const [subscription] = await tx
       .update(subscriptionTable)
       .set({
@@ -144,6 +166,7 @@ export async function updateMySubscription(input: {
         costAmount: input.costAmount,
         costFrequency: input.costFrequency,
         nextInvoiceDate: input.nextInvoiceDate,
+        ...(rescheduled ? { remindersEligibleAt: new Date() } : {}),
       })
       .where(getSubscriptionFilter(input.userId, input.subscriptionId))
       .returning();
@@ -336,12 +359,8 @@ export async function reactivateMySubscriptions(input: {
   }
 
   return db.transaction(async (tx) => {
-    const clock = await tx.execute<{ processingDate: string }>(sql`select current_date as "processingDate"`);
-    const processingDate = clock.rows[0]?.processingDate;
-
-    if (!processingDate) {
-      throw new Error('Could not read the database date');
-    }
+    // Invoice processing and notifications use the user's local date too.
+    const processingDate = await getUserLocalDate(input.userId, new Date(), tx);
 
     if (input.nextInvoiceDate && input.nextInvoiceDate < processingDate) {
       throw new UserFacingError('Next invoice date must be today or later');
@@ -375,7 +394,7 @@ export async function reactivateMySubscriptions(input: {
     const nextInvoiceDate = sql<string>`case ${subscriptionTable.id} ${sql.join(nextInvoiceDateCases, sql.raw(' '))} end`;
     const updated = await tx
       .update(subscriptionTable)
-      .set({ status: 'active', deactivatedAt: null, nextInvoiceDate })
+      .set({ status: 'active', deactivatedAt: null, nextInvoiceDate, remindersEligibleAt: new Date() })
       .where(
         and(
           eq(subscriptionTable.userId, input.userId),
@@ -510,7 +529,12 @@ export async function moveMySubscriptions(input: { userId: string; subscriptionI
 
     const updated = await tx
       .update(subscriptionTable)
-      .set({ collectionId: input.collectionId, categoryId: textBySubscriptionId(movedCategoryIds) })
+      // Moving changes which routes apply, so only future reminder times count.
+      .set({
+        collectionId: input.collectionId,
+        categoryId: textBySubscriptionId(movedCategoryIds),
+        remindersEligibleAt: new Date(),
+      })
       .where(subscriptionFilter)
       .returning();
 

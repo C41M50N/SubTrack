@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link, useParams, useRouteContext } from '@tanstack/react-router';
 import {
+  BellIcon,
   FileTextIcon,
   LayoutDashboardIcon,
   SettingsIcon,
@@ -20,6 +21,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { notificationDestinationsQueryOptions } from '@/features/notifications/queries';
 import { subscriptionsQueryOptions } from '@/features/subscriptions/queries';
 
 export function AppSidebar() {
@@ -30,6 +32,14 @@ export function AppSidebar() {
     subscriptionsQueryOptions({ collectionId, status: 'active' }),
   );
   const subscriptionCount = subscriptions?.length ?? 0;
+  const { data: destinations } = useQuery(
+    notificationDestinationsQueryOptions(),
+  );
+  const needsAttention = (destinations ?? []).some(
+    (destination) =>
+      destination.health === 'needs_attention' ||
+      destination.health === 'failing',
+  );
 
   const userName = user.name;
   const userAvatarUrl =
@@ -133,6 +143,24 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter className="p-2">
         <SidebarMenu>
+          <SidebarMenuItem>
+            <Link to="/settings/notifications">
+              <SidebarMenuButton size="lg">
+                <div className="flex w-full items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <BellIcon />
+                    <span>Notifications</span>
+                  </div>
+                  {needsAttention ? (
+                    <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium whitespace-nowrap text-destructive">
+                      Attention
+                      <span className="sr-only"> needed</span>
+                    </span>
+                  ) : null}
+                </div>
+              </SidebarMenuButton>
+            </Link>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <ThemeSwitcher />
           </SidebarMenuItem>

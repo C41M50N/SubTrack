@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import {
   Field,
+  FieldContent,
   FieldDescription,
   FieldError,
   FieldLabel,
@@ -39,6 +40,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { useCreateCategory } from '@/features/categories/mutations';
 import {
   CategoryCombobox,
@@ -132,6 +134,7 @@ type FormState = {
   cost: string;
   costFrequency: SubscriptionCostFrequency;
   nextInvoiceDate: string;
+  notificationsIncluded: boolean;
 };
 
 function emptyForm(): FormState {
@@ -142,10 +145,14 @@ function emptyForm(): FormState {
     cost: '',
     costFrequency: 'monthly',
     nextInvoiceDate: format(new Date(), 'yyyy-MM-dd'),
+    notificationsIncluded: true,
   };
 }
 
-function formFromPrefill(prefill: SubscriptionFormPrefill): FormState {
+function formFromPrefill(
+  prefill: SubscriptionFormPrefill,
+  notificationsIncluded = true,
+): FormState {
   return {
     name: prefill.name,
     iconRef: prefill.iconRef,
@@ -156,6 +163,7 @@ function formFromPrefill(prefill: SubscriptionFormPrefill): FormState {
         : formatCentsForInput(prefill.costAmount),
     costFrequency: prefill.costFrequency ?? 'monthly',
     nextInvoiceDate: prefill.nextInvoiceDate ?? '',
+    notificationsIncluded,
   };
 }
 
@@ -167,7 +175,9 @@ function getInitialForm(
     return formFromPrefill(prefill);
   }
 
-  return subscription ? formFromPrefill(subscription) : emptyForm();
+  return subscription
+    ? formFromPrefill(subscription, subscription.notificationsIncluded)
+    : emptyForm();
 }
 
 export function SubscriptionFormDialog({
@@ -312,6 +322,7 @@ export function SubscriptionFormDialog({
         costAmount,
         costFrequency: form.costFrequency,
         nextInvoiceDate: form.nextInvoiceDate,
+        notificationsIncluded: form.notificationsIncluded,
       });
 
       if (!parsed.success) {
@@ -338,6 +349,7 @@ export function SubscriptionFormDialog({
       costAmount,
       costFrequency: form.costFrequency,
       nextInvoiceDate: form.nextInvoiceDate,
+      notificationsIncluded: form.notificationsIncluded,
     });
 
     if (!parsed.success) {
@@ -518,6 +530,30 @@ export function SubscriptionFormDialog({
             )}
             <FieldError>{errors.nextInvoiceDate}</FieldError>
           </Field>
+
+          {/* Imports are included by default; the switch returns once saved. */}
+          {review ? null : (
+            <Field orientation="horizontal">
+              <FieldContent>
+                <FieldLabel htmlFor="subscription-notifications">
+                  Include in notifications
+                </FieldLabel>
+                <FieldDescription>
+                  Lets this subscription and its recorded invoices appear in
+                  reminders and overviews for this collection.
+                </FieldDescription>
+              </FieldContent>
+              <Switch
+                id="subscription-notifications"
+                checked={form.notificationsIncluded}
+                onCheckedChange={(checked) =>
+                  update('notificationsIncluded', checked)
+                }
+                disabled={isPending}
+                aria-label="Include in notifications"
+              />
+            </Field>
+          )}
 
           <DialogFooter>
             <DialogClose

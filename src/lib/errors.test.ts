@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { UserFacingError, withUserFacingErrors } from '@/lib/errors';
+import { describeErrorSafely, UserFacingError, withUserFacingErrors } from '@/lib/errors';
 
 describe('withUserFacingErrors', () => {
   it('passes through user-facing messages', async () => {
@@ -26,5 +26,32 @@ describe('withUserFacingErrors', () => {
 
   it('returns the result on success', async () => {
     await expect(withUserFacingErrors('Fallback', async () => 'ok')).resolves.toBe('ok');
+  });
+});
+
+describe('describeErrorSafely', () => {
+  it('keeps the type and code but drops the message', () => {
+    const error = Object.assign(new Error('Failing row contains (https://hooks.example.com/secret)'), {
+      code: '23514',
+    });
+
+    expect(describeErrorSafely(error)).toBe('Error (23514)');
+  });
+
+  it('logs only the safe description when details are off', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    await expect(
+      withUserFacingErrors(
+        'Fallback',
+        async () => {
+          throw new Error('whsec_secret');
+        },
+        { logDetails: false },
+      ),
+    ).rejects.toThrow(/^Fallback$/);
+    expect(consoleError).toHaveBeenCalledWith('Error');
+
+    consoleError.mockRestore();
   });
 });
