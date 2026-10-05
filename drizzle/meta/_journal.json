@@ -57,6 +57,13 @@
       "when": 1790419263052,
       "tag": "0007_gifted_mongoose",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791159568402,
+      "tag": "0008_majestic_the_hood",
+      "breakpoints": true
     }
   ]
 }
