@@ -37,7 +37,7 @@ export function McpTerminal() {
     <div
       ref={ref}
       data-reveal={reveal}
-      className="flex grow basis-0 flex-col overflow-clip rounded-2xl border border-white/8 bg-[#0B0D10] font-mono shadow-[0_30px_60px_-20px_#00000080]"
+      className="flex flex-col overflow-clip rounded-2xl border border-white/8 bg-[#0B0D10] font-mono shadow-[0_30px_60px_-20px_#00000080] lg:grow lg:basis-0"
     >
       <div className="flex h-10.5 shrink-0 items-center gap-3.5 border-b border-white/6 px-4">
         <div aria-hidden className="flex gap-1.75">
@@ -49,7 +49,7 @@ export function McpTerminal() {
           claude — connected to everysub
         </p>
       </div>
-      <div className="flex flex-col gap-4.5 px-6 pt-6 pb-7">
+      <div className="flex flex-col gap-4.5 px-4 pt-5 pb-6 sm:px-6 sm:pt-6 sm:pb-7">
         <p className="flex gap-2.5 rounded-[10px] bg-[#161A1F] px-3.5 py-3 text-sm/5.5">
           <span aria-hidden className="font-medium text-brand-bright">
             &gt;
@@ -99,17 +99,19 @@ export function McpTerminal() {
         </ul>
         <div
           data-status={frame.answer ? 'shown' : 'hidden'}
-          className="flex flex-col gap-3.5 text-sm/5.5 text-[#E4E8EC] transition-[opacity,translate] duration-300 ease-reveal data-[status=hidden]:translate-y-1 data-[status=hidden]:opacity-0"
+          className="flex flex-col gap-3.5 text-[13px]/5.5 text-[#E4E8EC] transition-[opacity,translate] duration-300 ease-reveal data-[status=hidden]:translate-y-1 data-[status=hidden]:opacity-0 sm:text-sm/5.5"
         >
           <p>Four renewals this week, $62.00 in total:</p>
           <ul className="flex flex-col gap-1 border-l-2 border-[#23282F] pl-3.5 text-[#F1F4F7]">
             {RENEWALS.map((renewal) => (
               <li key={renewal.name} className="flex">
-                <span className="w-37.5 shrink-0">{renewal.name}</span>
-                <span className="w-27.5 shrink-0 text-[#8A949F]">
+                <span className="min-w-0 grow sm:w-37.5 sm:shrink-0 sm:grow-0">
+                  {renewal.name}
+                </span>
+                <span className="w-[12ch] shrink-0 text-[#8A949F] sm:w-27.5">
                   {renewal.date}
                 </span>
-                <span className="w-20 shrink-0 text-right">
+                <span className="w-[6ch] shrink-0 text-right sm:w-20">
                   {renewal.amount}
                 </span>
               </li>

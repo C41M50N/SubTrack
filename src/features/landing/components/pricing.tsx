@@ -1,7 +1,11 @@
 import { Link } from '@tanstack/react-router';
 
 import { CheckIcon } from '@/features/landing/components/icons';
-import { landingButtonVariants } from '@/features/landing/styles';
+import {
+  contentColumn,
+  landingButtonVariants,
+  sectionHeading,
+} from '@/features/landing/styles';
 import { cn } from '@/lib/utils';
 
 type Plan = {
@@ -67,23 +71,26 @@ export function Pricing() {
   return (
     <section
       id="pricing"
-      className="flex w-full max-w-280 flex-col items-center gap-14 pt-42 pb-38"
+      className={cn(
+        'flex flex-col items-center gap-10 pt-28 pb-24 md:gap-14 md:pt-42 md:pb-38',
+        contentColumn,
+      )}
     >
       <div className="flex flex-col items-center gap-5 text-center">
-        <h2 className="w-190 text-[56px]/15 tracking-[-0.04em]">
+        <h2 className={cn('max-w-190', sectionHeading)}>
           Pricing with nothing to hide.
         </h2>
-        <p className="w-150 text-lg/7.25 text-ink-muted">
+        <p className="max-w-150 text-lg/7.25 text-ink-muted">
           You’re the customer, not the product. EverySub never sells your data
           or gets paid to keep you subscribed to anything.
         </p>
       </div>
-      <ul className="flex w-full gap-4">
+      <ul className="grid w-full max-w-120 gap-4 lg:max-w-none lg:grid-cols-3">
         {PLANS.map((plan) => (
           <li
             key={plan.name}
             className={cn(
-              'flex grow basis-0 flex-col gap-7 rounded-[22px] border bg-white p-8',
+              'flex flex-col gap-7 rounded-[22px] border bg-white p-6 sm:p-8',
               plan.featured
                 ? 'border-brand shadow-[0_0_0_1px_#176AAB,0_24px_48px_-20px_#176AAB59]'
                 : 'border-line',
@@ -132,18 +139,21 @@ export function Pricing() {
                 {plan.features.map((feature) => (
                   <li
                     key={feature.label}
-                    className="flex items-center gap-2.5 text-[15px]/5 text-ink-soft"
+                    className="flex gap-2.5 text-[15px]/5 text-ink-soft"
                   >
                     <CheckIcon
                       strokeWidth={2.2}
-                      className="size-4.5 shrink-0 self-start text-brand"
+                      className="size-4.5 shrink-0 text-brand"
                     />
-                    {feature.label}
-                    {feature.comingSoon && (
-                      <span className="flex h-5 items-center rounded-full border border-[#CFE3F2] bg-[#F3F8FC] px-1.75 text-[11px]/3.5 font-semibold text-brand">
-                        Coming soon
-                      </span>
-                    )}
+                    {/* The badge drops below the label when both don't fit. */}
+                    <span className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                      {feature.label}
+                      {feature.comingSoon && (
+                        <span className="flex h-5 items-center rounded-full border border-[#CFE3F2] bg-[#F3F8FC] px-1.75 text-[11px]/3.5 font-semibold whitespace-nowrap text-brand">
+                          Coming soon
+                        </span>
+                      )}
+                    </span>
                   </li>
                 ))}
               </ul>

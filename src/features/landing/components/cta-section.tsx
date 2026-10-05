@@ -5,7 +5,11 @@ import {
   ArrowRightIcon,
   CalendarIcon,
 } from '@/features/landing/components/icons';
-import { arrowNudge, landingButtonVariants } from '@/features/landing/styles';
+import {
+  arrowNudge,
+  landingButtonVariants,
+  panelColumn,
+} from '@/features/landing/styles';
 import { useRevealOnce } from '@/hooks/use-reveal-once';
 import { cn } from '@/lib/utils';
 
@@ -14,20 +18,23 @@ export function CtaSection() {
   const reveal = useRevealOnce(panelRef, { threshold: 0.4 });
 
   return (
-    <section className="flex w-full justify-center pt-42 pb-38">
+    <section className="flex w-full justify-center pt-28 pb-24 md:pt-42 md:pb-38">
       <div
         ref={panelRef}
         data-reveal={reveal}
-        className="group/cta relative flex w-300 shrink-0 flex-col items-center gap-7 overflow-clip rounded-[28px] bg-brand-glow px-20 py-26 text-center"
+        className={cn(
+          'group/cta relative flex flex-col items-center gap-7 overflow-clip rounded-[20px] bg-brand-glow px-5 py-16 text-center sm:rounded-[28px] sm:px-12 sm:py-20 xl:px-20 xl:py-26',
+          panelColumn,
+        )}
       >
-        <h2 className="w-160 text-[64px]/17 tracking-[-0.045em] text-white">
+        <h2 className="max-w-160 text-[40px]/11 tracking-[-0.045em] text-balance text-white md:text-[64px]/17">
           Find out before your statement does.
         </h2>
-        <p className="w-140 text-[19px]/7.5 text-[#D6E8F6]">
+        <p className="max-w-140 text-[17px]/7 text-[#D6E8F6] sm:text-[19px]/7.5">
           Add your first subscriptions in a few minutes. Free to start, with no
           card and no bank connection.
         </p>
-        <div className="flex items-center gap-3 pt-2">
+        <div className="flex w-full max-w-96 flex-col gap-3 pt-2 sm:w-auto sm:max-w-none sm:flex-row">
           <Link
             to="/login"
             className={landingButtonVariants({
@@ -83,7 +90,7 @@ export function CtaSection() {
 
 /**
  * A tilted notification that springs into place the first time the panel
- * scrolls into view.
+ * scrolls into view. Only wide panels have room for them beside the text.
  */
 function FloatingCard({
   tilt,
@@ -105,7 +112,7 @@ function FloatingCard({
       aria-hidden
       style={{ '--tilt': tilt, animationDelay: delay } as CSSProperties}
       className={cn(
-        'absolute flex origin-top-left rotate-(--tilt) items-center gap-3 rounded-[14px] bg-white px-4 py-3.5 text-left shadow-[0_16px_32px_-12px_#051E3773] group-data-[reveal=pending]/cta:opacity-0 motion-safe:group-data-[reveal=in]/cta:animate-card-in',
+        'absolute hidden origin-top-left rotate-(--tilt) items-center gap-3 rounded-[14px] bg-white px-4 py-3.5 text-left shadow-[0_16px_32px_-12px_#051E3773] group-data-[reveal=pending]/cta:opacity-0 xl:flex motion-safe:group-data-[reveal=in]/cta:animate-card-in',
         className,
       )}
     >

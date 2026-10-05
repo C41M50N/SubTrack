@@ -1,4 +1,6 @@
 import { McpTerminal } from '@/features/landing/components/mcp-terminal';
+import { panelColumn, sectionHeading } from '@/features/landing/styles';
+import { cn } from '@/lib/utils';
 
 const CLIENTS = [
   { name: 'Claude', logo: '/landing/logos/claude.svg' },
@@ -8,10 +10,15 @@ const CLIENTS = [
 
 export function McpSection() {
   return (
-    <section className="flex w-full justify-center pt-30">
-      <div className="flex w-300 shrink-0 items-center gap-16 overflow-clip rounded-[28px] bg-ink py-18 pr-18 pl-20">
-        <div className="flex w-105 shrink-0 flex-col gap-6">
-          <div className="flex items-center gap-2.5">
+    <section className="flex w-full justify-center pt-20 md:pt-30">
+      <div
+        className={cn(
+          'flex flex-col gap-10 overflow-clip rounded-[20px] bg-ink px-5 py-10 sm:rounded-[28px] sm:p-12 lg:flex-row lg:items-center lg:gap-12 xl:gap-16 xl:py-18 xl:pr-18 xl:pl-20',
+          panelColumn,
+        )}
+      >
+        <div className="flex max-w-140 flex-col gap-6 lg:w-105 lg:shrink-0">
+          <div className="flex flex-wrap items-center gap-2.5">
             <p className="text-[15px]/4.5 font-medium text-[#AEB6C0]">
               EverySub MCP server
             </p>
@@ -20,7 +27,7 @@ export function McpSection() {
               Coming soon
             </span>
           </div>
-          <h2 className="text-[56px]/15 tracking-[-0.04em] text-white">
+          <h2 className={cn('text-white', sectionHeading)}>
             Ask your subscriptions anything.
           </h2>
           <p className="text-lg/7.25 text-[#AEB6C0]">
@@ -28,9 +35,9 @@ export function McpSection() {
             what’s due, check your totals, or add a new subscription without
             opening the app.
           </p>
-          <div className="flex items-center gap-5 pt-3 text-sm/4.5 font-medium">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-3 pt-3 text-sm/4.5 font-medium">
             <p className="text-[#7D8792]">Works with</p>
-            <ul className="flex items-center gap-5">
+            <ul className="flex flex-wrap items-center gap-x-5 gap-y-3">
               {CLIENTS.map((client) => (
                 <li
                   key={client.name}

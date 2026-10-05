@@ -1,3 +1,6 @@
+import { contentColumn } from '@/features/landing/styles';
+import { cn } from '@/lib/utils';
+
 const SERVICES = [
   { name: 'Netflix', logo: '/landing/logos/netflix.svg' },
   { name: 'Spotify', logo: '/landing/logos/spotify.svg' },
@@ -11,11 +14,16 @@ const SERVICES = [
 
 export function ServicesStrip() {
   return (
-    <div className="flex w-full max-w-280 flex-col items-center gap-7 pt-18">
-      <p className="text-[15px]/4.5 font-medium text-ink-muted">
+    <div
+      className={cn(
+        'flex flex-col items-center gap-7 pt-14 md:pt-18',
+        contentColumn,
+      )}
+    >
+      <p className="text-center text-[15px]/5.5 font-medium text-balance text-ink-muted">
         Track anything you pay for, from streaming to software
       </p>
-      <ul className="flex w-full items-center justify-between px-6">
+      <ul className="grid w-full grid-cols-2 justify-items-center gap-y-5 sm:grid-cols-4 lg:flex lg:items-center lg:justify-between lg:px-6">
         {SERVICES.map((service) => (
           <li key={service.name} className="flex items-center gap-2 opacity-72">
             <img src={service.logo} alt="" className="size-5" />

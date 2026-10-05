@@ -27,7 +27,7 @@ export const Route = createFileRoute('/')({
 /** The public marketing page. It's light-only, whatever the app theme. */
 function LandingPage() {
   return (
-    <div className="relative flex min-h-screen flex-col items-center bg-white text-ink scheme-light">
+    <div className="relative flex min-h-screen flex-col items-center bg-white text-ink scheme-light [--gutter:--spacing(5)] sm:[--gutter:--spacing(8)]">
       <SiteHeader />
       <main className="flex w-full flex-col items-center">
         <Hero />

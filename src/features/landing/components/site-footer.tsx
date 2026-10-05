@@ -1,4 +1,4 @@
-import { focusRing } from '@/features/landing/styles';
+import { contentColumn, focusRing } from '@/features/landing/styles';
 import { cn } from '@/lib/utils';
 
 const REPOSITORY_URL = 'https://github.com/C41M50N/SubTrack';
@@ -24,24 +24,18 @@ const LINK_GROUPS = [
       { label: 'Contact', href: 'mailto:hello@everysub.app' },
     ],
   },
-  {
-    title: 'Legal',
-    links: [
-      { label: 'Privacy', href: '/privacy' },
-      { label: 'Terms', href: '/terms' },
-      {
-        label: 'Data handling',
-        href: `${REPOSITORY_URL}/blob/main/PRODUCT.md#boundaries-and-trust`,
-      },
-    ],
-  },
 ];
 
 export function SiteFooter() {
   return (
-    <footer className="flex w-full flex-col items-center gap-14 border-t border-line-soft bg-[#F7F8FA] pt-18 pb-10">
-      <div className="flex w-full max-w-280 justify-between">
-        <div className="flex w-70 shrink-0 flex-col gap-4">
+    <footer className="flex w-full flex-col items-center gap-12 border-t border-line-soft bg-[#F7F8FA] pt-14 pb-10 md:gap-14 md:pt-18">
+      <div
+        className={cn(
+          'flex flex-col gap-10 md:flex-row md:justify-between',
+          contentColumn,
+        )}
+      >
+        <div className="flex max-w-70 shrink-0 flex-col gap-4">
           <div className="flex items-center gap-2.5">
             <img src="/favicon.svg" alt="" className="size-7" />
             <span className="text-lg/5.5 font-semibold tracking-[-0.02em]">
@@ -78,7 +72,12 @@ export function SiteFooter() {
           ))}
         </nav>
       </div>
-      <div className="flex w-full max-w-280 items-center justify-between border-t border-line pt-7">
+      <div
+        className={cn(
+          'flex items-center justify-between gap-6 border-t border-line pt-7',
+          contentColumn,
+        )}
+      >
         <p className="text-sm/4.5 text-ink-muted">
           © {new Date().getFullYear()} EverySub. Open source and built in
           public.

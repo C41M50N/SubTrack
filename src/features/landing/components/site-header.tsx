@@ -1,7 +1,11 @@
 import { Link } from '@tanstack/react-router';
 import { useEffect, useRef, useState } from 'react';
 
-import { focusRing, landingButtonVariants } from '@/features/landing/styles';
+import {
+  contentColumn,
+  focusRing,
+  landingButtonVariants,
+} from '@/features/landing/styles';
 import { cn } from '@/lib/utils';
 
 const NAV_LINKS = [
@@ -45,12 +49,15 @@ export function SiteHeader() {
       >
         <nav
           aria-label="Main"
-          className="flex h-18 w-full max-w-280 items-center justify-between"
+          className={cn(
+            'flex h-16 items-center justify-between sm:h-18',
+            contentColumn,
+          )}
         >
           <Link
             to="/"
             className={cn(
-              'flex w-55 shrink-0 items-center gap-2.5 rounded-md',
+              'flex shrink-0 items-center gap-2.5 rounded-md md:w-55',
               focusRing,
             )}
           >
@@ -59,7 +66,9 @@ export function SiteHeader() {
               EverySub
             </span>
           </Link>
-          <ul className="flex items-center gap-9 text-[15px]/4.5 font-medium">
+          {/* Hidden on small screens, where the footer links to the same
+              sections. */}
+          <ul className="hidden items-center gap-9 text-[15px]/4.5 font-medium md:flex">
             {NAV_LINKS.map((link) => (
               <li key={link.href}>
                 <a
@@ -74,7 +83,7 @@ export function SiteHeader() {
               </li>
             ))}
           </ul>
-          <div className="flex w-55 shrink-0 items-center justify-end gap-5">
+          <div className="flex shrink-0 items-center justify-end gap-4 sm:gap-5 md:w-55">
             <Link
               to="/login"
               className={cn(

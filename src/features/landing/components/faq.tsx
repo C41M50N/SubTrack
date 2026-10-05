@@ -5,7 +5,12 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { ArrowRightIcon } from '@/features/landing/components/icons';
-import { arrowNudge, focusRing } from '@/features/landing/styles';
+import {
+  arrowNudge,
+  contentColumn,
+  focusRing,
+  sectionHeading,
+} from '@/features/landing/styles';
 import { cn } from '@/lib/utils';
 
 const QUESTIONS = [
@@ -55,12 +60,16 @@ const QUESTIONS = [
 
 export function Faq() {
   return (
-    <section id="faq" className="flex w-full max-w-280 justify-between pt-38">
-      <div className="flex w-95 shrink-0 flex-col gap-5">
-        <h2 className="text-[56px]/15 tracking-[-0.04em]">
-          Questions, answered.
-        </h2>
-        <div className="flex w-82.5 flex-col gap-2.5">
+    <section
+      id="faq"
+      className={cn(
+        'flex flex-col gap-8 pt-24 md:pt-38 lg:flex-row lg:justify-between lg:gap-12',
+        contentColumn,
+      )}
+    >
+      <div className="flex shrink-0 flex-col gap-5 lg:w-95">
+        <h2 className={sectionHeading}>Questions, answered.</h2>
+        <div className="flex max-w-82.5 flex-col gap-2.5">
           <p className="text-lg/7.25 text-ink-muted">
             Still curious? A real person
             <br />
@@ -78,9 +87,12 @@ export function Faq() {
           </a>
         </div>
       </div>
-      {/* Pulled up so the first question's cap height lines up with the
-          heading's. */}
-      <Accordion defaultValue={['bank']} className="-mt-[17px] w-160 shrink-0">
+      {/* Side by side, it's pulled up so the first question's cap height
+          lines up with the heading's. */}
+      <Accordion
+        defaultValue={['bank']}
+        className="w-full lg:-mt-[17px] lg:w-160"
+      >
         {QUESTIONS.map((item) => (
           <AccordionItem
             key={item.id}
@@ -89,7 +101,7 @@ export function Faq() {
           >
             <AccordionTrigger
               className={cn(
-                'items-center gap-6 rounded-sm border-0 pt-6.5 pb-4.25 text-lg/5.5 font-medium tracking-[-0.01em] text-ink transition-none hover:no-underline focus-visible:ring-0 data-panel-open:font-semibold **:data-[slot=accordion-trigger-icon]:text-ink-muted',
+                'items-center gap-6 rounded-sm border-0 pt-6.5 pb-4.25 text-[17px]/5.5 font-medium sm:text-lg/5.5 tracking-[-0.01em] text-ink transition-none hover:no-underline focus-visible:ring-0 data-panel-open:font-semibold **:data-[slot=accordion-trigger-icon]:text-ink-muted',
                 focusRing,
               )}
             >

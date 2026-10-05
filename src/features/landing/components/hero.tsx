@@ -7,8 +7,10 @@ import {
 } from '@/features/landing/components/icons';
 import {
   arrowNudge,
+  contentColumn,
   focusRing,
   landingButtonVariants,
+  panelColumn,
 } from '@/features/landing/styles';
 import { cn } from '@/lib/utils';
 
@@ -21,7 +23,12 @@ const REASSURANCES = [
 export function Hero() {
   return (
     <section className="flex w-full flex-col items-center">
-      <div className="flex w-full max-w-280 flex-col items-center gap-7 pt-24 pb-18">
+      <div
+        className={cn(
+          'flex flex-col items-center gap-7 pt-14 pb-12 sm:pt-24 sm:pb-18',
+          contentColumn,
+        )}
+      >
         <a
           href="#smart-import"
           className={cn(
@@ -33,24 +40,25 @@ export function Hero() {
             New
           </span>
           <span className="text-sm/4.5 font-medium text-ink-soft">
-            Smart import finds subscriptions in your bank statements
+            Smart import finds subscriptions
+            <span className="max-sm:hidden"> in your bank statements</span>
           </span>
           <ArrowRightIcon
             className={cn('size-3.5 text-ink-muted', arrowNudge)}
           />
         </a>
         <div className="flex flex-col items-center gap-6 text-center">
-          <h1 className="w-225 text-[80px]/21 tracking-[-0.045em]">
+          <h1 className="max-w-225 text-[44px]/12 tracking-[-0.045em] text-balance sm:text-[60px]/16 sm:text-wrap lg:text-[80px]/21">
             Know what you pay for, before it renews.
           </h1>
-          <p className="w-160 text-xl/7.75 text-ink-muted">
+          <p className="max-w-160 text-lg/7 text-ink-muted sm:text-xl/7.75">
             EverySub keeps every subscription’s cost, renewal date, and billing
             history in one place. See what you’re committed to, what’s coming
             up, and what it all adds up to.
           </p>
         </div>
-        <div className="flex flex-col items-center gap-5 pt-2">
-          <div className="flex items-center gap-3">
+        <div className="flex w-full flex-col items-center gap-5 pt-2">
+          <div className="flex w-full max-w-96 flex-col gap-3 sm:w-auto sm:max-w-none sm:flex-row">
             <Link
               to="/login"
               className={landingButtonVariants({
@@ -73,7 +81,7 @@ export function Hero() {
               See how it works
             </a>
           </div>
-          <ul className="flex items-center gap-5">
+          <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
             {REASSURANCES.map((reassurance) => (
               <li
                 key={reassurance}
@@ -94,11 +102,19 @@ export function Hero() {
   );
 }
 
-/** The app window rises into the blue panel on load, which clips it. */
+/**
+ * The app window rises into the blue panel on load, which clips it. On narrow
+ * screens the window keeps a readable size and runs off the panel's edge.
+ */
 function ProductShot() {
   return (
-    <div className="flex w-300 justify-center overflow-clip rounded-[28px] bg-brand-glow px-10 pt-10">
-      <div className="flex w-280 shrink-0 flex-col overflow-clip rounded-t-[14px] border-x border-t border-white/20 bg-white shadow-[0_32px_72px_-16px_#0A1F3A59,0_2px_8px_#0A1F3A26] motion-safe:animate-product-rise">
+    <div
+      className={cn(
+        'flex overflow-clip rounded-[20px] bg-brand-glow px-4 pt-4 sm:rounded-[28px] sm:px-6 sm:pt-6 md:px-10 md:pt-10',
+        panelColumn,
+      )}
+    >
+      <div className="flex w-full max-w-280 min-w-160 shrink-0 flex-col overflow-clip rounded-t-[14px] border-x border-t border-white/20 bg-white shadow-[0_32px_72px_-16px_#0A1F3A59,0_2px_8px_#0A1F3A26] motion-safe:animate-product-rise">
         <div
           aria-hidden
           className="flex h-10 shrink-0 items-center justify-between border-b border-line-soft bg-[#FAFBFC] px-4"
@@ -120,7 +136,7 @@ function ProductShot() {
           width={1120}
           height={700}
           fetchPriority="high"
-          className="h-175 w-280"
+          className="h-auto w-full"
         />
       </div>
     </div>

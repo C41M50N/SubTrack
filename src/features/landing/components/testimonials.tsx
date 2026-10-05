@@ -1,7 +1,11 @@
 import { PauseIcon, PlayIcon } from 'lucide-react';
 import { type CSSProperties, useState } from 'react';
 
-import { focusRing } from '@/features/landing/styles';
+import {
+  contentColumn,
+  focusRing,
+  sectionHeading,
+} from '@/features/landing/styles';
 import { cn } from '@/lib/utils';
 
 const QUOTES = [
@@ -71,19 +75,26 @@ export function Testimonials() {
   const [paused, setPaused] = useState(false);
 
   return (
-    <section className="flex w-full flex-col items-center gap-14 overflow-clip bg-[#E6F0FA] pt-30 pb-18 motion-reduce:pb-32">
-      <div className="flex flex-col items-center gap-5 text-center">
-        <h2 className="w-190 text-[56px]/15 tracking-[-0.04em]">
+    <section className="flex w-full flex-col items-center gap-10 overflow-clip bg-[#E6F0FA] pt-20 pb-14 motion-reduce:pb-24 md:gap-14 md:pt-30 md:pb-18 md:motion-reduce:pb-32">
+      <div
+        className={cn(
+          'flex flex-col items-center gap-5 text-center',
+          contentColumn,
+        )}
+      >
+        <h2 className={cn('max-w-190', sectionHeading)}>
           Less guessing, fewer surprises.
         </h2>
-        <p className="w-140 text-lg/7.25 text-ink-muted">
+        <p className="max-w-140 text-lg/7.25 text-ink-muted">
           What people notice once every subscription is in one place.
         </p>
       </div>
       <div className="flex w-full flex-col items-center gap-6">
-        {/* Under reduced motion this becomes a row you scroll yourself, with
-            the first card lined up with the page's content column. */}
-        <div className="group/marquee w-full overflow-x-clip [mask-image:linear-gradient(90deg,transparent_0,#000_120px,#000_calc(100%-120px),transparent_100%)] motion-safe:max-w-360 motion-reduce:-my-6 motion-reduce:snap-x motion-reduce:snap-mandatory motion-reduce:scroll-px-[calc((100%-1120px)/2)] motion-reduce:overflow-x-auto motion-reduce:px-[calc((100%-1120px)/2)] motion-reduce:py-6">
+        {/* `--inset` is the space beside the page's content column. The edges
+            fade across it, up to 120px. Under reduced motion this becomes a
+            row you scroll yourself, with the first card lined up with the
+            content column. */}
+        <div className="group/marquee w-full overflow-x-clip [--fade:min(120px,var(--inset))] [--inset:max(var(--gutter),(100%_-_1120px)/2)] [mask-image:linear-gradient(90deg,transparent_0,#000_var(--fade),#000_calc(100%-var(--fade)),transparent_100%)] motion-safe:max-w-360 motion-reduce:-my-6 motion-reduce:snap-x motion-reduce:snap-mandatory motion-reduce:scroll-px-(--inset) motion-reduce:overflow-x-auto motion-reduce:px-(--inset) motion-reduce:py-6">
           <div
             data-paused={paused ? '' : undefined}
             style={trackStyle}
@@ -93,7 +104,9 @@ export function Testimonials() {
             <QuoteSet duplicate />
           </div>
         </div>
-        <div className="flex w-full max-w-280 justify-end motion-reduce:hidden">
+        <div
+          className={cn('flex justify-end motion-reduce:hidden', contentColumn)}
+        >
           <button
             type="button"
             onClick={() => setPaused((value) => !value)}
