@@ -34,6 +34,7 @@ function getSafeRedirect(redirectTo?: string) {
 }
 
 export const Route = createFileRoute('/login')({
+  ssr: true,
   head: () => ({ meta: [{ title: 'Sign in · EverySub' }] }),
   validateSearch: (search): LoginSearch => ({
     redirect: typeof search.redirect === 'string' ? search.redirect : undefined,

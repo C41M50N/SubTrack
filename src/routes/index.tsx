@@ -12,6 +12,7 @@ import { SiteHeader } from '@/features/landing/components/site-header';
 import { Testimonials } from '@/features/landing/components/testimonials';
 
 export const Route = createFileRoute('/')({
+  ssr: true,
   head: () => ({
     meta: [
       {

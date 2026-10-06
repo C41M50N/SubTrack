@@ -13,3 +13,9 @@ Use TanStack Router's `Link` component for internal navigation (for example, the
 TanStack Query is wired into Router SSR in `src/router.tsx`.
 
 See [TanStack Start x Query](./tanstack-start-query.md) for route data conventions.
+
+## Rendering
+
+`src/start.ts` sets `defaultSsr: false`, so the signed-in app renders on the client. The public pages (`/`, `/login`, and the 404 page) set `ssr: true` and are server-rendered. The root route sets `ssr: true` as well, because a route can't render on the server when its parent doesn't.
+
+Give any new public page `ssr: true`.
