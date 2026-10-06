@@ -37,8 +37,8 @@ function invalidateSubscriptionViews(queryClient: ReturnType<typeof useQueryClie
 }
 
 // Adding subscriptions can complete onboarding. Onboarding refreshes after the
-// subscriptions and isn't awaited, so the dialog that saved them closes before
-// the reminder invitation can open.
+// subscriptions and isn't awaited, so the dialog that saved them closes without
+// waiting on it.
 function refreshOnboarding(queryClient: ReturnType<typeof useQueryClient>) {
   void queryClient.invalidateQueries({ queryKey: onboardingQueryKey });
 }

@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { CircleAlertIcon } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import {
@@ -68,6 +68,10 @@ type ImportSubscriptionsDialogProps = {
   collection: ImportTarget;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Files chosen before opening, such as ones dropped on the page, to start with. */
+  initialFiles?: File[];
+  /** Called once the reviewed subscriptions are saved, before the dialog closes. */
+  onImported?: () => void;
   /** Where focus goes when the dialog closes. Defaults to the trigger. */
   finalFocus?: React.ComponentProps<typeof DialogContent>['finalFocus'];
   /** Called once opening or closing, including its animation, finishes. */
@@ -83,6 +87,8 @@ export function ImportSubscriptionsDialog({
   collection,
   open,
   onOpenChange,
+  initialFiles,
+  onImported,
   finalFocus,
   onOpenChangeComplete,
 }: ImportSubscriptionsDialogProps) {
@@ -90,14 +96,22 @@ export function ImportSubscriptionsDialog({
   // its rows, duplicate checks, and categories can't end up imported into
   // another collection. The session only changes on open, so the dialog stays
   // mounted through its close animation.
-  const [session, setSession] = useState({ id: 0, collection });
+  const [session, setSession] = useState({
+    id: 0,
+    collection,
+    initialFiles: initialFiles ?? [],
+  });
   const [wasOpen, setWasOpen] = useState(open);
 
   if (open !== wasOpen) {
     setWasOpen(open);
 
     if (open) {
-      setSession((current) => ({ id: current.id + 1, collection }));
+      setSession((current) => ({
+        id: current.id + 1,
+        collection,
+        initialFiles: initialFiles ?? [],
+      }));
     }
   }
 
@@ -107,6 +121,8 @@ export function ImportSubscriptionsDialog({
       collection={session.collection}
       open={open}
       onOpenChange={onOpenChange}
+      initialFiles={session.initialFiles}
+      onImported={onImported}
       finalFocus={finalFocus}
       onOpenChangeComplete={onOpenChangeComplete}
     />
@@ -124,6 +140,8 @@ function ImportDialog({
   collection,
   open,
   onOpenChange,
+  initialFiles = [],
+  onImported,
   finalFocus,
   onOpenChangeComplete,
 }: ImportSubscriptionsDialogProps) {
@@ -151,6 +169,7 @@ function ImportDialog({
   const runRef = useRef<AbortController | null>(null);
   // Async steps check this so nothing continues, or uploads, after closing.
   const closedRef = useRef(false);
+  const startedWithFilesRef = useRef(false);
 
   // Also stops work when the parent closes the dialog or it unmounts, such as
   // after navigating away mid-run.
@@ -166,6 +185,22 @@ function ImportDialog({
       runRef.current?.abort();
     };
   }, [open]);
+
+  // Files picked before opening go through the same checks as ones dropped
+  // here. Strict Mode remounts before any upload starts, so starting once is
+  // enough: the remount reopens the dialog before the first await resolves.
+  const selectInitialFiles = useEffectEvent(() => {
+    void handleSelectFiles(initialFiles);
+  });
+
+  useEffect(() => {
+    if (!open || startedWithFilesRef.current || initialFiles.length === 0) {
+      return;
+    }
+
+    startedWithFilesRef.current = true;
+    selectInitialFiles();
+  }, [open, initialFiles]);
 
   const smartImportAvailability = getAvailability(status);
 
@@ -419,6 +454,7 @@ function ImportDialog({
       {
         onSuccess: (result) => {
           toast.success(formatImportResult(result));
+          onImported?.();
           onOpenChange(false);
         },
       },

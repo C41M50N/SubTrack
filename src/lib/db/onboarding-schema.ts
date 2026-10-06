@@ -17,8 +17,8 @@ export const onboardingTable = pgTable('onboarding', {
     .primaryKey()
     .references(() => user.id, { onDelete: 'cascade' }),
   // When the account first saved a subscription by adding or importing one.
-  // The dashboard welcome panel shows until then. Removing subscriptions later
-  // doesn't clear it.
+  // Dashboard visits open in onboarding until then. Removing subscriptions
+  // later doesn't clear it.
   firstSubscriptionSavedAt: timestamp('first_subscription_saved_at', { withTimezone: true }),
   // The collection that first save went into. Reminder setup hands off to it.
   collectionId: text('collection_id').references(() => collectionTable.id, { onDelete: 'set null' }),

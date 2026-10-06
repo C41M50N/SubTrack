@@ -88,6 +88,21 @@ export type SubscriptionFormPrefill = {
   nextInvoiceDate: string | null;
 };
 
+/** A new subscription's starting values, with some already chosen. */
+export function newSubscriptionPrefill(
+  values: Partial<SubscriptionFormPrefill>,
+): SubscriptionFormPrefill {
+  return {
+    name: '',
+    iconRef: '',
+    categoryId: null,
+    costAmount: null,
+    costFrequency: 'monthly',
+    nextInvoiceDate: format(new Date(), 'yyyy-MM-dd'),
+    ...values,
+  };
+}
+
 export type SubscriptionFormValues = {
   name: string;
   iconRef: string;
@@ -121,6 +136,8 @@ type SubscriptionFormDialogProps = {
   collectionId: string;
   subscription?: SubscriptionRecord | null;
   review?: SubscriptionFormReviewMode;
+  /** Starting values for a new subscription, such as a service picked from a list. */
+  prefill?: SubscriptionFormPrefill;
   categories: CategoryOption[];
   onCreated?: () => void;
   /** Where focus goes when the dialog closes. Defaults to the trigger. */
@@ -188,6 +205,7 @@ export function SubscriptionFormDialog({
   collectionId,
   subscription,
   review,
+  prefill: createPrefill,
   categories,
   onCreated,
   finalFocus,
@@ -197,7 +215,7 @@ export function SubscriptionFormDialog({
   const status = review ? review.status : subscription?.status;
   // Review mode re-renders with new callbacks as pending categories change, so
   // only a new prefill resets the form.
-  const prefill = review?.prefill;
+  const prefill = review?.prefill ?? createPrefill;
   const createSubscription = useCreateSubscription();
   const updateSubscription = useUpdateSubscription();
   const createCategory = useCreateCategory();

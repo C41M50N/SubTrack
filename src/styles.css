@@ -320,3 +320,18 @@ body,
     @apply font-sans;
   }
 }
+
+/*
+ * Onboarding hands over to the dashboard in a view transition: the metrics,
+ * named `dashboard-metrics`, glide to their new spot while the rest of the
+ * page crossfades.
+ */
+::view-transition-group(dashboard-metrics) {
+  animation-duration: 450ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 300ms;
+}

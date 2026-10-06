@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatInvoiceDate, formatInvoiceDistance } from '@/features/subscriptions/format';
+import { formatInvoiceDate, formatInvoiceDistance, formatUpcomingDay } from '@/features/subscriptions/format';
 
 /** Fixed reference point so distances never depend on the wall clock. */
 const NOW = new Date(2026, 0, 10);
@@ -59,5 +59,31 @@ describe('formatInvoiceDistance', () => {
     const earlyMorning = new Date(2026, 0, 10, 0, 30);
 
     expect(formatInvoiceDistance('2026-01-13', earlyMorning)).toBe('in 3 days');
+  });
+});
+
+describe('formatUpcomingDay', () => {
+  // NOW is Saturday, January 10, 2026.
+  function day(isoDate: string): string {
+    return formatUpcomingDay(isoDate, NOW);
+  }
+
+  it('names today and tomorrow', () => {
+    expect(day('2026-01-10')).toBe('today');
+    expect(day('2026-01-11')).toBe('tomorrow');
+  });
+
+  it('names the weekday within the coming week', () => {
+    expect(day('2026-01-12')).toBe('on Monday');
+    expect(day('2026-01-16')).toBe('on Friday');
+  });
+
+  it('switches to a date once the weekday would repeat', () => {
+    expect(day('2026-01-17')).toBe('on Jan 17');
+    expect(day('2026-02-03')).toBe('on Feb 3');
+  });
+
+  it('ignores the time component of the reference date', () => {
+    expect(formatUpcomingDay('2026-01-11', new Date(2026, 0, 10, 23, 59))).toBe('tomorrow');
   });
 });

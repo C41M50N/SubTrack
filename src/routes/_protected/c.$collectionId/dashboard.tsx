@@ -2,6 +2,7 @@ import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { PlusIcon, UploadIcon, WalletIcon } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -35,10 +36,19 @@ import {
   toRecordedInvoices,
 } from '@/features/invoices/domain';
 import { collectionInvoicesQueryOptions } from '@/features/invoices/queries';
-import { ReminderInvitationDialog } from '@/features/onboarding/components/reminder-invitation-dialog';
-import { WelcomePanel } from '@/features/onboarding/components/welcome-panel';
+import { OnboardingPanel } from '@/features/onboarding/components/onboarding-panel';
+import { ReminderInvitationCard } from '@/features/onboarding/components/reminder-invitation-card';
+import {
+  findServiceCategoryId,
+  type PopularService,
+} from '@/features/onboarding/popular-services';
 import { onboardingQueryOptions } from '@/features/onboarding/queries';
-import { SubscriptionFormDialog } from '@/features/subscriptions/components/subscription-form-dialog';
+import {
+  newSubscriptionPrefill,
+  SubscriptionFormDialog,
+  type SubscriptionFormPrefill,
+} from '@/features/subscriptions/components/subscription-form-dialog';
+import { formatUpcomingDay } from '@/features/subscriptions/format';
 import { subscriptionsQueryOptions } from '@/features/subscriptions/queries';
 
 export const Route = createFileRoute('/_protected/c/$collectionId/dashboard')({
@@ -66,7 +76,7 @@ export const Route = createFileRoute('/_protected/c/$collectionId/dashboard')({
       ),
     ]);
 
-    // The welcome panel describes what the importer accepts.
+    // Onboarding describes what the importer accepts.
     if (!onboarding.completed) {
       void context.queryClient.prefetchQuery(smartImportStatusQueryOptions());
     }
@@ -88,8 +98,12 @@ function CollectionDashboard({ collectionId }: { collectionId: string }) {
   const [now] = useState(() => new Date());
   const [entryDialog, setEntryDialog] = useState<EntryDialog | null>(null);
   // Stays true through the close animation, so the reminder invitation can't
-  // open until the dialog that saved the subscription has returned focus.
+  // appear until the dialog that saved the subscription has returned focus.
   const [entryDialogShown, setEntryDialogShown] = useState(false);
+  const [formPrefill, setFormPrefill] = useState<SubscriptionFormPrefill>();
+  const [importFiles, setImportFiles] = useState<File[]>([]);
+  // An import adds the bulk at once, so it ends onboarding once its dialog closes.
+  const finishAfterImportRef = useRef(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const entryTriggerRef = useRef<HTMLElement | null>(null);
 
@@ -100,6 +114,11 @@ function CollectionDashboard({ collectionId }: { collectionId: string }) {
   const { data: collections } = useSuspenseQuery(collectionsQueryOptions());
   const { data: categoryOptions = [] } = useQuery(
     categoriesQueryOptions(collectionId),
+  );
+  // Decided once per visit, so onboarding stays up while someone keeps adding
+  // after their first save. Leaving or reloading lands on the dashboard.
+  const [onboardingActive, setOnboardingActive] = useState(
+    () => !onboarding.completed,
   );
   const collection = {
     id: collectionId,
@@ -127,6 +146,7 @@ function CollectionDashboard({ collectionId }: { collectionId: string }) {
     UPCOMING_LIST_DAYS,
   );
   const recent = recordedInvoices.slice(0, RECENT_LIST_LIMIT);
+  const [nextCharge] = upcoming;
 
   function openEntryDialog(dialog: EntryDialog, trigger: HTMLElement) {
     entryTriggerRef.current = trigger;
@@ -134,8 +154,55 @@ function CollectionDashboard({ collectionId }: { collectionId: string }) {
     setEntryDialogShown(true);
   }
 
-  // A first save replaces the welcome panel, taking the button that opened the
-  // dialog with it, so focus falls back to the heading.
+  function openImport(files: File[], trigger: HTMLElement) {
+    setImportFiles(files);
+    openEntryDialog('import', trigger);
+  }
+
+  function openCreate(
+    prefill: SubscriptionFormPrefill | undefined,
+    trigger: HTMLElement,
+  ) {
+    setFormPrefill(prefill);
+    openEntryDialog('create', trigger);
+  }
+
+  function addService(service: PopularService, trigger: HTMLElement) {
+    openCreate(
+      newSubscriptionPrefill({
+        name: service.name,
+        iconRef: service.domain,
+        categoryId: findServiceCategoryId(service, categoryOptions),
+      }),
+      trigger,
+    );
+  }
+
+  function addByHand(name: string, trigger: HTMLElement) {
+    openCreate(name ? newSubscriptionPrefill({ name }) : undefined, trigger);
+  }
+
+  // Swaps onboarding for the dashboard. The metrics are the same element in
+  // both, so a view transition glides them into place while the rest crossfades.
+  function finishOnboarding() {
+    const finish = () => {
+      flushSync(() => setOnboardingActive(false));
+      headingRef.current?.focus();
+    };
+
+    if (
+      !('startViewTransition' in document) ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      finish();
+      return;
+    }
+
+    document.startViewTransition(finish);
+  }
+
+  // Saving can remove the button that opened the dialog, such as when an
+  // import ends onboarding, so focus falls back to the heading.
   function getEntryFinalFocus() {
     return entryTriggerRef.current?.isConnected
       ? entryTriggerRef.current
@@ -149,83 +216,117 @@ function CollectionDashboard({ collectionId }: { collectionId: string }) {
   }
 
   function handleEntryOpenChangeComplete(open: boolean) {
-    if (!open) {
-      setEntryDialogShown(false);
+    if (open) {
+      return;
+    }
+
+    setEntryDialogShown(false);
+
+    if (finishAfterImportRef.current) {
+      finishAfterImportRef.current = false;
+      finishOnboarding();
     }
   }
 
+  const metrics = (
+    <DashboardMetrics
+      subscriptions={subscriptions}
+      projectedInvoices={projectedInvoices}
+      recordedThisMonth={invoicesInCurrentMonth(recordedInvoices, now)}
+      historyLoading={historyQuery.isPending}
+      historyError={historyQuery.isError}
+      onRetryHistory={() => void historyQuery.refetch()}
+      now={now}
+      preview={onboardingActive}
+    />
+  );
+
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
-      <header>
-        <h1
-          ref={headingRef}
-          tabIndex={-1}
-          className="font-heading text-2xl font-semibold outline-none"
-        >
-          Dashboard
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Spending and renewals for the subscriptions tracked in this
-          collection.
-        </p>
-      </header>
-
-      {!onboarding.completed && subscriptions.length === 0 ? (
-        <WelcomePanel
-          onImport={(trigger) => openEntryDialog('import', trigger)}
-          onAdd={(trigger) => openEntryDialog('create', trigger)}
-        />
-      ) : subscriptions.length === 0 ? (
-        <NoActiveSubscriptions
-          onImport={(trigger) => openEntryDialog('import', trigger)}
-          onAdd={(trigger) => openEntryDialog('create', trigger)}
+      {onboardingActive ? (
+        <OnboardingPanel
+          headingRef={headingRef}
+          subscriptions={subscriptions}
+          onImportFiles={openImport}
+          onAddService={addService}
+          onAddByHand={addByHand}
+          onFinish={finishOnboarding}
+          metrics={metrics}
         />
       ) : (
         <>
-          <DashboardMetrics
-            subscriptions={subscriptions}
-            projectedInvoices={projectedInvoices}
-            recordedThisMonth={invoicesInCurrentMonth(recordedInvoices, now)}
-            historyLoading={historyQuery.isPending}
-            historyError={historyQuery.isError}
-            onRetryHistory={() => void historyQuery.refetch()}
+          <header>
+            <h1
+              ref={headingRef}
+              tabIndex={-1}
+              className="font-heading text-2xl font-semibold outline-none"
+            >
+              Dashboard
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Spending and renewals for the subscriptions tracked in this
+              collection.
+            </p>
+          </header>
+
+          <ReminderInvitationCard
+            invitation={onboarding.reminderInvitation}
+            ready={!entryDialogShown}
+            currentCollection={collection}
+            nextCharge={nextCharge ?? null}
             now={now}
+            onDismiss={() => headingRef.current?.focus()}
           />
 
-          <div className="grid items-start gap-6 lg:grid-cols-3">
-            <div className="flex min-w-0 flex-col gap-6 lg:col-span-2">
-              <SpendTrendChart
-                points={trend}
-                isLoading={historyQuery.isPending}
-                isError={historyQuery.isError}
-                onRetry={() => void historyQuery.refetch()}
-              />
-              <InvoiceListCard
-                title="Upcoming invoices"
-                description={`Expected in the next ${UPCOMING_LIST_DAYS} days`}
-                view="upcoming"
-                collectionId={collectionId}
-                invoices={upcoming}
-                emptyMessage={`No invoices expected in the next ${UPCOMING_LIST_DAYS} days.`}
-                now={now}
-              />
-            </div>
-            <div className="flex min-w-0 flex-col gap-6">
-              <CategoryBreakdown entries={categories} />
-              <InvoiceListCard
-                title="Recently recorded"
-                description="The latest invoices EverySub has recorded"
-                view="history"
-                collectionId={collectionId}
-                invoices={recent}
-                emptyMessage="No invoices have been recorded yet."
-                isLoading={historyQuery.isPending}
-                isError={historyQuery.isError}
-                onRetry={() => void historyQuery.refetch()}
-                now={now}
-              />
-            </div>
-          </div>
+          {subscriptions.length === 0 ? (
+            <NoActiveSubscriptions
+              onImport={(trigger) => openImport([], trigger)}
+              onAdd={(trigger) => openCreate(undefined, trigger)}
+            />
+          ) : (
+            <>
+              {metrics}
+
+              <div className="grid items-start gap-6 lg:grid-cols-3">
+                <div className="flex min-w-0 flex-col gap-6 lg:col-span-2">
+                  <SpendTrendChart
+                    points={trend}
+                    isLoading={historyQuery.isPending}
+                    isError={historyQuery.isError}
+                    onRetry={() => void historyQuery.refetch()}
+                  />
+                  <InvoiceListCard
+                    title="Upcoming invoices"
+                    description={`Expected in the next ${UPCOMING_LIST_DAYS} days`}
+                    view="upcoming"
+                    collectionId={collectionId}
+                    invoices={upcoming}
+                    emptyMessage={`No invoices expected in the next ${UPCOMING_LIST_DAYS} days.`}
+                    now={now}
+                  />
+                </div>
+                <div className="flex min-w-0 flex-col gap-6">
+                  <CategoryBreakdown entries={categories} />
+                  <InvoiceListCard
+                    title="Recently recorded"
+                    description="The latest invoices EverySub has recorded"
+                    view="history"
+                    collectionId={collectionId}
+                    invoices={recent}
+                    emptyMessage={
+                      nextCharge
+                        ? `Nothing recorded yet. ${nextCharge.name}’s charge ${formatUpcomingDay(nextCharge.date, now)} will show up here.`
+                        : 'No invoices have been recorded yet.'
+                    }
+                    isLoading={historyQuery.isPending}
+                    isError={historyQuery.isError}
+                    onRetry={() => void historyQuery.refetch()}
+                    now={now}
+                  />
+                </div>
+              </div>
+            </>
+          )}
         </>
       )}
 
@@ -233,6 +334,10 @@ function CollectionDashboard({ collectionId }: { collectionId: string }) {
         collection={collection}
         open={entryDialog === 'import'}
         onOpenChange={handleEntryOpenChange}
+        initialFiles={importFiles}
+        onImported={() => {
+          finishAfterImportRef.current = onboardingActive;
+        }}
         onOpenChangeComplete={handleEntryOpenChangeComplete}
         finalFocus={getEntryFinalFocus}
       />
@@ -241,16 +346,10 @@ function CollectionDashboard({ collectionId }: { collectionId: string }) {
         open={entryDialog === 'create'}
         onOpenChange={handleEntryOpenChange}
         collectionId={collectionId}
+        prefill={formPrefill}
         categories={categoryOptions}
         onOpenChangeComplete={handleEntryOpenChangeComplete}
         finalFocus={getEntryFinalFocus}
-      />
-
-      <ReminderInvitationDialog
-        invitation={onboarding.reminderInvitation}
-        ready={!entryDialogShown}
-        fallbackCollection={collection}
-        finalFocus={headingRef}
       />
     </div>
   );

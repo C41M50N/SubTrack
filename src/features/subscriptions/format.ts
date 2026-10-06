@@ -21,6 +21,25 @@ function pluralize(count: number, unit: string): string {
 }
 
 /**
+ * Names an upcoming day for use mid-sentence: "today", "tomorrow", a weekday
+ * within the coming week ("on Friday"), or a date beyond it ("on Oct 18").
+ */
+export function formatUpcomingDay(isoDate: string, now: Date = new Date()): string {
+  const target = parseISO(isoDate);
+  const days = differenceInCalendarDays(startOfDay(target), startOfDay(now));
+
+  if (days === 0) {
+    return 'today';
+  }
+
+  if (days === 1) {
+    return 'tomorrow';
+  }
+
+  return days > 1 && days < 7 ? `on ${format(target, 'EEEE')}` : `on ${format(target, 'MMM d')}`;
+}
+
+/**
  * Describes an invoice date relative to `now`, e.g. "in 3 days" or "2 months ago".
  *
  * Distances are measured in calendar days rather than elapsed time, because

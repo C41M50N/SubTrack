@@ -14,7 +14,7 @@ Import is the primary invitation because it can give users a useful spending pic
 
 - New accounts and existing accounts with no collections, including the production account that currently lands on the unactionable **No collections yet** screen.
 - Automatic initial collection creation, starter categories, and time zone capture.
-- A dashboard welcome panel using the existing import and manual-entry flows.
+- Dashboard onboarding using the existing import and manual-entry flows.
 - A one-time reminder invitation and guidance through the existing reminder settings.
 - Prevention of last-collection deletion.
 - USD only. No currency selection or conversion is introduced.
@@ -26,7 +26,7 @@ Established users who already have subscriptions must not be put through onboard
 - [Import subscriptions](import-subscriptions.md) defines upload, extraction, review, validation, usage limits, privacy disclosure, and commit behavior.
 - [Subscription notifications](subscription-notifications.md) defines scheduling, destinations, collection routing, subscription inclusion, and delivery behavior.
 
-This spec adds onboarding entry points and guidance. It does not replace those features' existing rules. Import is primary within the welcome panel; the existing subscriptions page header does not need to change its action hierarchy.
+This spec adds onboarding entry points and guidance. It does not replace those features' existing rules. Import is primary within dashboard onboarding; the existing subscriptions page header does not need to change its action hierarchy.
 
 ## Initial account setup
 
@@ -74,16 +74,18 @@ Preserve existing behavior rather than introduce onboarding-specific validation:
 - If a valid browser time zone cannot be detected, retain the existing fallback behavior and allow correction in settings without blocking subscription entry.
 - Capturing a time zone does not select a destination, enable a collection route, or imply that reminders are working.
 
-## Dashboard welcome panel
+## Dashboard onboarding
 
 ### Presentation and actions
 
-- Show the welcome panel within the actual collection dashboard, with normal app navigation available.
+- Show onboarding within the actual collection dashboard, with normal app navigation available.
 - Do not introduce a dedicated welcome page or a required setup wizard.
-- **Import subscriptions** is the primary action.
-- **Add manually** is the secondary action and must be clearly visible.
-- Both actions use the current collection and open the existing workflows.
-- There is no **Skip for now** action on the welcome panel: skipping would expose the same available actions.
+- Importing is the primary action: a drop zone whose **Choose files** button, or files dropped on it, start the existing importer with those files.
+- Adding by hand is the secondary path and must be clearly visible: a short list of popular services that opens the existing subscription form with the name, icon, and matching starter category filled in, a search that also offers any typed name, and an **Add something else by hand** action.
+- Quick-add never fills in a price. Users enter what they actually pay.
+- All actions use the current collection and open the existing workflows.
+- Below the actions, a preview of the dashboard's metrics fills in as subscriptions are saved.
+- There is no **Skip for now** action: skipping would expose the same available actions.
 - Users can navigate elsewhere without completing onboarding.
 
 ### Import invitation
@@ -92,37 +94,40 @@ Preserve existing behavior rather than introduce onboarding-specific validation:
 - Do not imply that arbitrary bank CSV files are supported. CSV import expects EverySub's export format.
 - Keep the existing upload disclosure, review step, validation, file limits, usage limits, and cancellation behavior.
 - Do not add bank linking, pasted-text input, or new supported file formats.
+- Files dropped on the dashboard upload right away, so the drop zone shows the existing smart import disclosure itself.
 - If smart import is unavailable, manual entry remains available and the existing importer communicates its availability accurately.
 
 ### Completion and returning visits
 
-- Keep the welcome panel until the account successfully saves its first subscription.
+- Dashboard visits open in onboarding until the account successfully saves its first subscription.
 - A successful manual creation or committed import containing at least one subscription completes this milestone.
 - Uploading a file, extracting candidates, or reviewing rows does not complete it.
-- Cancelled imports, failed saves, and imports with no saved subscriptions leave the welcome panel available.
-- Returning before the first successful save shows the welcome panel again.
+- Cancelled imports, failed saves, and imports with no saved subscriptions leave onboarding available.
+- Returning before the first successful save shows onboarding again.
+- After the first save, onboarding stays up for the rest of that visit so users can keep adding, with saved services confirmed in place. **See your dashboard** leaves it, and a committed import leaves it once the import dialog closes. Leaving the page or reloading after the first save opens the regular dashboard.
 - Completion applies to the account, not separately to every collection.
 - Once completed, onboarding does not restart when users remove subscriptions or create another collection. Ordinary empty states must continue to provide actionable import and manual-entry controls.
 
 ## First successful save
 
-- Present the populated dashboard using the saved subscriptions' spending and renewal information.
+- Show the saved subscriptions' spending and renewal information right away in the onboarding preview, and the populated dashboard once onboarding hands over to it.
 - A multi-subscription import completes onboarding once and produces one reminder invitation, not one per imported subscription.
 - Do not require users to inventory all their subscriptions before using the app.
 - Spending totals represent the subscriptions currently tracked; the interface must not imply that onboarding establishes a complete inventory of the user's spending.
 
 ## One-time reminder invitation
 
-After the first successful save during onboarding, show a **Set up reminders** dialog over the dashboard with two actions:
+After the first successful save, once the user reaches the regular dashboard, show a one-time **Set up reminders** invitation at the top of it. When the collection has a charge in the upcoming list, the invitation names it. It has two actions:
 
 | Action               | Behavior                                                                                          |
 | -------------------- | ------------------------------------------------------------------------------------------------- |
 | **Set up reminders** | Go to account notification settings and begin the guided handoff to collection reminder settings. |
-| **Skip for now**     | Close the dialog and leave the user on the dashboard.                                             |
+| **Not now**          | Remove the invitation and leave the user on the dashboard.                                        |
 
-- Closing the dialog through its close control, Escape, or outside interaction counts as skipping.
+- Leaving or reloading the page while it shows counts as skipping.
+- Do not show it during onboarding, where it would interrupt someone still adding subscriptions.
 - Show the invitation only once per account, regardless of collection, refresh, later sign-in, or device.
-- Taking either action or closing the dialog must not cause it to reopen on later visits.
+- Taking either action or leaving must not cause it to reappear on later visits.
 - Reminder settings remain accessible through normal navigation after skipping.
 - Suppress the invitation for established users and when the onboarding collection already has a working reminder configuration.
 - Tracking subscriptions does not require accepting the invitation or enabling reminders.
@@ -156,7 +161,7 @@ Reuse the existing settings screens rather than introduce a separate reminder wi
 
 - Account-level setup, first-save completion, and reminder-invitation history must survive refreshes and later sign-ins.
 - Failed initial setup or subscription saves must not mark onboarding complete or consume the reminder invitation. A failed reminder-setup operation does not reopen an invitation the user has already acted on.
-- Keyboard users must be able to reach both welcome actions and both reminder-dialog actions. The dialog must have an accessible title, manage focus, and restore focus when dismissed.
+- Keyboard users must be able to reach every onboarding action and both reminder invitation actions. The invitation must have an accessible title. When it's dismissed, or when onboarding hands over to the dashboard, focus moves to the page heading.
 - Loading, unavailable, and error states must communicate what happened and preserve a usable next action.
 
 ## Non-goals
@@ -176,12 +181,12 @@ Reuse the existing settings screens rather than introduce a separate reminder wi
 3. Each newly created collection receives the seven agreed starter categories; user changes are not undone on later visits.
 4. Manual entry, import, and import review retain their existing category rules.
 5. The browser's time zone is captured without a setup step, can be changed in settings, and does not overwrite an existing preference or imply reminders are enabled.
-6. The welcome panel makes import primary and manual entry clearly available, with no skip action or navigation gate.
-7. Import copy accurately describes supported sources and retains the existing upload disclosure and review-before-save behavior.
-8. The welcome remains after cancellation, extraction without a commit, an empty result, or a failed save; the first successful manual save or import completes it.
+6. Dashboard onboarding makes import primary and adding by hand clearly available, with no skip action or navigation gate.
+7. Import copy accurately describes supported sources and retains the existing upload disclosure and review-before-save behavior, including for files dropped on the dashboard.
+8. Onboarding remains after cancellation, extraction without a commit, an empty result, or a failed save; the first successful manual save or import completes it. It stays up for the rest of that visit until the user moves on or an import commits.
 9. Completion survives subsequent visits and does not restart for another collection or after removing subscriptions.
-10. The first success presents the populated dashboard and, when eligible, one reminder dialog for the account.
-11. Setting up, skipping, or closing the reminder dialog prevents repeat invitations; established users and already configured users are excluded.
+10. The first success fills in the onboarding preview, and leaving onboarding presents the populated dashboard with, when eligible, one reminder invitation for the account.
+11. Setting up, skipping, or leaving the reminder invitation prevents repeat invitations; established users and already configured users are excluded.
 12. Reminder setup guides users from account schedule and destination settings into the relevant collection's routing and inclusion controls.
 13. A destination without an enabled collection reminder route is not treated as completed reminder setup.
 14. Attempting to delete the final collection shows an error toast and changes no data, including when requests use stale state or overlap.
