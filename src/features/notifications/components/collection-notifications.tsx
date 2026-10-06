@@ -52,6 +52,7 @@ import {
   type CollectionNotificationsData,
 } from '@/features/notifications/queries';
 import { getTimeZoneAbbreviation } from '@/features/notifications/time';
+import type { NotificationSettingsSearch } from '@/features/onboarding/search';
 import {
   notificationKindEnum,
   type NotificationKind,
@@ -62,12 +63,18 @@ const KINDS = notificationKindEnum.enumValues;
 /** A collection's notification routes and which of its subscriptions may appear. */
 export function CollectionNotifications({
   collectionId,
+  guidedReminderSetup = false,
 }: {
   collectionId: string;
+  /** Keeps links back to account settings inside guided reminder setup. */
+  guidedReminderSetup?: boolean;
 }) {
   const { data } = useSuspenseQuery(
     collectionNotificationsQueryOptions(collectionId),
   );
+  const accountSettingsSearch = guidedReminderSetup
+    ? { remindersFor: collectionId }
+    : {};
 
   return (
     <section
@@ -93,19 +100,27 @@ export function CollectionNotifications({
           <AlertTitle>Choose your time zone first</AlertTitle>
           <AlertDescription>
             Notifications send at 9:00 AM in your time zone.{' '}
-            <Link to="/settings/notifications">Set up notifications</Link> to
-            turn on routes.
+            <Link to="/settings/notifications" search={accountSettingsSearch}>
+              Set up notifications
+            </Link>{' '}
+            to turn on routes.
           </AlertDescription>
         </Alert>
       )}
 
-      <RoutesCard data={data} />
+      <RoutesCard data={data} accountSettingsSearch={accountSettingsSearch} />
       <InclusionCard data={data} />
     </section>
   );
 }
 
-function RoutesCard({ data }: { data: CollectionNotificationsData }) {
+function RoutesCard({
+  data,
+  accountSettingsSearch,
+}: {
+  data: CollectionNotificationsData;
+  accountSettingsSearch: NotificationSettingsSearch;
+}) {
   const setRoute = useSetRoute();
   const [review, setReview] = useState<RouteReviewTarget | null>(null);
   const schedule = data.schedule;
@@ -157,7 +172,12 @@ function RoutesCard({ data }: { data: CollectionNotificationsData }) {
             size="sm"
             className="text-muted-foreground"
             nativeButton={false}
-            render={<Link to="/settings/notifications" />}
+            render={
+              <Link
+                to="/settings/notifications"
+                search={accountSettingsSearch}
+              />
+            }
           >
             Manage destinations
             <ArrowRightIcon data-icon="inline-end" />
@@ -182,7 +202,12 @@ function RoutesCard({ data }: { data: CollectionNotificationsData }) {
               <Button
                 variant="outline"
                 nativeButton={false}
-                render={<Link to="/settings/notifications" />}
+                render={
+                  <Link
+                    to="/settings/notifications"
+                    search={accountSettingsSearch}
+                  />
+                }
               >
                 Add a destination
               </Button>

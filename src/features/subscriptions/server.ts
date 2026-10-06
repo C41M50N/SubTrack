@@ -5,6 +5,7 @@ import { assertCategoryInCollection, findOrCreateCategoriesByName } from '@/feat
 import { getCollectionFilter, getMyCollection } from '@/features/collections/server';
 import { applyInclusion } from '@/features/notifications/inclusion';
 import { getUserLocalDate } from '@/features/notifications/user-time-zone';
+import { recordSubscriptionSave } from '@/features/onboarding/server';
 import { getImportedDeactivatedAt } from '@/features/subscriptions/import';
 import type { ImportSubscriptionItem } from '@/features/subscriptions/schema';
 import { buildSeedSubscriptions } from '@/features/subscriptions/seed-data';
@@ -91,22 +92,26 @@ export async function createMySubscription(input: {
     await assertCategoryInCollection(input.userId, input.collectionId, input.categoryId);
   }
 
-  const [subscription] = await db
-    .insert(subscriptionTable)
-    .values({
-      userId: input.userId,
-      name: input.name,
-      collectionId: input.collectionId,
-      iconRef: input.iconRef,
-      categoryId: input.categoryId ?? null,
-      costAmount: input.costAmount,
-      costFrequency: input.costFrequency,
-      nextInvoiceDate: input.nextInvoiceDate,
-      notificationsIncluded: input.notificationsIncluded ?? true,
-    })
-    .returning();
+  return db.transaction(async (tx) => {
+    await recordSubscriptionSave(tx, { userId: input.userId, collectionId: input.collectionId });
 
-  return subscription;
+    const [subscription] = await tx
+      .insert(subscriptionTable)
+      .values({
+        userId: input.userId,
+        name: input.name,
+        collectionId: input.collectionId,
+        iconRef: input.iconRef,
+        categoryId: input.categoryId ?? null,
+        costAmount: input.costAmount,
+        costFrequency: input.costFrequency,
+        nextInvoiceDate: input.nextInvoiceDate,
+        notificationsIncluded: input.notificationsIncluded ?? true,
+      })
+      .returning();
+
+    return subscription;
+  });
 }
 
 // Moving is the only way to change a subscription's collection, so updates
@@ -223,6 +228,7 @@ export async function importMySubscriptions(input: {
       };
     });
 
+    await recordSubscriptionSave(tx, { userId: input.userId, collectionId: input.collectionId });
     await tx.insert(subscriptionTable).values(values);
 
     return {

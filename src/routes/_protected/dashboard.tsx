@@ -1,6 +1,7 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
 
 import { collectionsQueryOptions } from '@/features/collections/queries';
+import { AccountSetup } from '@/features/onboarding/components/account-setup';
 
 export const Route = createFileRoute('/_protected/dashboard')({
   beforeLoad: async ({ context }) => {
@@ -17,16 +18,6 @@ export const Route = createFileRoute('/_protected/dashboard')({
       });
     }
   },
-  component: NoCollections,
+  // Accounts without a collection get one automatically.
+  component: AccountSetup,
 });
-
-function NoCollections() {
-  return (
-    <main className="mx-auto flex w-full max-w-5xl flex-col items-start px-6 py-12 sm:px-8">
-      <h2 className="mb-2 text-2xl font-semibold">No collections yet</h2>
-      <p className="text-base text-slate-600">
-        Create your first collection to start tracking subscriptions.
-      </p>
-    </main>
-  );
-}

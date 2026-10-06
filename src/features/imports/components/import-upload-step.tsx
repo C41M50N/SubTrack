@@ -24,6 +24,10 @@ import {
 } from '@/features/imports/files';
 import { cn } from '@/lib/utils';
 
+/** Shown wherever files can be sent to smart import, before they are. */
+export const SMART_IMPORT_DISCLOSURE =
+  'Files are sent to OpenAI to extract subscriptions and aren’t stored.';
+
 export type UploadNotice = {
   tone: 'error' | 'info';
   message: string;
@@ -94,7 +98,7 @@ export function ImportUploadStep({
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-xs text-muted-foreground">
           <p className="flex items-center gap-1.5">
             <LockIcon className="size-3.5" aria-hidden />
-            Files are sent to OpenAI to extract subscriptions and aren’t stored.
+            {SMART_IMPORT_DISCLOSURE}
           </p>
           {smartImport.usageMessage && (
             <p className="tabular-nums">{smartImport.usageMessage}</p>

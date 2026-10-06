@@ -59,8 +59,10 @@ export const deleteCollection = createServerFn({ method: 'POST' })
   .middleware([requireAuthMiddleware])
   .validator(deleteCollectionInputSchema)
   .handler(async ({ context: { auth }, data }) => {
-    return deleteMyCollection({
-      userId: auth.userId,
-      collectionId: data.collectionId,
-    });
+    return withUserFacingErrors('Failed to delete collection', () =>
+      deleteMyCollection({
+        userId: auth.userId,
+        collectionId: data.collectionId,
+      }),
+    );
   });

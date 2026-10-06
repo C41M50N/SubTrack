@@ -142,14 +142,17 @@ export function AppSidebar() {
                       <WalletIcon />
                       <span>Subscriptions</span>
                     </div>
-                    <div className="rounded-full bg-muted mr-0.5 px-2 py-0.5 ring-1 ring-inset ring-border group-data-[collapsible=icon]:hidden">
-                      <span
-                        className="text-sm text-muted-foreground"
-                        aria-label={`${subscriptionCount} active subscriptions`}
-                      >
-                        {subscriptionCount}
-                      </span>
-                    </div>
+                    {/* A zero count says nothing the empty dashboard doesn't. */}
+                    {subscriptionCount > 0 ? (
+                      <div className="rounded-full bg-muted mr-0.5 px-2 py-0.5 ring-1 ring-inset ring-border group-data-[collapsible=icon]:hidden">
+                        <span
+                          className="text-sm text-muted-foreground"
+                          aria-label={`${subscriptionCount} active subscriptions`}
+                        >
+                          {subscriptionCount}
+                        </span>
+                      </div>
+                    ) : null}
                   </div>
                 </SidebarMenuButton>
               )}

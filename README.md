@@ -6,7 +6,8 @@ The project is in development and currently serves one person, while being built
 
 ## What works today
 
-- Organize subscriptions in collections and categories. Add, edit, deactivate, reactivate, delete, and move them between collections.
+- Start tracking without setup. New accounts get a Personal collection with starter categories and a dashboard welcome that leads with import, with manual entry right beside it. After the first save, a one-time prompt offers guided reminder setup.
+- Organize subscriptions in collections and categories. Add, edit, deactivate, reactivate, delete, and move them between collections. Every account keeps at least one collection.
 - Track weekly, monthly, yearly, and biennial billing schedules in USD. See effective monthly and yearly costs and the next expected charge.
 - Review collection dashboards with cost metrics, spending trends, category breakdowns, upcoming invoices, and recently recorded invoices.
 - Explore projected upcoming invoices and recorded invoice history separately. Recorded entries are schedule snapshots; EverySub does not verify payment.

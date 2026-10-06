@@ -4,6 +4,7 @@ import type { z } from 'zod';
 import { categoriesListQueryKey, categoriesQueryOptions } from '@/features/categories/queries';
 import { collectionsListQueryKey } from '@/features/collections/queries';
 import { notificationsQueryKey } from '@/features/notifications/queries';
+import { onboardingQueryKey } from '@/features/onboarding/queries';
 import {
   clearSubscriptions,
   createSubscription,
@@ -35,12 +36,22 @@ function invalidateSubscriptionViews(queryClient: ReturnType<typeof useQueryClie
   ]);
 }
 
+// Adding subscriptions can complete onboarding. Onboarding refreshes after the
+// subscriptions and isn't awaited, so the dialog that saved them closes without
+// waiting on it.
+function refreshOnboarding(queryClient: ReturnType<typeof useQueryClient>) {
+  void queryClient.invalidateQueries({ queryKey: onboardingQueryKey });
+}
+
 export function useCreateSubscription() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (input: CreateSubscriptionInput) => createSubscription({ data: input }),
-    onSuccess: () => invalidateSubscriptionViews(queryClient),
+    onSuccess: async () => {
+      await invalidateSubscriptionViews(queryClient);
+      refreshOnboarding(queryClient);
+    },
   });
 }
 
@@ -108,11 +119,13 @@ export function useImportSubscriptions() {
 
   return useMutation({
     mutationFn: (input: ImportSubscriptionsInput) => importSubscriptions({ data: input }),
-    onSuccess: (_result, input) =>
-      Promise.all([
+    onSuccess: async (_result, input) => {
+      await Promise.all([
         invalidateSubscriptionViews(queryClient),
         queryClient.invalidateQueries({ queryKey: categoriesQueryOptions(input.collectionId).queryKey }),
-      ]),
+      ]);
+      refreshOnboarding(queryClient);
+    },
   });
 }
 

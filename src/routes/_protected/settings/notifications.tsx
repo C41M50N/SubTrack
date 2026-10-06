@@ -1,19 +1,35 @@
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 
+import { collectionsQueryOptions } from '@/features/collections/queries';
 import { DestinationsCard } from '@/features/notifications/components/destinations-card';
 import { NotificationAttentionAlert } from '@/features/notifications/components/notification-attention-alert';
 import { ScheduleCard } from '@/features/notifications/components/schedule-card';
-import { notificationSettingsQueryOptions } from '@/features/notifications/queries';
+import {
+  notificationSettingsQueryOptions,
+  type NotificationSettingsData,
+} from '@/features/notifications/queries';
+import { canDeliver } from '@/features/notifications/reminder-setup';
+import { ReminderSetupGuide } from '@/features/onboarding/components/reminder-setup-guide';
+import { validateNotificationSettingsSearch } from '@/features/onboarding/search';
 
 export const Route = createFileRoute('/_protected/settings/notifications')({
-  loader: ({ context }) =>
-    context.queryClient.ensureQueryData(notificationSettingsQueryOptions()),
+  validateSearch: validateNotificationSettingsSearch,
+  loaderDeps: ({ search }) => ({ remindersFor: search.remindersFor }),
+  loader: ({ context, deps }) =>
+    Promise.all([
+      context.queryClient.ensureQueryData(notificationSettingsQueryOptions()),
+      // Guided setup names the collection it hands off to.
+      deps.remindersFor
+        ? context.queryClient.ensureQueryData(collectionsQueryOptions())
+        : undefined,
+    ]),
   head: () => ({ meta: [{ title: 'Notifications · EverySub' }] }),
   component: NotificationSettingsPage,
 });
 
 function NotificationSettingsPage() {
+  const { remindersFor } = Route.useSearch();
   const { data } = useSuspenseQuery(notificationSettingsQueryOptions());
 
   return (
@@ -28,6 +44,9 @@ function NotificationSettingsPage() {
       </header>
 
       <NotificationAttentionAlert showSettingsLink={false} />
+      {remindersFor ? (
+        <AccountReminderSetup collectionId={remindersFor} data={data} />
+      ) : null}
       <ScheduleCard schedule={data.schedule} />
       <DestinationsCard data={data} />
 
@@ -47,5 +66,43 @@ function NotificationSettingsPage() {
         </p>
       </section>
     </div>
+  );
+}
+
+function AccountReminderSetup({
+  collectionId,
+  data,
+}: {
+  collectionId: string;
+  data: NotificationSettingsData;
+}) {
+  const { data: collections } = useQuery(collectionsQueryOptions());
+  const collection = collections?.find(
+    (candidate) => candidate.id === collectionId,
+  );
+
+  // A stale or foreign collection ID shows the page without the guide.
+  if (!collection) {
+    return null;
+  }
+
+  const deliverableDestinations = data.destinations.filter(canDeliver);
+
+  return (
+    <ReminderSetupGuide
+      step="account"
+      collection={collection}
+      progress={{
+        schedule: data.schedule,
+        deliverableDestinations,
+        reminderDestinations: deliverableDestinations.filter((destination) =>
+          destination.routes.some(
+            (route) =>
+              route.collectionId === collection.id &&
+              route.kind === 'renewal_reminder',
+          ),
+        ),
+      }}
+    />
   );
 }

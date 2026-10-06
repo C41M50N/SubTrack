@@ -27,7 +27,11 @@ import {
 import { TimeZoneCombobox } from '@/features/notifications/components/time-zone-combobox';
 import { useSaveNotificationSchedule } from '@/features/notifications/mutations';
 import { saveNotificationScheduleInputSchema } from '@/features/notifications/schema';
-import { getTimeZoneAbbreviation } from '@/features/notifications/time';
+import {
+  FALLBACK_TIME_ZONE,
+  getBrowserTimeZone,
+  getTimeZoneAbbreviation,
+} from '@/features/notifications/time';
 import {
   DEFAULT_REMINDER_LEAD_DAYS,
   MAX_REMINDER_LEAD_DAYS,
@@ -41,14 +45,6 @@ const LEAD_DAY_OPTIONS = Array.from(
 
 function formatLeadDays(days: number) {
   return `${days} ${days === 1 ? 'day' : 'days'} before`;
-}
-
-function getBrowserTimeZone(): string {
-  try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
-  } catch {
-    return 'UTC';
-  }
 }
 
 type Schedule = { timeZone: string; reminderLeadDays: number };
@@ -65,7 +61,9 @@ export function ScheduleCard({ schedule }: { schedule: Schedule | null }) {
   // The browser's zone is only known on the client, so suggest it after mount.
   useEffect(() => {
     if (!schedule) {
-      setTimeZone((current) => current || getBrowserTimeZone());
+      setTimeZone(
+        (current) => current || (getBrowserTimeZone() ?? FALLBACK_TIME_ZONE),
+      );
     }
   }, [schedule]);
 
@@ -108,7 +106,7 @@ export function ScheduleCard({ schedule }: { schedule: Schedule | null }) {
           <CardTitle>{isSetUp ? 'Schedule' : 'Set up notifications'}</CardTitle>
           <CardDescription>
             {isSetUp
-              ? 'Every notification sends at 9:00 AM in your time zone.'
+              ? 'Every notification sends at 9:00 AM in your time zone, which also sets the day each invoice is recorded.'
               : 'Choose your time zone to start scheduling notifications. Every notification sends at 9:00 AM local time.'}
           </CardDescription>
         </CardHeader>

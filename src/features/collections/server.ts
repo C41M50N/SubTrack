@@ -1,6 +1,8 @@
 import { and, asc, eq } from 'drizzle-orm';
 
-import { db } from '@/lib/db';
+import { STARTER_CATEGORY_NAMES } from '@/features/categories/names';
+import { LAST_COLLECTION_DELETE_MESSAGE } from '@/features/collections/schema';
+import { db, type DbTransaction } from '@/lib/db';
 import { categoryTable } from '@/lib/db/category-schema';
 import { COLLECTION_NAME_UNIQUE_CONSTRAINT, collectionTable } from '@/lib/db/collection-schema';
 import { subscriptionTable } from '@/lib/db/subscription-schema';
@@ -66,17 +68,26 @@ export async function getMyCollection(userId: string, collectionId: string) {
   return collection ?? null;
 }
 
+/** Inserts a new collection with the starter categories. */
+export async function insertCollection(tx: DbTransaction, input: { userId: string; name: string }) {
+  const [collection] = await tx
+    .insert(collectionTable)
+    .values({
+      userId: input.userId,
+      name: input.name,
+    })
+    .returning();
+
+  await tx
+    .insert(categoryTable)
+    .values(STARTER_CATEGORY_NAMES.map((name) => ({ userId: input.userId, collectionId: collection.id, name })));
+
+  return collection;
+}
+
 export async function createMyCollection(input: { userId: string; name: string }) {
   try {
-    const [collection] = await db
-      .insert(collectionTable)
-      .values({
-        userId: input.userId,
-        name: input.name,
-      })
-      .returning();
-
-    return collection;
+    return await db.transaction((tx) => insertCollection(tx, input));
   } catch (error) {
     if (isDuplicateCollectionNameError(error)) {
       throw new UserFacingError(DUPLICATE_COLLECTION_NAME_MESSAGE);
@@ -199,15 +210,32 @@ export async function duplicateMyCollection(input: { userId: string; collectionI
   });
 }
 
+/** Deletes a collection and everything in it, unless it's the user's last one. */
 export async function deleteMyCollection(input: { userId: string; collectionId: string }) {
-  const [collection] = await db
-    .delete(collectionTable)
-    .where(getCollectionFilter(input.userId, input.collectionId))
-    .returning();
+  return db.transaction(async (tx) => {
+    // Locking all of the user's collections, in a fixed order, serializes
+    // deletions, so two overlapping requests can't each see another collection
+    // remaining and delete both.
+    const collections = await tx
+      .select({ id: collectionTable.id })
+      .from(collectionTable)
+      .where(eq(collectionTable.userId, input.userId))
+      .orderBy(asc(collectionTable.id))
+      .for('update');
 
-  if (!collection) {
-    throw new Error('Collection not found');
-  }
+    if (!collections.some((collection) => collection.id === input.collectionId)) {
+      throw new Error('Collection not found');
+    }
 
-  return collection;
+    if (collections.length === 1) {
+      throw new UserFacingError(LAST_COLLECTION_DELETE_MESSAGE);
+    }
+
+    const [collection] = await tx
+      .delete(collectionTable)
+      .where(getCollectionFilter(input.userId, input.collectionId))
+      .returning();
+
+    return collection;
+  });
 }

@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 
-import { FALLBACK_TIME_ZONE, toLocalDateKey } from '@/features/notifications/time';
+import { FALLBACK_TIME_ZONE, normalizeTimeZone, toLocalDateKey } from '@/features/notifications/time';
 import { db, type DbTransaction } from '@/lib/db';
 import { notificationSettingsTable } from '@/lib/db/notification-schema';
 
@@ -22,4 +22,23 @@ export async function getUserLocalDate(
   executor: typeof db | DbTransaction = db,
 ): Promise<string> {
   return toLocalDateKey(now, await getUserTimeZone(userId, executor));
+}
+
+/**
+ * Saves a detected time zone as the user's default unless they already have
+ * one, so a later visit or another browser never overwrites their choice. An
+ * invalid zone is ignored, which keeps the UTC fallback until they choose one.
+ */
+export async function saveInitialTimeZone(
+  userId: string,
+  timeZone: string | undefined,
+  executor: typeof db | DbTransaction = db,
+): Promise<void> {
+  const normalized = timeZone ? normalizeTimeZone(timeZone) : null;
+
+  if (!normalized) {
+    return;
+  }
+
+  await executor.insert(notificationSettingsTable).values({ userId, timeZone: normalized }).onConflictDoNothing();
 }

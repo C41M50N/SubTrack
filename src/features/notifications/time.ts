@@ -29,6 +29,15 @@ export function normalizeTimeZone(timeZone: string): string | null {
   }
 }
 
+/** This browser's IANA time zone, or null when it can't be detected. */
+export function getBrowserTimeZone(): string | null {
+  try {
+    return normalizeTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+  } catch {
+    return null;
+  }
+}
+
 function pad(value: number, length = 2): string {
   return String(value).padStart(length, '0');
 }
