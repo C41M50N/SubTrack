@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import { useEffect, useRef, useState } from 'react';
 
+import { Wordmark } from '@/features/landing/components/wordmark';
 import {
   contentColumn,
   focusRing,
@@ -56,15 +57,9 @@ export function SiteHeader() {
         >
           <Link
             to="/"
-            className={cn(
-              'flex shrink-0 items-center gap-2.5 rounded-md md:w-55',
-              focusRing,
-            )}
+            className={cn('flex shrink-0 rounded-md md:w-55', focusRing)}
           >
-            <img src="/favicon.svg" alt="" className="size-7" />
-            <span className="text-lg/5.5 font-semibold tracking-[-0.02em]">
-              EverySub
-            </span>
+            <Wordmark />
           </Link>
           {/* Hidden on small screens, where the footer links to the same
               sections. */}
