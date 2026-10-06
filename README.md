@@ -1,37 +1,118 @@
-# SubTrack
+# EverySub
 
-SubTrack is a subscription management tool designed to help users take control of their recurring expenses through an intuitive dashboard, custom organization features, and proactive notifications. For more details check out my [writeup](https://cbuff.dev/project/subtrack).
+EverySub helps you see what your subscriptions cost, when they renew, and how those charges add up. It brings subscription details, upcoming invoices, recorded billing history, and spending trends into one place.
 
-![Dashboard Image](/public/dashboard.jpeg)
+The project is in development and currently serves one person, while being built as an open source product and portfolio project. See [PRODUCT.md](PRODUCT.md) for the product direction and decision principles.
 
-## Core Features
+## What works today
 
-- **Manage Subscriptions**: Manage subscriptions via feature-rich dashboard table
-- **Gain Insights**: Gain insights on your subscriptions via cost metrics
-- **Categorize**: Organize subscriptions using custom categories
-- **Collections**: Separate subscriptions into various collections
-- **Stay Informed**: Stay informed on the state of your subscriptions with a monthly review email
-- **Cancel Reminders**: Create reminders to cancel subscriptions with Todoist
-- **Export Your Data**: Export your subscriptions to a CSV file
+- Organize subscriptions in collections and categories. Add, edit, deactivate, reactivate, delete, and move them between collections.
+- Track weekly, monthly, yearly, and biennial billing schedules in USD. See effective monthly and yearly costs and the next expected charge.
+- Review collection dashboards with cost metrics, spending trends, category breakdowns, upcoming invoices, and recently recorded invoices.
+- Explore projected upcoming invoices and recorded invoice history separately. Recorded entries are schedule snapshots; EverySub does not verify payment.
+- Import and export subscriptions as JSON or CSV. An optional smart import finds candidates in statements, receipts, and screenshots, then lets you review them before saving.
+- Get renewal reminders and a monthly overview by email, Discord, or a signed webhook. Each collection chooses where its notifications go, and each subscription can be excluded from them.
 
-## Tech Stack 🛠️
+## Stack
 
-- [Next.js](https://nextjs.org)
-- [Better-Auth](https://better-auth.com/)
-- [Prisma](https://prisma.io)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
-- [shadcn](https://ui.shadcn.com)
-- [Resend](https://resend.com)
+TanStack Start and Router, React, TanStack Query, Better Auth with Google sign-in, Drizzle ORM and PostgreSQL, Tailwind CSS, optional OpenAI-powered import, and React Email with Resend for notification emails. Bun runs the local scripts. Portless provides local HTTPS.
 
-## Development Environment Requirements
+## Local setup
 
-- [Node.js (v20+)](https://nodejs.org/)
-- [pnpm (v8+)](https://pnpm.io/)
-- [Docker](https://docker.com)
+Install dependencies and create `.env.local` in the project root. [`.env.schema`](.env.schema) defines the required and optional variables.
 
-## FAQ
+```bash
+bun install
+```
 
-### How do I request more subscription icons?
+```dotenv
+DATABASE_URL=
+BETTER_AUTH_SECRET=
+BETTER_AUTH_URL=https://dev.everysub.com
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
 
-- Create an issue with the "icon request" label. Attach a screenshot of the icon that you want added.
+# Optional: enables smart import
+OPENAI_API_KEY=
+# Optional: subscription brand icons
+LOGO_DEV_SECRET_KEY=
+LOGO_DEV_PUBLISHABLE_KEY=
+
+# Optional: enables email notifications
+RESEND_API_KEY=
+RESEND_FROM_ADDRESS="EverySub <notifications@mail.example.com>"
+RESEND_WEBHOOK_SECRET=
+```
+
+Set the Google OAuth callback URL to `https://dev.everysub.com/api/auth/callback/google`. Apply the existing Drizzle migrations to your local database with `bun run db:migrate`.
+
+```bash
+bun run dev
+```
+
+The app runs at **https://dev.everysub.com**. The dev script requests `.com` (alongside `.dev` and `.localhost`) and registers `dev.everysub`. Portless manages the local HTTPS certificate and hosts entry. If an existing Portless proxy was started without `.com` support, restart it from an interactive terminal before running the app:
+
+```bash
+bunx portless proxy stop
+bunx portless proxy start --tld com --tld dev --tld localhost
+```
+
+Portless may ask for your system password because the HTTPS proxy uses port 443. Restarting the shared proxy may briefly disconnect other local Portless apps.
+
+## Scripts
+
+| Command                    | Purpose                                    |
+| -------------------------- | ------------------------------------------ |
+| `bun run dev`              | Start the local HTTPS app                  |
+| `bun run build`            | Build the production app                   |
+| `bun run start`            | Serve the production build                 |
+| `bun run test`             | Run Vitest tests                           |
+| `bun run lint`             | Run Oxlint                                 |
+| `bun run fmt:check`        | Check formatting with Oxfmt                |
+| `bun run db:migrate`       | Apply existing Drizzle migrations          |
+| `bun run db:push`          | Push the current schema during development |
+| `bun run db:studio`        | Open Drizzle Studio                        |
+| `bun run jobs:run`         | Record due invoices and send notifications |
+| `bun run invoices:process` | Record due invoice snapshots only          |
+| `bun run email:dev`        | Preview notification emails                |
+| `bun run import:eval`      | Run the smart import evaluation script     |
+
+`db:generate` exists for authoring migrations, but should only be run when explicitly requested by the project owner.
+
+## Notifications
+
+Notifications are scheduled by one recurring job, `bun run jobs:run`, which [Railway IaC](.railway/railway.ts) runs every five minutes. Each run records due invoices in each user's time zone, creates the reminders and overviews whose 9 a.m. local send time has arrived, and delivers them with retries. Five minutes is frequent enough to reach 9 a.m. in time zones offset by 30 or 45 minutes and to space retries over about an hour.
+
+Email needs a [Resend](https://resend.com) account:
+
+1. Verify the sending domain in Resend and set `RESEND_FROM_ADDRESS` to an address on it. Leave open and click tracking off for that domain; EverySub keeps email unavailable while either is on.
+2. Create an API key for `RESEND_API_KEY`. A full-access key lets EverySub confirm the domain is ready; a sending-only key works too.
+3. Add a Resend webhook pointing to `https://<your-host>/api/webhooks/resend` with the `email.sent`, `email.delivered`, `email.delivery_delayed`, `email.bounced`, `email.complained`, `email.failed`, and `email.suppressed` events. Put its signing secret in `RESEND_WEBHOOK_SECRET`. Email stays unavailable without it, because bounces and complaints couldn't pause sending.
+
+Until all three are set, email is shown as unavailable and Discord and webhook destinations keep working. The generic webhook contract and signature verification are documented in [`docs/notifications/webhooks.md`](docs/notifications/webhooks.md). `bun run email:dev` previews the email templates against fictional fixtures, with mobile and desktop widths and the plain-text version.
+
+## Tests
+
+`bun run test` runs the unit tests. There are no database-backed tests yet, so notification event claiming and row locking, persistence across job reruns, and concurrent job runs have no automated coverage. That stays open until the project has a managed test database with migrations applied in CI.
+
+## Deployment
+
+The SubTrack Railway project has separate `development` and `production` environments. [`.railway/railway.ts`](.railway/railway.ts) manages their Postgres, web app, scheduled jobs, and production domain. Both app services deploy from the `v3` Git branch. Production uses **https://everysub.app**; development uses **https://web-development-0c7f.up.railway.app**. The web app applies existing Drizzle migrations before deployment and checks database connectivity at `/api/health`.
+
+See [the Railway deployment guide](.railway/README.md) for configuration changes, secrets, domain setup, and verification.
+
+## Project map
+
+- [`src/features`](src/features) contains the subscription, collection, invoice, dashboard, auth, import, and notification features.
+- [`src/routes`](src/routes) contains public, account, and collection-scoped app routes and API endpoints.
+- [`src/jobs`](src/jobs) holds the scheduled job that records invoices and sends notifications.
+- [`src/lib/db`](src/lib/db) holds the Drizzle schema and database client; [`drizzle`](drizzle) holds migrations.
+- [`docs/requirements`](docs/requirements) captures detailed behavior for invoices, imports, and notifications.
+- [`docs/notifications`](docs/notifications) documents the webhook contract for notification receivers.
+- [`fixtures/synthetic-statement.pdf`](fixtures/synthetic-statement.pdf) is fictional data for smart import demos and testing.
+
+## Current limits
+
+The app supports USD only; multi-currency support remains open. Email notifications go only to the account's verified address, and there's no in-app notification inbox.
+
+Smart import is available only when `OPENAI_API_KEY` is configured. Uploaded files are sent to OpenAI for extraction and are not stored by EverySub. Import suggestions require review before saving.

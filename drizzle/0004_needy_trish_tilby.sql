@@ -1,0 +1,4 @@
+ALTER TABLE "subscription_invoices" ADD COLUMN "collection_id" text NOT NULL;--> statement-breakpoint
+ALTER TABLE "subscription_invoices" ADD CONSTRAINT "subscription_invoices_collection_id_collections_id_fk" FOREIGN KEY ("collection_id") REFERENCES "public"."collections"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "subscription_invoices" ADD CONSTRAINT "subscription_invoices_user_collection_fk" FOREIGN KEY ("user_id","collection_id") REFERENCES "public"."collections"("user_id","id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "subscription_invoices_user_collection_id_idx" ON "subscription_invoices" USING btree ("user_id","collection_id");

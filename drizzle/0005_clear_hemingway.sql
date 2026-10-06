@@ -1,0 +1,2 @@
+DROP INDEX "subscription_invoices_user_collection_id_idx";--> statement-breakpoint
+CREATE INDEX "subscription_invoices_user_collection_date_idx" ON "subscription_invoices" USING btree ("user_id","collection_id","invoice_date");
