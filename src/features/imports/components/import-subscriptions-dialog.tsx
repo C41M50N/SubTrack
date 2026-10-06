@@ -68,6 +68,10 @@ type ImportSubscriptionsDialogProps = {
   collection: ImportTarget;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Where focus goes when the dialog closes. Defaults to the trigger. */
+  finalFocus?: React.ComponentProps<typeof DialogContent>['finalFocus'];
+  /** Called once opening or closing, including its animation, finishes. */
+  onOpenChangeComplete?: (open: boolean) => void;
 };
 
 /**
@@ -79,6 +83,8 @@ export function ImportSubscriptionsDialog({
   collection,
   open,
   onOpenChange,
+  finalFocus,
+  onOpenChangeComplete,
 }: ImportSubscriptionsDialogProps) {
   // Every open starts a fresh import bound to the collection it opened for, so
   // its rows, duplicate checks, and categories can't end up imported into
@@ -101,6 +107,8 @@ export function ImportSubscriptionsDialog({
       collection={session.collection}
       open={open}
       onOpenChange={onOpenChange}
+      finalFocus={finalFocus}
+      onOpenChangeComplete={onOpenChangeComplete}
     />
   );
 }
@@ -116,6 +124,8 @@ function ImportDialog({
   collection,
   open,
   onOpenChange,
+  finalFocus,
+  onOpenChangeComplete,
 }: ImportSubscriptionsDialogProps) {
   const queryClient = useQueryClient();
   const importSubscriptions = useImportSubscriptions();
@@ -418,6 +428,7 @@ function ImportDialog({
   return (
     <Dialog
       open={open}
+      onOpenChangeComplete={onOpenChangeComplete}
       onOpenChange={(nextOpen) => {
         if (nextOpen) {
           onOpenChange(true);
@@ -426,7 +437,10 @@ function ImportDialog({
         }
       }}
     >
-      <DialogContent className="flex max-h-[min(88vh,56rem)] flex-col gap-0 p-0 sm:max-w-5xl">
+      <DialogContent
+        className="flex max-h-[min(88vh,56rem)] flex-col gap-0 p-0 sm:max-w-5xl"
+        finalFocus={finalFocus}
+      >
         <DialogHeader className="px-6 pt-6 pb-5">
           <DialogTitle>Import subscriptions to {collection.name}</DialogTitle>
           <DialogDescription>

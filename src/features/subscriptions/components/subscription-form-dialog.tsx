@@ -125,6 +125,8 @@ type SubscriptionFormDialogProps = {
   onCreated?: () => void;
   /** Where focus goes when the dialog closes. Defaults to the trigger. */
   finalFocus?: React.ComponentProps<typeof DialogContent>['finalFocus'];
+  /** Called once opening or closing, including its animation, finishes. */
+  onOpenChangeComplete?: (open: boolean) => void;
 };
 
 type FormState = {
@@ -189,6 +191,7 @@ export function SubscriptionFormDialog({
   categories,
   onCreated,
   finalFocus,
+  onOpenChangeComplete,
 }: SubscriptionFormDialogProps) {
   const isEdit = Boolean(subscription) || Boolean(review);
   const status = review ? review.status : subscription?.status;
@@ -368,7 +371,11 @@ export function SubscriptionFormDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={onOpenChange}
+      onOpenChangeComplete={onOpenChangeComplete}
+    >
       <DialogContent className="sm:max-w-lg" finalFocus={finalFocus}>
         <form onSubmit={handleSubmit} className="grid gap-6">
           <DialogHeader>

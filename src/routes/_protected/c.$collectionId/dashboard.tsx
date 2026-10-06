@@ -1,7 +1,7 @@
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
-import { Link, createFileRoute } from '@tanstack/react-router';
-import { PlusIcon, WalletIcon } from 'lucide-react';
-import { useState } from 'react';
+import { createFileRoute } from '@tanstack/react-router';
+import { PlusIcon, UploadIcon, WalletIcon } from 'lucide-react';
+import { useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -12,6 +12,8 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty';
+import { categoriesQueryOptions } from '@/features/categories/queries';
+import { collectionsQueryOptions } from '@/features/collections/queries';
 import { CategoryBreakdown } from '@/features/dashboard/components/category-breakdown';
 import { DashboardMetrics } from '@/features/dashboard/components/dashboard-metrics';
 import { InvoiceListCard } from '@/features/dashboard/components/invoice-list-card';
@@ -24,6 +26,8 @@ import {
   getRecordedTrendRange,
   invoicesInCurrentMonth,
 } from '@/features/dashboard/domain';
+import { ImportSubscriptionsDialog } from '@/features/imports/components/import-subscriptions-dialog';
+import { smartImportStatusQueryOptions } from '@/features/imports/queries';
 import {
   getProjectionRange,
   invoicesInRollingWindow,
@@ -31,6 +35,10 @@ import {
   toRecordedInvoices,
 } from '@/features/invoices/domain';
 import { collectionInvoicesQueryOptions } from '@/features/invoices/queries';
+import { ReminderInvitationDialog } from '@/features/onboarding/components/reminder-invitation-dialog';
+import { WelcomePanel } from '@/features/onboarding/components/welcome-panel';
+import { onboardingQueryOptions } from '@/features/onboarding/queries';
+import { SubscriptionFormDialog } from '@/features/subscriptions/components/subscription-form-dialog';
 import { subscriptionsQueryOptions } from '@/features/subscriptions/queries';
 
 export const Route = createFileRoute('/_protected/c/$collectionId/dashboard')({
@@ -43,24 +51,62 @@ export const Route = createFileRoute('/_protected/c/$collectionId/dashboard')({
         ...getRecordedTrendRange(),
       }),
     );
-
-    await context.queryClient.ensureQueryData(
-      subscriptionsQueryOptions({
-        collectionId: params.collectionId,
-        status: 'active',
-      }),
+    // Only needed once someone adds a subscription from the dashboard.
+    void context.queryClient.prefetchQuery(
+      categoriesQueryOptions(params.collectionId),
     );
+
+    const [onboarding] = await Promise.all([
+      context.queryClient.ensureQueryData(onboardingQueryOptions()),
+      context.queryClient.ensureQueryData(
+        subscriptionsQueryOptions({
+          collectionId: params.collectionId,
+          status: 'active',
+        }),
+      ),
+    ]);
+
+    // The welcome panel describes what the importer accepts.
+    if (!onboarding.completed) {
+      void context.queryClient.prefetchQuery(smartImportStatusQueryOptions());
+    }
   },
   component: DashboardPage,
 });
 
 function DashboardPage() {
   const { collectionId } = Route.useParams();
+
+  // Remounting per collection closes any open dialog, so an import or a new
+  // subscription can't carry over to another collection.
+  return <CollectionDashboard key={collectionId} collectionId={collectionId} />;
+}
+
+type EntryDialog = 'import' | 'create';
+
+function CollectionDashboard({ collectionId }: { collectionId: string }) {
   const [now] = useState(() => new Date());
+  const [entryDialog, setEntryDialog] = useState<EntryDialog | null>(null);
+  // Stays true through the close animation, so the reminder invitation can't
+  // open until the dialog that saved the subscription has returned focus.
+  const [entryDialogShown, setEntryDialogShown] = useState(false);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const entryTriggerRef = useRef<HTMLElement | null>(null);
 
   const { data: subscriptions } = useSuspenseQuery(
     subscriptionsQueryOptions({ collectionId, status: 'active' }),
   );
+  const { data: onboarding } = useSuspenseQuery(onboardingQueryOptions());
+  const { data: collections } = useSuspenseQuery(collectionsQueryOptions());
+  const { data: categoryOptions = [] } = useQuery(
+    categoriesQueryOptions(collectionId),
+  );
+  const collection = {
+    id: collectionId,
+    name:
+      collections.find((candidate) => candidate.id === collectionId)?.name ??
+      'this collection',
+  };
   const historyQuery = useQuery(
     collectionInvoicesQueryOptions({
       collectionId,
@@ -82,17 +128,58 @@ function DashboardPage() {
   );
   const recent = recordedInvoices.slice(0, RECENT_LIST_LIMIT);
 
+  function openEntryDialog(dialog: EntryDialog, trigger: HTMLElement) {
+    entryTriggerRef.current = trigger;
+    setEntryDialog(dialog);
+    setEntryDialogShown(true);
+  }
+
+  // A first save replaces the welcome panel, taking the button that opened the
+  // dialog with it, so focus falls back to the heading.
+  function getEntryFinalFocus() {
+    return entryTriggerRef.current?.isConnected
+      ? entryTriggerRef.current
+      : headingRef.current;
+  }
+
+  function handleEntryOpenChange(open: boolean) {
+    if (!open) {
+      setEntryDialog(null);
+    }
+  }
+
+  function handleEntryOpenChangeComplete(open: boolean) {
+    if (!open) {
+      setEntryDialogShown(false);
+    }
+  }
+
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
       <header>
-        <h1 className="font-heading text-2xl font-semibold">Dashboard</h1>
+        <h1
+          ref={headingRef}
+          tabIndex={-1}
+          className="font-heading text-2xl font-semibold outline-none"
+        >
+          Dashboard
+        </h1>
         <p className="text-sm text-muted-foreground">
-          An overview of spending across this collection.
+          Spending and renewals for the subscriptions tracked in this
+          collection.
         </p>
       </header>
 
-      {subscriptions.length === 0 ? (
-        <NoActiveSubscriptions collectionId={collectionId} />
+      {!onboarding.completed && subscriptions.length === 0 ? (
+        <WelcomePanel
+          onImport={(trigger) => openEntryDialog('import', trigger)}
+          onAdd={(trigger) => openEntryDialog('create', trigger)}
+        />
+      ) : subscriptions.length === 0 ? (
+        <NoActiveSubscriptions
+          onImport={(trigger) => openEntryDialog('import', trigger)}
+          onAdd={(trigger) => openEntryDialog('create', trigger)}
+        />
       ) : (
         <>
           <DashboardMetrics
@@ -141,11 +228,40 @@ function DashboardPage() {
           </div>
         </>
       )}
+
+      <ImportSubscriptionsDialog
+        collection={collection}
+        open={entryDialog === 'import'}
+        onOpenChange={handleEntryOpenChange}
+        onOpenChangeComplete={handleEntryOpenChangeComplete}
+        finalFocus={getEntryFinalFocus}
+      />
+
+      <SubscriptionFormDialog
+        open={entryDialog === 'create'}
+        onOpenChange={handleEntryOpenChange}
+        collectionId={collectionId}
+        categories={categoryOptions}
+        onOpenChangeComplete={handleEntryOpenChangeComplete}
+        finalFocus={getEntryFinalFocus}
+      />
+
+      <ReminderInvitationDialog
+        invitation={onboarding.reminderInvitation}
+        ready={!entryDialogShown}
+        fallbackCollection={collection}
+        finalFocus={headingRef}
+      />
     </div>
   );
 }
 
-function NoActiveSubscriptions({ collectionId }: { collectionId: string }) {
+type EntryActionsProps = {
+  onImport: (trigger: HTMLElement) => void;
+  onAdd: (trigger: HTMLElement) => void;
+};
+
+function NoActiveSubscriptions({ onImport, onAdd }: EntryActionsProps) {
   return (
     <Empty className="border">
       <EmptyHeader>
@@ -158,18 +274,17 @@ function NoActiveSubscriptions({ collectionId }: { collectionId: string }) {
           adds up over time.
         </EmptyDescription>
       </EmptyHeader>
-      <EmptyContent>
+      <EmptyContent className="flex-row justify-center">
         <Button
-          nativeButton={false}
-          render={
-            <Link
-              to="/c/$collectionId/subscriptions"
-              params={{ collectionId }}
-            />
-          }
+          variant="outline"
+          onClick={(event) => onImport(event.currentTarget)}
         >
+          <UploadIcon data-icon="inline-start" />
+          Import
+        </Button>
+        <Button onClick={(event) => onAdd(event.currentTarget)}>
           <PlusIcon data-icon="inline-start" />
-          Go to subscriptions
+          Add subscription
         </Button>
       </EmptyContent>
     </Empty>

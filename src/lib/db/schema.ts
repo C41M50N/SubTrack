@@ -4,4 +4,5 @@ export * from './collection-schema';
 export * from './category-schema';
 export * from './invoice-schema';
 export * from './notification-schema';
+export * from './onboarding-schema';
 export * from './subscription-schema';

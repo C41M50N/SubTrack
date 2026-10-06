@@ -37,6 +37,7 @@ import {
   useDuplicateCollection,
 } from '@/features/collections/mutations';
 import { collectionsQueryOptions } from '@/features/collections/queries';
+import { LAST_COLLECTION_DELETE_MESSAGE } from '@/features/collections/schema';
 import { ImportSubscriptionsDialog } from '@/features/imports/components/import-subscriptions-dialog';
 import type { SubscriptionTransferFormat } from '@/features/subscriptions/export';
 
@@ -95,6 +96,16 @@ export function CollectionSwitcher() {
     anchor.remove();
   }
 
+  function handleDelete(collection: CollectionTarget) {
+    // The server enforces this too, for a list that's out of date.
+    if (collections.length === 1) {
+      toast.error(LAST_COLLECTION_DELETE_MESSAGE);
+      return;
+    }
+
+    setDeleteTarget({ id: collection.id, name: collection.name });
+  }
+
   function handleConfirmDelete() {
     if (!deleteTarget) {
       return;
@@ -108,8 +119,8 @@ export function CollectionSwitcher() {
         setDeleteTarget(null);
 
         // If we deleted the collection we're currently viewing, fall back to
-        // the first remaining collection, or the dashboard when none are left
-        // (mirrors the c.$collectionId route loader).
+        // the first remaining collection. The last one can't be deleted, but
+        // /dashboard resolves a list that changed elsewhere.
         if (target.id === collectionId) {
           const [first] = collections.filter(
             (collection) => collection.id !== target.id,
@@ -125,8 +136,9 @@ export function CollectionSwitcher() {
           }
         }
       },
-      onError: () => {
-        toast.error('Failed to delete collection');
+      onError: (error) => {
+        setDeleteTarget(null);
+        toast.error(error.message);
       },
     });
   }
@@ -184,12 +196,7 @@ export function CollectionSwitcher() {
                       setIsImportOpen(true);
                     }}
                     onExport={(format) => handleExport(collection, format)}
-                    onDelete={() =>
-                      setDeleteTarget({
-                        id: collection.id,
-                        name: collection.name,
-                      })
-                    }
+                    onDelete={() => handleDelete(collection)}
                   />
                 </div>
               </DropdownMenuItem>
