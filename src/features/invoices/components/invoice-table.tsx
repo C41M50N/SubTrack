@@ -302,6 +302,7 @@ export function InvoiceTable({
                     <Button
                       variant="outline"
                       size="sm"
+                      nativeButton={false}
                       render={
                         <Link
                           to="/c/$collectionId/subscriptions"

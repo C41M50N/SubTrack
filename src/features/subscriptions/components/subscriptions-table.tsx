@@ -120,6 +120,9 @@ export function useSubscriptionsTable({
     getFilteredRowModel: getFilteredRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
+    // The table doesn't paginate. Left on, the reset runs from a microtask
+    // queued during render and can update the table before it mounts.
+    autoResetPageIndex: false,
   });
 }
 
