@@ -15,6 +15,7 @@ import { ThemeProvider } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { NotFoundPage } from '@/features/landing/components/not-found-page';
 
 import appCss from '../styles.css?url';
 
@@ -48,7 +49,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
     ],
   }),
-  notFoundComponent: NotFound,
+  notFoundComponent: NotFoundPage,
   errorComponent: RootError,
   shellComponent: RootDocument,
   component: RootLayout,
@@ -92,23 +93,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <Scripts />
       </body>
     </html>
-  );
-}
-
-function NotFound() {
-  return (
-    <div className="mx-auto flex min-h-[50vh] w-full max-w-2xl flex-col items-center justify-center gap-3 px-6 text-center">
-      <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
-        404
-      </p>
-      <h1 className="text-2xl font-semibold">Page not found</h1>
-      <p className="text-base leading-7 text-slate-600">
-        The page you were looking for does not exist or has moved.
-      </p>
-      <Link className="text-sm font-medium underline underline-offset-4" to="/">
-        Back to home
-      </Link>
-    </div>
   );
 }
 

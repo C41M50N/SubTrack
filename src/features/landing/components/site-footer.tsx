@@ -1,3 +1,4 @@
+import { Wordmark } from '@/features/landing/components/wordmark';
 import { contentColumn, focusRing } from '@/features/landing/styles';
 import { cn } from '@/lib/utils';
 
@@ -36,12 +37,7 @@ export function SiteFooter() {
         )}
       >
         <div className="flex max-w-70 shrink-0 flex-col gap-4">
-          <div className="flex items-center gap-2.5">
-            <img src="/favicon.svg" alt="" className="size-7" />
-            <span className="text-lg/5.5 font-semibold tracking-[-0.02em]">
-              EverySub
-            </span>
-          </div>
+          <Wordmark />
           <p className="text-[15px]/6 text-ink-muted">
             Subscription costs and renewals, easy to understand and act on.
           </p>
@@ -93,6 +89,29 @@ export function SiteFooter() {
           <img src="/landing/logos/github.svg" alt="" className="size-4.5" />
         </a>
       </div>
+    </footer>
+  );
+}
+
+/** The single-row footer of the standalone pages, like sign-in and 404. */
+export function CompactFooter({ className }: { className?: string }) {
+  return (
+    <footer
+      className={cn(
+        'flex h-10 shrink-0 items-center justify-between gap-6 text-[13px]/4',
+        className,
+      )}
+    >
+      <p className="text-[#6B7380]">© {new Date().getFullYear()} EverySub</p>
+      <a
+        href={REPOSITORY_URL}
+        className={cn(
+          'rounded-sm font-medium text-ink-muted transition-colors duration-150 ease-reveal hover:text-ink',
+          focusRing,
+        )}
+      >
+        GitHub
+      </a>
     </footer>
   );
 }

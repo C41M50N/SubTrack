@@ -95,6 +95,16 @@
       opacity: 0;
     }
   }
+
+  /* The 404 receipt's stamp, pressed down onto the paper as it settles. */
+  --animate-stamp-in: stamp-in 280ms cubic-bezier(0.55, 0, 1, 0.45) 700ms both;
+
+  @keyframes stamp-in {
+    from {
+      opacity: 0;
+      scale: 1.5;
+    }
+  }
 }
 
 /*
