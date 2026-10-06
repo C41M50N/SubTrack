@@ -97,7 +97,7 @@ Until all three are set, email is shown as unavailable and Discord and webhook d
 
 ## Deployment
 
-The SubTrack Railway project has separate `development` and `production` environments. [`.railway/railway.ts`](.railway/railway.ts) manages their Postgres, web app, scheduled jobs, and production domain. Both app services deploy from the `v3` Git branch. Production uses **https://everysub.app**; development uses **https://web-development-0c7f.up.railway.app**. The web app applies existing Drizzle migrations before deployment and checks database connectivity at `/api/health`.
+The SubTrack Railway project has separate `development` and `production` environments. [`.railway/railway.ts`](.railway/railway.ts) manages Postgres in both environments and the web app, scheduled jobs, and domain in production. Both production app services deploy from the `main` Git branch. The web app is served at **https://everysub.app**. Development keeps only Postgres with persistent storage and a public connection; run the web app and jobs locally. The production web app applies existing Drizzle migrations before deployment and checks database connectivity at `/api/health`.
 
 See [the Railway deployment guide](.railway/README.md) for configuration changes, secrets, domain setup, and verification.
 
