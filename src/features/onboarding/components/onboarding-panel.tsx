@@ -50,7 +50,9 @@ export function OnboardingPanel({
   const hasSubscriptions = count > 0;
 
   return (
-    <div className="flex flex-col gap-9 pt-2">
+    // Capped so wide screens don't pull the drop zone's copy and statement
+    // apart.
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-9 pt-2">
       <header className="flex flex-col gap-3.5">
         <p className="text-sm font-semibold tracking-[0.02em] text-primary dark:text-primary-light">
           {hasSubscriptions

@@ -44,7 +44,9 @@ export function StatementIllustration({ className }: { className?: string }) {
       aria-hidden
       className={cn('pointer-events-none select-none', className)}
     >
-      <div className="h-110 w-68 rotate-[2.5deg] rounded-lg bg-card px-4.5 pt-5 shadow-[0_24px_40px_-8px_rgb(20_35_60/0.16),0_2px_4px_rgb(20_35_60/0.08)] ring-1 ring-foreground/5">
+      {/* Fades out below what it found, so the statement reads as continuing
+          rather than being cut off by the drop zone's edge. */}
+      <div className="h-110 w-68 rotate-[2.5deg] rounded-lg bg-card [mask-image:linear-gradient(to_bottom,#000_60%,transparent_78%)] px-4.5 pt-5 shadow-[0_24px_40px_-8px_rgb(20_35_60/0.16),0_2px_4px_rgb(20_35_60/0.08)] ring-1 ring-foreground/5">
         <div className="flex items-start justify-between border-b border-dashed border-foreground/20 pb-3.5">
           <div className="flex flex-col gap-1">
             <span className="text-[13px]/4 font-semibold">Card statement</span>
@@ -74,7 +76,7 @@ export function StatementIllustration({ className }: { className?: string }) {
           ))}
         </ul>
       </div>
-      <div className="absolute top-79 left-5.5 flex -rotate-3 items-center gap-2.5 rounded-full bg-popover py-2 pr-4 pl-2.5 text-sm font-semibold text-popover-foreground shadow-[0_12px_24px_-4px_rgb(20_35_60/0.2),0_1px_3px_rgb(20_35_60/0.1)] ring-1 ring-foreground/5">
+      <div className="absolute top-77 -left-6 flex -rotate-3 items-center gap-2.5 rounded-full bg-popover py-2 pr-4 pl-2.5 text-sm font-semibold text-popover-foreground shadow-[0_12px_24px_-4px_rgb(20_35_60/0.2),0_1px_3px_rgb(20_35_60/0.1)] ring-1 ring-foreground/5">
         <span className="flex size-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
           <CheckIcon className="size-3.5" strokeWidth={3} />
         </span>
