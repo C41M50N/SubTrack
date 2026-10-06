@@ -174,7 +174,7 @@ export function DashboardMetrics({
           </span>
           <span className="text-xs text-muted-foreground tabular-nums">
             {categoryCount === 0
-              ? 'No categories yet'
+              ? 'No categories in use yet'
               : `Across ${categoryCount} ${categoryCount === 1 ? 'category' : 'categories'}`}
           </span>
         </CardHeader>
