@@ -24,8 +24,9 @@ export function useMarkReminderInvitationShown() {
 
   return useMutation({
     mutationFn: () => markReminderInvitationShown(),
-    // The open dialog keeps its own copy, so the cache can let go right away.
-    onMutate: () =>
+    retry: 3,
+    // Consume the cached invitation only after the server records it.
+    onSuccess: () =>
       queryClient.setQueryData<OnboardingData>(onboardingQueryKey, (current) =>
         current ? { ...current, reminderInvitation: null } : current,
       ),

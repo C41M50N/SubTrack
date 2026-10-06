@@ -1,6 +1,7 @@
 import { useNavigate } from '@tanstack/react-router';
 import { BellIcon } from 'lucide-react';
-import { useEffect, useId, useState } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { useMarkReminderInvitationShown } from '@/features/onboarding/mutations';
@@ -36,22 +37,44 @@ export function ReminderInvitationCard({
 }: ReminderInvitationCardProps) {
   const titleId = useId();
   const navigate = useNavigate();
-  const { mutate: markShown } = useMarkReminderInvitationShown();
+  const { mutateAsync: markShown } = useMarkReminderInvitationShown();
   // Marking it shown drops it from the cache, so the card keeps its own copy.
   const [shown, setShown] = useState<ReminderInvitationData | null>(null);
+  const [confirmed, setConfirmed] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const startedRef = useRef(false);
 
   if (invitation && ready && !shown) {
     setShown(invitation);
   }
 
-  useEffect(() => {
-    if (shown) {
-      markShown();
-    }
-  }, [shown, markShown]);
+  const prepareInvitation = useCallback(
+    async function prepareInvitation() {
+      try {
+        await markShown();
+        setConfirmed(true);
+      } catch {
+        toast.error('Couldn’t load reminder setup. Try again.', {
+          duration: Infinity,
+          action: {
+            label: 'Retry',
+            onClick: () => void prepareInvitation(),
+          },
+        });
+      }
+    },
+    [markShown],
+  );
 
-  if (!shown || dismissed) {
+  useEffect(() => {
+    if (shown && !startedRef.current) {
+      startedRef.current = true;
+      void prepareInvitation();
+    }
+  }, [shown, prepareInvitation]);
+
+  // Once visible, leaving or either action is safe even if the connection drops.
+  if (!shown || !confirmed || dismissed) {
     return null;
   }
 
